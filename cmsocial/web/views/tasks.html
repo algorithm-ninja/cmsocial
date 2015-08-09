@@ -1,0 +1,11 @@
+<div>
+  <div ng-if="tasks.length < 1" class="not-found-msg">{{'no tasks found' | l10n}}</div>
+  <div class="list-group">
+    <a ng-repeat="task in tasks" ng-class="{'correct': task.score == 100, 'partial': task.score > 0 && task.score < 100, 'wrong': task.score == 0}" class="list-group-item" ui-sref="task.statement({ taskName: task.name })">
+      <i class="fa fa-angle-right"></i> {{task.title}}
+      <span ng-if="task.score == 0" class="badge badge-wrong">0 / 100</span>
+      <span ng-if="task.score > 0 && task.score < 100" class="badge badge-partial">{{task.score}} / 100</span>
+      <span ng-if="task.score == 100" class="badge badge-correct">100 / 100</span>
+    </a>
+  </div>
+</div>

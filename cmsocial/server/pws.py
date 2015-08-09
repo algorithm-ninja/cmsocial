@@ -104,6 +104,9 @@ class APIHandler(object):
 
     def wsgi_app(self, environ, start_response):
         route = self.router.bind_to_environ(environ)
+
+        __import__("pdb").set_trace()
+
         try:
             endpoint, args = route.match()
         except HTTPException:
@@ -241,7 +244,7 @@ class APIHandler(object):
 
         __import__("pdb").set_trace()
         path = os.path.join(
-            pkg_resources.resource_filename('cms.app', 'practice'),
+            pkg_resources.resource_filename('cmsocial', 'web'),
             filename)
 
         response = Response()
@@ -357,6 +360,7 @@ class APIHandler(object):
         })
 
     def user_handler(self):
+        __import__("pdb").set_trace()
         if local.data['action'] == 'new':
             try:
                 username = local.data['username']
@@ -1237,7 +1241,9 @@ class PracticeWebServer(Service):
 
         handler = APIHandler(self)
 
-        self.wsgi_app = SharedDataMiddleware(handler, {})
+        self.wsgi_app = SharedDataMiddleware(handler, {
+            '/': ('cmsocial', 'web')
+        })
 
     def run(self):
         server = Server((self.address, self.port), self.wsgi_app)

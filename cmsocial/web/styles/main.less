@@ -1,0 +1,556 @@
+html {
+  overflow-y: scroll;
+}
+
+body {
+  padding-top: 70px;
+  padding-bottom: 20px;
+}
+
+.wider-modal {
+  width: 700px;
+}
+
+a {
+  cursor: pointer;
+}
+
+a:focus {
+  outline: none;
+}
+
+a.dont-underline:hover {
+  text-decoration: none;
+}
+
+.hyphenate {
+  text-align: justify;
+  -webkit-hyphens: auto;
+     -moz-hyphens: auto;
+          hyphens: auto;
+}
+
+.not-found-msg {
+  text-align: center;
+  font-style: italic;
+}
+
+/* Navbar */
+
+.user-brand {
+  color: #999;
+  padding-right: 10px;
+}
+
+.signin-form {
+  width: 250px;
+  padding: 15px;
+}
+
+/* Notification alerts */
+
+.notifications {
+  position: fixed;
+  right: 10px;
+  z-index: 500;
+}
+
+.notifications .alert {
+  position: relative;
+  width: 250px;
+  right: 0px;
+}
+
+/* Pagination */
+
+.pagination {
+  margin: 0px 0px 5px 0px;
+}
+
+/* Task list */
+
+.big-tag {
+  padding: 5.5px;
+  margin-left: 15px;
+  position: absolute;
+  border: 1px solid;
+}
+
+.big-tag button.close {
+  margin-left: 5px;
+}
+
+.big-tag i.fa {
+  margin-top: 5px;
+}
+
+.search-by-tag {
+  margin-bottom: 10px;
+}
+
+.badge-correct {
+  background-color: #25AD25;
+}
+
+.badge-partial {
+  background-color: #F3A22A;
+}
+
+.badge-wrong {
+  background-color: #FA5555;
+}
+
+.correct, .correct.list-group-item {
+  color: rgb(70, 136, 71);
+  background-color: rgb(223, 240, 216);
+}
+
+.empty, .empty.list-group-item {
+  color: rgb(58, 135, 173);
+  background-color: rgb(217, 237, 247);
+}
+
+.partial, .partial.list-group-item {
+  color: rgb(156, 116, 47);
+  background-color: rgb(248, 229, 189);
+}
+
+.wrong, .wrong.list-group-item {
+  color: rgb(185, 74, 72);
+  background-color: rgb(242, 222, 222);
+}
+
+/* TODO: ripulire il CSS della tabella delle submission, evitando la duplicazione seguente: */
+
+td.correct {
+  background-color: rgb(223, 240, 216) !important;
+}
+
+td.empty {
+  background-color: rgb(217, 237, 247) !important;
+}
+
+td.partial {
+  background-color: rgb(248, 229, 189) !important;
+}
+
+td.wrong {
+  background-color: rgb(242, 222, 222) !important;
+}
+
+/* Task page */
+
+iframe.viewer {
+  margin-top: 1px;
+}
+
+/* Taskbar */
+
+ul.nav-tabs {
+  border-bottom: none;
+}
+
+ul.nav-tabs > li > a {
+  border-bottom-color: #DDD !important;
+}
+
+.tab-badge-total {
+  margin-left: 5px;
+}
+
+.topleft-fix {
+  border-top-left-radius: 0px;
+}
+
+/* Tags */
+
+.tag-group-item a {
+  text-decoration: none;
+}
+
+.tag-group-item a.left {
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.tag-group-item a.right {
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+}
+
+/* User page */
+
+.userbadge.admin {
+  color: red;
+}
+
+.userbadge.admin .label {
+  background-color: pink;
+  text-transform: uppercase;
+}
+
+.problem {
+  padding: 4px;
+}
+
+.problem .progress {
+  position: relative;
+  margin: 0px;
+}
+
+.progress-bar-text {
+  position: absolute;
+  width: 100%;
+  left: 0px;
+  color: #414141;
+}
+
+/* PMs */
+
+.talkpage .sidebar, .talkpage .mainbar {
+  border-bottom: 1px solid #DDD;
+}
+
+.talkpage .editor-forum {
+  min-height: 120px;
+}
+
+.talklist .img-thumbnail {
+  float: left;
+}
+
+.talklist .list-group-item {
+  height: 70px;
+}
+
+.talklist .list-group-item > div {
+  padding-left: 10px;
+  float: left;
+}
+
+.talklist .list-group-item.new-message {
+  background-color: #C1E4F8;
+}
+
+/* Submissions */
+
+#submission_detail .modal-body {
+  max-height: 600px;
+  overflow-y: scroll;
+}
+
+/* Signup page */
+
+.user-preview {
+  text-align: center;
+}
+
+.user-preview .nome-cognome {
+  text-transform: capitalize;
+}
+
+.avatar-wrapper {
+  position: relative;
+  margin: auto;
+  width: 200px;
+}
+
+.avatar {
+  width: 200px;
+  height: 200px;
+  display: block;
+}
+
+.avatar-loader {
+  position: absolute;
+  right: 78px;
+  top: 95px;
+}
+
+/* Submission page */
+
+table.submissions {
+  table-layout: fixed;
+}
+
+table.submissions th {
+  background-color: #FFD !important;
+}
+
+.no-submissions {
+  text-align: center;
+  font-style: italic;
+}
+
+.submissions tbody+tbody {
+  border-top: none;
+}
+
+.submission .files {
+  padding: 0;
+}
+
+.submissions .files div>a {
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: block;
+  padding: 8px;
+}
+
+.submissions .files div li, .submissions .files div ul {
+  text-align: center;
+  width: 100%;
+}
+
+.submissions .files div {
+  display: block;
+  width: 100%;
+}
+
+/* Tests */
+
+.input-group-addon:not(:first-child):not(:last-child), .input-group-btn:not(:first-child):not(:last-child), .input-group .form-control:not(:first-child):not(:last-child) {
+  border-right: 0px;
+}
+
+.test p {
+  text-align: justify;
+}
+
+.input-group .form-control.number {
+  width: 80px;
+  text-align: center;
+}
+
+.test .list-group-item .list-group {
+  border: 0;
+  box-shadow: none;
+}
+
+/* Forum */
+
+.editor-forum {
+  height: auto;
+  min-height: 60px;
+  max-height: 400px;
+  overflow-y: scroll;
+  resize: vertical;
+}
+
+.forum-group dl {
+  margin: 0px;
+}
+
+.forum-group dl.solved > dd {
+  opacity: 0.5;
+}
+
+.forum-group .panel-body {
+  padding: 0px;
+}
+
+.forum-group .panel-body:not(.topic) dl {
+  padding: 5px 0px 5px 0px;
+  border-bottom: 1px solid #EEE;
+}
+
+.forum-group .panel-body:not(.topic) dl.sticky {
+  border-bottom: 1px solid #CFCFCF;
+}
+
+.forum-group .panel-heading:not(.topic) {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.forum-group .panel-body dl:nth-child(even) {
+  background-color: #FFF;
+}
+
+.forum-group .panel-body dl:nth-child(odd) {
+  background-color: #F9F9F9;
+}
+
+.forum-group .panel-body dl.sticky {
+  background-color: #E4F2FF;
+}
+
+.forum-group.focus-light .panel-body dl:hover {
+  background-color: #FFD;
+}
+
+.forum-group.focus-light .panel-body dl.sticky:hover {
+  background-color: #F2FCFF;
+}
+
+.forum-group .panel-body dl:last-child {
+  border-radius: 0px 0px 3px 3px;
+}
+
+.forum-top {
+  margin-bottom: 10px;
+}
+
+.forum-top .badge {
+  margin-left: 5px;
+  margin-top: 2px;
+}
+
+#showAll {
+  display: none;
+}
+
+/* Topic view */
+
+.small-avatar {
+  width: 85px;
+  height: 85px;
+}
+
+.forum-group.post {
+  margin-bottom: 10px;
+}
+
+.forum-group.post dd {
+  vertical-align: top;
+  display: table-cell;
+}
+
+.forum-group.post .panel-heading {
+  border-bottom: 1px solid #CCC;
+}
+
+.forum-group.post .panel-heading:not(:first-child) {
+  border-top: 1px solid #DDD;
+}
+
+.forum-group .sidebar {
+  width: 150px;
+  padding: 10px 0px 10px 0px;
+  text-align: center;
+}
+
+.forum-group .sidebar.bordered {
+  border-right: 1px solid #DDD;
+  background-color: #F6F9FC;
+}
+
+.forum-group .sidebar.head {
+  padding: 3px 0px 3px 0px;
+}
+
+.forum-group .mainbar {
+  width: 552px;
+}
+
+.forum-group .mainbar.head {
+  padding: 3px 0px 3px 10px;
+}
+
+.forum-group .mainbar.head .pull-right {
+  padding-right: 10px;
+}
+
+.forum-group.post .panel-heading {
+  padding: 0px;
+}
+
+.forum-group .panel-heading:not(:first-child) {
+  border-radius: 0px;
+}
+
+.forum-group .message {
+  padding: 5px 5px 5px 10px;
+  word-break: break-word;
+}
+
+.forum-group .message blockquote {
+  background-color: #F6F9FC;
+  border: 1px solid #ADCDDD;
+  border-left-width: 4px;
+  font-size: 14px;
+}
+
+.forum-group .message pre {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+
+@media (min-width: 768px){
+  .forum-group .mainbar {
+    width: 568px;
+    max-width: 568px;
+  }
+}
+
+@media (min-width: 992px){
+  .forum-group .mainbar {
+    width: 788px;
+    max-width: 788px;
+  }
+}
+
+@media (min-width: 1200px){
+  .forum-group .mainbar {
+    width: 988px;
+    max-width: 988px;
+  }
+}
+
+/* Ranking page */
+.ranking .user-thumbnail {
+    margin-right: 10px;
+    width: 40px;
+    height: 40px;
+}
+
+.ranking span[data-field='username'] {
+    font-weight: 500;
+}
+
+.ranking span[data-field='real-name'] {
+    margin-left: 10px;
+    color: gray;
+    font-size: 90%;
+    font-weight: 400;
+}
+
+.ranking tt[data-field='score'] {
+    display: inline-block;
+    margin-top: 7px;
+    margin-left: 40px;
+}  
+
+.ranking tt[data-field='tasks-solved'] {
+    display: inline-block;
+    margin-top: 7px;
+}
+
+/* PDF.JS */
+
+.viewer {
+  width: 100%;
+  height: 600px;
+}
+
+@media (min-width: 768px){
+  .viewer {
+    height: 800px;
+  }
+}
+
+@media (min-width: 992px){
+  .viewer {
+    height: 900px;
+  }
+}
+
+@media (min-width: 1170px){
+  .viewer {
+    height: 1000px;
+  }
+}

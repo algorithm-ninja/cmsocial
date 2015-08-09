@@ -1,0 +1,35 @@
+<div class="container">
+  <h3>{{test.description}}</h3>
+  <form ng-submit="score()">
+    <ul class="list-group test">
+      <li ng-repeat="q in test.questions" class="list-group-item">
+        <legend>
+          <b>Esercizio {{$index+1}}</b> - La risposta esatta vale <b>{{q.scorestring}}</b>
+          <span class="pull-right {{q.status}} badge" ng-show="q.status != undefined">
+            {{q.score}}/{{q.max_score}}
+          </span>
+        </legend>
+        <div ng-bind-html="q.text"></div>
+        <div class="radio" ng-repeat="c in q.choices">
+          <label>
+            <input type="radio" name="{{q.name}}" value="{{$index}}" ng-model="q.ans" />
+            <div ng-bind-html="c"></div>
+          </label>
+        </div>
+        <ul class="list-group">
+          <li class="input-group list-group" ng-repeat="ans in q.Answers">
+            <span class="input-group-addon">{{ans.name}}</span>
+            <input type="text" name="{{a.name}}" ng-repeat="a in ans.input" class="form-control {{q.type}}" ng-model="a.ans"/>
+          </li>
+        </ul>
+      </li>
+      <li class="list-group-item {{test.status}}" ng-show="test.score != undefined">
+        <div class="col-sm-10">Totale</div>
+        <div><b>{{test.score}}</b>/{{test.max_score}}</div>
+      </li>
+      <li class="list-group-item text-center">
+        <button type="submit" class="btn btn-success">Invia</button>
+      </li>
+    </ul>
+  </form>
+</div>

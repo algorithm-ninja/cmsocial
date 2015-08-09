@@ -1,0 +1,32 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{'Stats' | l10n}}</h3>
+  </div>
+  <div class="panel-body">
+    <table class="table table-bordered">
+      <tr>
+        <th>{{'Number of people who solved it:' | l10n}}</th>
+        <td>{{nuserscorrect}}</td>
+      </tr>
+      <tr>
+        <th>{{'Number of people who tried it:' | l10n}}</th>
+        <td>{{nusers}}</td>
+      </tr>
+      <tr>
+        <th>{{'Number of correct submissions:' | l10n}}</th>
+        <td>{{nsubscorrect}}</td>
+      </tr>
+      <tr>
+        <th>{{'Number of solutions submitted:' | l10n}}</th>
+        <td>{{nsubs}}</td>
+      </tr>
+    </table>
+    <h3>{{'Users with the best solutions' | l10n}}</h3>
+    <div class="list-group">
+      <a ng-repeat="good in best" class="list-group-item" ui-sref="user({ userId: good.username })">
+        <i class="fa fa-angle-right"></i> {{good.username}}
+        <tt class="pull-right">{{good.time}}</tt>
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+<div class="container">
+  <ul class="nav nav-tabs">
+    <li ng-class="{active: isActiveTab(1)}">
+      <a ui-sref=".profile"><i class="fa fa-file-text fa-lg"></i> {{'Profile' | l10n}}</a>
+    </li>
+    <li ng-show="isMe()" ng-class="{active: isActiveTab(2)}">
+      <a ui-sref=".talks"><i class="fa fa-comments fa-lg"></i> {{'Talks' | l10n}}</a>
+    </li>
+    <li ng-show="isMe()" ng-class="{active: isActiveTab(3)}">
+      <a ui-sref=".edit"><i class="fa fa-pencil fa-lg"></i> {{'Edit your data' | l10n}}</a>
+    </li>
+  </ul>
+  <div ui-view></div>
+</div>

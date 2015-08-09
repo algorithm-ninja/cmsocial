@@ -1,0 +1,41 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{'Edit your data' | l10n}}</h3>
+  </div>
+  <div class="panel-body row">
+    <div class="col-sm-6">
+      <form class="form-horizontal" role="form" ng-submit="submit()" name="edituserform">
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="password1">{{'Old password' | l10n}}</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="password" id="password1" name="password" ng-model="user.password"/>
+            <span class="help-block">{{'Leave empty if you don\'t want to change your password' | l10n}}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="password2">{{'New password' | l10n}}</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="password" id="password2" name="password2" ng-model="user.password2"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="password3">{{'Confirm password' | l10n}}</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="password" id="password3" name="password3" ng-model="user.password3"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="email">{{'New e-mail address' | l10n}}</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="email" name="email" ng-model="user.email"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+            <button type="submit" class="btn btn-warning">{{'Apply' | l10n}}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

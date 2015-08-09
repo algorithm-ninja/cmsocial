@@ -1,0 +1,10 @@
+<div class="container">
+  <div class="list-group">
+    <a ng-repeat="test in tests" ng-class="{'correct': test.score == test.max_score, 'partial': test.score > 0 && test.score < test.max_score, 'wrong': test.score == 0}" class="list-group-item" ui-sref="test({ testName: test.name })">
+      <i class="fa fa-angle-right"></i> {{test.description}}
+      <span ng-if="test.score == 0" class="badge badge-wrong">0 / {{test.max_score}}</span>
+      <span ng-if="test.score > 0 && test.score < test.max_score" class="badge badge-partial">{{test.score}} / {{test.max_score}}</span>
+      <span ng-if="test.score == test.max_score" class="badge badge-correct">{{test.score}} / {{test.max_score}}</span>
+    </a>
+  </div>
+</div>

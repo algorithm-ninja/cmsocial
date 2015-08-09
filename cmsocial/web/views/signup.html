@@ -1,0 +1,118 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-6">
+      <form class="form-horizontal" role="form" ng-submit="submit()" name="signupform">
+        <fieldset>
+          <legend>{{'Login data' | l10n}}</legend>
+          <div class="form-group" ng-class="{'has-error': signupform.username.$dirty && isBad['username']}">
+            <label class="col-sm-4 control-label" for="username1">{{'Username' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" maxlength="15" autocomplete="off" type="text" id="username1" name="username" ng-model="user.username" ng-change="checkUsername()"/>
+              <span class="help-block" ng-show="signupform.username.$dirty && isBad['username']">{{errorMsg['username'] | l10n}}</span>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error': signupform.password.$dirty && isBad['password']}">
+            <label class="col-sm-4 control-label" for="password1">{{'Password' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" autocomplete="off" type="password" id="password1" name="password" ng-model="user.password" ng-change="checkPassword(); matchPassword()"/>
+              <span class="help-block" ng-show="signupform.password.$dirty && isBad['password']">{{errorMsg['password'] | l10n}}</span>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error': signupform.password2.$dirty && isBad['password2']}">
+            <label class="col-sm-4 control-label" for="password2">{{'Confirm password' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" autocomplete="off" type="password" id="password2" name="password2" ng-model="user.password2" ng-change="matchPassword()"/>
+              <span class="help-block" ng-show="signupform.password2.$dirty && isBad['password2']">{{errorMsg['password2'] | l10n}}</span>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>{{'Personal data' | l10n}}</legend>
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for="firstname">{{'First name' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" maxlength="30" autocomplete="off" type="text" id="firstname" ng-model="user.firstname"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-4 control-label" for="lastname">{{'Last name' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" maxlength="30" autocomplete="off" type="text" id="lastname" ng-model="user.lastname"/>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error': signupform.email.$dirty && isBad['email']}">
+            <label class="col-sm-4 control-label" for="email1">{{'E-mail address' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" autocomplete="off" type="text" id="email1" name="email" ng-model="user.email" ng-change="checkEmail(); matchEmail()"/>
+              <span class="help-block" ng-show="signupform.email.$dirty && isBad['email']">{{errorMsg['email'] | l10n}}</span>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error': signupform.email2.$dirty && isBad['email2']}">
+            <label class="col-sm-4 control-label" for="email2">{{'Confirm e-mail' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" autocomplete="off" type="text" id="email2" name="email2" ng-model="user.email2" ng-change="matchEmail()"/>
+              <span class="help-block" ng-show="signupform.email2.$dirty && isBad['email2']">{{errorMsg['email2'] | l10n}}</span>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>{{'Institute data' | l10n}}</legend>
+          <div class="form-group" ng-class="{'has-error': signupform.region.$dirty && isBad['region']}">
+            <label class="col-sm-4 control-label" for="region">{{'Region' | l10n}}</label>
+            <div class="col-sm-6">
+              <select id="region" name="region" ng-model="user.region" class="form-control" ng-change="resetProvince(); checkRegion()">
+                <option ng-repeat="r in regions | orderBy:'name'" value="{{r.id}}">{{r.name}}</option>
+              </select>
+              <span class="help-block" ng-show="signupform.region.$dirty && isBad['region']">{{errorMsg['region'] | l10n}}</span>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error': signupform.province.$dirty && isBad['province']}">
+            <label class="col-sm-4 control-label" for="province">{{'Province' | l10n}}</label>
+            <div class="col-sm-6">
+              <select id="province" name="province" ng-model="user.province" class="form-control" ng-change="resetCity(); checkProvince()" ng-disabled="isBad['region']">
+                <option ng-repeat="p in provinces | orderBy:'name'" value="{{p.id}}">{{p.name}}</option>
+              </select>
+              <span class="help-block" ng-show="signupform.province.$dirty && isBad['province']">{{errorMsg['province'] | l10n}}</span>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error': signupform.city.$dirty && isBad['city']}">
+            <label class="col-sm-4 control-label" for="city">{{'City' | l10n}}</label>
+            <div class="col-sm-6">
+              <select id="city" name="city" ng-model="user.city" class="form-control" ng-change="resetInstitute(); checkCity()" ng-disabled="isBad['province']">
+                <option ng-repeat="c in cities | orderBy:'name'" value="{{c.id}}">{{c.name}}</option>
+              </select>
+              <span class="help-block" ng-show="signupform.city.$dirty && isBad['city']">{{errorMsg['city'] | l10n}}</span>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error': signupform.institute.$dirty && isBad['institute']}">
+            <label class="col-sm-4 control-label" for="institute">{{'Institute' | l10n}}</label>
+            <div class="col-sm-6">
+              <select id="institute" name="institute" ng-model="user.institute" class="form-control" ng-change="checkInstitute()" ng-disabled="isBad['city']">
+                <option ng-repeat="i in institutes | orderBy:'name'" value="{{i.id}}">{{i.name}}</option>
+              </select>
+              <span class="help-block" ng-show="signupform.institute.$dirty && isBad['institute']">{{errorMsg['institute'] | l10n}}</span>
+            </div>
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+            <button type="submit" class="btn btn-default">{{'Sign up' | l10n}}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="col-sm-6 hidden-xs">
+      <legend>{{'User profile preview' | l10n}}</legend>
+      <div class="user-preview well well-lg col-sm-offset-1 col-sm-9 col-md-offset-2 col-md-8">
+        <div class="avatar-wrapper">
+          <img src="http://gravatar.com/avatar/d41d8cd98f00b204e9800998ecf8427e?d=identicon&s=200" class="avatar img-thumbnail"/>
+          <img src="assets/ico/loader.gif" class="avatar-loader"/>
+        </div>
+        <h2>{{{true: user.username, false: '(username)'}[user.username.length > 0]}}</h2>
+        <span class="nome-cognome">
+          {{{true: user.firstname, false: '(nome)'}[user.firstname.length > 0] | lowercase}} {{{true: user.lastname, false: '(cognome)'}[user.lastname.length > 0] | lowercase}}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

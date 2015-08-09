@@ -1,0 +1,53 @@
+<div class="topleft-fix panel panel-default">
+  <div class="topleft-fix panel-heading">
+    <h3 class="panel-title">{{'Profile' | l10n}}</h3>
+  </div>
+  <div class="panel-body row">
+    <div class="col-xs-6">
+      <h3 class="userbadge {{user.access_level | levelClass}}">
+        {{user.username}}
+        <small class="label label-default">{{user.access_level | levelClass}}</small>
+      </h3>
+      <br />
+      <span ng-if="user.institute.name">
+        <i class="fa fa-home fa-lg"></i> {{user.institute.name}} ({{user.institute.province}})
+      </span>
+      <br />
+      <span ng-if="!isMe()">
+        <i class="fa fa-comment fa-lg"></i> <a ui-sref="talkRedirect({userId: myName(), recipientName: user.username})">{{'Send message' | l10n}}</a>
+        <br />
+      </span>
+    </div>
+    <div class="col-xs-6">
+      <div ng-if="isMe()" class="pull-right well well-lg">
+        <a href="http://gravatar.com/emails/" target="_blank" class="avatar">
+          <img ng-show="user.mail_hash" class="my-tooltip avatar img-thumbnail"
+               data-toggle="tooltip" data-placement="bottom"
+               title="{{'Change your avatar at gravatar.com' | l10n}}"
+               src="http://gravatar.com/avatar/{{user.mail_hash}}?d=identicon&s=200"/>
+        </a>
+      </div>
+      <span ng-if="!isMe()" class="pull-right well well-lg">
+        <span class="avatar">
+          <img ng-show="user.mail_hash" class="my-tooltip avatar img-thumbnail"
+               src="http://gravatar.com/avatar/{{user.mail_hash}}?d=identicon&s=200"/>
+        </span>
+      </span>
+    </div>
+  </div>
+  <div class="topleft-fix panel-heading">
+    <h3 class="panel-title">{{'Submitted tasks' | l10n}}</h3>
+  </div>
+  <div class="panel-body">
+    <div ng-if="user.scores.length < 1" class="no-submissions">{{'no submissions' | l10n}}</div>
+    <div ng-repeat="p in user.scores | orderBy:'-score'" class="problem col-lg-1 col-md-2 col-sm-3 col-xs-4">
+      <div class="progress" title="{{p.title}}">
+        <div class="progress-bar"
+             ng-class="{'progress-bar-warning': p.score < 100, 'progress-bar-success': p.score == 100}"
+             ng-style="{width: p.score + '%'}">
+          <a class="progress-bar-text dont-underline" ui-sref="task.statement({taskName: p.name})">{{p.name}}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

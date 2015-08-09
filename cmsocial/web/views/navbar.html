@@ -1,0 +1,94 @@
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" ui-sref="overview"><i class="fa fa-home fa-lg"></i> OII Web</a>
+    </div>
+    <div class="navbar-collapse collapse" ng-controller="SignCtrl">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-archive fa-lg"></i> {{'Task & quiz archive' | l10n}} <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a ui-sref="tasklist.page({pageNum: 1})"><i class="fa fa-list-ol fa-fw"></i> {{'All tasks' | l10n}}</a></li>
+            <li><a ui-sref="tags"><i class="fa fa-tag fa-fw"></i> {{'Task categories' | l10n}}</a></li>
+<!--
+            <li><a href="#"><i class="fa fa-flask fa-fw"></i> Tutti i problemi, per tecnica</a></li>
+            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Fase nazionale OII, per anno</a></li>
+            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Fase territoriale OII, per anno</a></li>
+            <li class="divider"></li>
+            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Problemi creati dagli utenti</a></li>
+            <li class="divider"></li>
+-->
+            <li><a ui-sref="tests"><i class="fa fa-pencil fa-fw"></i> {{'Quizzes' | l10n}}</a></li>
+          </ul>
+        </li>
+        <li ng-class="{active: isActiveTab(4)}">
+          <a ui-sref="ranking.page({ pageNum: 1 })"><i class="fa fa-trophy fa-lg"></i> {{'Ranking' | l10n}}</a>
+        </li>
+        <li>
+          <a ng-if="!me.isLogged()" href="http://cms.di.unipi.it:8000"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
+          <a ng-if="me.isLogged()" href="http://cms.di.unipi.it:8000/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
+        </li>
+        <li ng-class="{active: isActiveTab(2)}">
+          <a ui-sref="forums"><i class="fa fa-comments fa-lg"></i> <small>{{'Forum vecchio (read only)' | l10n}}</small></a>
+        </li>
+        <li ng-class="{active: isActiveTab(5)}" ng-if="!me.isLogged()">
+          <a ui-sref="signup"><i class="fa fa-pencil fa-lg"></i> {{'Sign up' | l10n}}</a>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li ng-if="!me.isLogged()" class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-in fa-lg"></i> {{'Sign in' | l10n}} <b class="caret"></b></a>
+          <div class="dropdown-menu">
+            <form class="signin-form" role="form" name="signinform" ng-submit="signin()">
+              <div class="form-group">
+                <label class="sr-only" for="username">{{'Username' | l10n}}</label>
+                <input class="form-control" maxlength="15" type="text" id="username" name="username" ng-model="user.username" placeholder="Username" />
+              </div>
+              <div class="form-group">
+                <label class="sr-only" for="password">{{'Password' | l10n}}</label>
+                <input class="form-control" type="password" id="password" name="password" ng-model="user.password" placeholder="Password" />
+              </div>
+              <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> {{'Sign in' | l10n}}</button>
+            </form>
+          </div>
+        </li>
+        <li ng-if="me.isLogged()" class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-user fa-lg"></i>
+            <i>{{me.getUser().username}}</i>
+            <span ng-if="me.getUser().unreadtalks" class="badge">{{me.getUser().unreadtalks}}</span>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a ui-sref="user.profile({userId: me.getUser().username})">
+                <i class="fa fa-list-ol fa-fw"></i>
+                {{'My user profile' | l10n}}
+              </a>
+            </li>
+            <li>
+              <a ui-sref="user.talks({userId: me.getUser().username})">
+                <i class="fa fa-comments fa-fw"></i> {{'Messages' | l10n}}
+                <span ng-if="me.getUser().unreadtalks" class="badge">{{me.getUser().unreadtalks}}</span>
+              </a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a ng-click="signout()">
+                <i class="fa fa-sign-out fa-fw"></i>
+                {{'Sign out' | l10n}}
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div><!--/.navbar-collapse -->
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="row container">
+    <pagination total-pages="pagination.total" current-page="pagination.current">
+    </pagination>
+    <span class="label alert-info big-tag" ng-if="search.tag_string">
+      <button type="button" class="close" aria-hidden="true" ng-click="search.tag=null;reloadTasks()">&times;</button>
+      <i class="fa fa-tag fa-lg"></i>
+      {{search.tag_string}}
+    </span>
+    <form class="search-by-tag form-inline pull-right" role="form" ng-submit="reloadTasks()">
+      <div class="form-group">
+        <input class="form-control" maxlength="50" autocomplete="off"
+            type="text" id="tag" name="tag" ng-model="search.q"
+            placeholder="{{'Search by name' | l10n}}"/>
+      </div>
+      <button type="submit" class="btn btn-info">{{'search' | l10n}}</button>
+    </form>
+  </div>
+  <div ui-view></div>
+</div>
