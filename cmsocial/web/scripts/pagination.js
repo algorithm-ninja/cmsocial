@@ -16,7 +16,7 @@
  */
 'use strict';
 
-angular.module('cmsocial.pagination', [])
+angular.module('cmsocial')
   .directive('pagination', function() {
     return {
       restrict: 'E',

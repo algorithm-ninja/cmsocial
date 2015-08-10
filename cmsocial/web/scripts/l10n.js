@@ -17,7 +17,7 @@
  */
 'use strict';
 
-angular.module('cmsocial.l10n', [])
+angular.module('cmsocial')
   .constant('words', {
     // User interface
     'Close':

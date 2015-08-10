@@ -20,11 +20,11 @@
 
 /* Test handling page */
 
-angular.module('cmsocial.tests', [])
+angular.module('cmsocial')
   .controller('TestsCtrl', function($scope, $http, notificationHub,
-        navbarManager, userManager, l10n) {
+        navbarManager, userManager, l10n, API_PREFIX) {
     navbarManager.setActiveTab(0);
-    $http.post('test', {
+    $http.post(API_PREFIX + 'test', {
         "username": userManager.getUser().username,
         "token": userManager.getUser().token,
         "action": "list"
@@ -49,7 +49,7 @@ angular.module('cmsocial.tests', [])
       });
   })
   .controller('TestpageCtrl', function($scope, $stateParams, $http,
-        $sce, notificationHub, navbarManager, userManager, l10n) {
+        $sce, notificationHub, navbarManager, userManager, l10n, API_PREFIX) {
     navbarManager.setActiveTab(0);
     $scope.score = function() {
       var data = [];
@@ -68,7 +68,7 @@ angular.module('cmsocial.tests', [])
           data.push(tmp);
         }
       }
-      $http.post('test', {
+      $http.post(API_PREFIX + 'test', {
         "username": userManager.getUser().username,
         "token": userManager.getUser().token,
         "answers": data,
@@ -99,7 +99,7 @@ angular.module('cmsocial.tests', [])
         notificationHub.serverError(status);
       });
     }
-    $http.post('test', {
+    $http.post(API_PREFIX + 'test', {
       "username": userManager.getUser().username,
       "token": userManager.getUser().token,
       "action": "get",

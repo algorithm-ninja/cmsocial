@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 """Task-related database interface for SQLAlchemy.
@@ -34,6 +33,7 @@ class SocialTask(Base):
     # Task.id == SocialTask.id
     id = Column(
         Integer,
+        ForeignKey('tasks.id'),
         primary_key=True
     )
 

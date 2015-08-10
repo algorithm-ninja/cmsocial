@@ -1,34 +1,16 @@
-/* Contest Management System
- * Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
- * Copyright © 2013 Luca Versari <veluca93@gmail.com>
- * Copyright © 2013 William Di Luigi <williamdiluigi@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 'use strict';
 
 /* Tasks page */
 
-angular.module('cmsocial.tasks', ['cmsocial.pagination'])
+angular.module('cmsocial')
   .service('subsDatabase', function($http, $rootScope, $timeout,
-      notificationHub, userManager, l10n) {
+      notificationHub, userManager, l10n, API_PREFIX) {
     $rootScope.submissions = {};
     var updInterval = {};
     var updAttempts = {};
     var timeout;
     this.load = function(name) {
-      $http.post('submission', {
+      $http.post(API_PREFIX + 'submission', {
         'username': userManager.getUser().username,
         'token': userManager.getUser().token,
         'action': 'list',
@@ -108,7 +90,7 @@ angular.module('cmsocial.tasks', ['cmsocial.pagination'])
           }
     }
     function subDetails(id) {
-      $http.post('submission', {
+      $http.post(API_PREFIX + 'submission', {
         "username": userManager.getUser().username,
         "token": userManager.getUser().token,
         "action": "details",
@@ -132,7 +114,7 @@ angular.module('cmsocial.tasks', ['cmsocial.pagination'])
               updAttempts[i] = -1;
             updAttempts[i]++;
             delete updInterval[i];
-            $http.post('submission', {
+            $http.post(API_PREFIX + 'submission', {
               'username': userManager.getUser().username,
               'token': userManager.getUser().token,
               'action': 'details',
@@ -173,7 +155,7 @@ angular.module('cmsocial.tasks', ['cmsocial.pagination'])
     };
   })
   .controller('TasklistPage', function($scope, $stateParams, $state, $http,
-      notificationHub, userManager, l10n) {
+      notificationHub, userManager, l10n, API_PREFIX) {
     $scope.pagination.current = +$stateParams.pageNum;
     $scope.search.q = $stateParams.q;
     $scope.search.tag_string = "";
@@ -181,7 +163,7 @@ angular.module('cmsocial.tasks', ['cmsocial.pagination'])
       $scope.search.tags = $scope.search.tag.split(",");
     }
     $scope.getTasks = function() {
-      $http.post('task', {
+      $http.post(API_PREFIX + 'task', {
         'search':   $stateParams.q,    // can be null
         'tag':      $stateParams.tag,  // can be null
         'first':    $scope.pagination.perPage * ($scope.pagination.current-1),
@@ -206,7 +188,7 @@ angular.module('cmsocial.tasks', ['cmsocial.pagination'])
   })
   .controller('TagsPage', function($scope, $http, notificationHub) {
     $scope.getTags = function() {
-      $http.post('tag', {
+      $http.post(API_PREFIX + 'tag', {
         'action':   'list'
       })
       .success(function(data, status, headers, config) {

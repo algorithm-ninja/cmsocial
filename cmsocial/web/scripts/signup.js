@@ -19,9 +19,9 @@
 
 /* Signup page */
 
-angular.module('cmsocial.signup', [])
+angular.module('cmsocial')
   .controller('SignupCtrl', function ($scope, $http, $state,
-      notificationHub, navbarManager) {
+      notificationHub, navbarManager, API_PREFIX) {
     navbarManager.setActiveTab(5);
     $(".avatar")
       .load(function() {
@@ -65,7 +65,7 @@ angular.module('cmsocial.signup', [])
       'city':      'You must specify a city',
       'institute': 'You must specify an institute'
     };
-    $http.post('location', {
+    $http.post(API_PREFIX + 'location', {
       'action': 'listregions'
     }).success(function(data, status, headers, config) {
       $scope.regions = data.regions;
@@ -107,7 +107,7 @@ angular.module('cmsocial.signup', [])
       }
       var data = $scope.user;
       data['action'] = 'new';
-      $http.post('user', data)
+      $http.post(API_PREFIX + 'user', data)
         .success(function(data, status, headers, config) {
           if (data.success === 1) {
             notificationHub.createAlert('success', 'Complimenti, ' +
@@ -125,7 +125,7 @@ angular.module('cmsocial.signup', [])
         });
     };
     $scope.askServer = function(type, value) {
-      $http.post('check', {
+      $http.post(API_PREFIX + 'check', {
         'type': type,
         'value': value
       })
@@ -148,7 +148,7 @@ angular.module('cmsocial.signup', [])
     };
     $scope.checkRegion = function() {
       $scope.isBad['region'] = false;
-      $http.post('location', {
+      $http.post(API_PREFIX + 'location', {
         'action': 'listprovinces',
         'id':     $scope.user.region
       }).success(function(data, status, headers, config) {
@@ -160,7 +160,7 @@ angular.module('cmsocial.signup', [])
     };
     $scope.checkProvince = function() {
       $scope.isBad['province'] = false;
-      $http.post('location', {
+      $http.post(API_PREFIX + 'location', {
         'action': 'listcities',
         'id':     $scope.user.province
       }).success(function(data, status, headers, config) {
@@ -172,7 +172,7 @@ angular.module('cmsocial.signup', [])
     };
     $scope.checkCity = function() {
       $scope.isBad['city'] = false;
-      $http.post('location', {
+      $http.post(API_PREFIX + 'location', {
         'action': 'listinstitutes',
         'id':     $scope.user.city
       }).success(function(data, status, headers, config) {

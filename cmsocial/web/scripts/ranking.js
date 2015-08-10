@@ -20,13 +20,13 @@
 
 /* Ranking page */
 
-angular.module('cmsocial.ranking', ['cmsocial.pagination'])
+angular.module('cmsocial')
   .controller('RankingSkel', function($scope, navbarManager) {
     navbarManager.setActiveTab(4);
     $scope.pagination = {perPage: 20};
   })
   .controller('RankingCtrl', function($scope, $stateParams, $state,
-      $http, userManager, notificationHub, l10n) {
+      $http, userManager, notificationHub, l10n, API_PREFIX) {
     $scope.pagination.current = +$stateParams.pageNum;
     $scope.getUsers = function() {
       var data = {
@@ -36,7 +36,7 @@ angular.module('cmsocial.ranking', ['cmsocial.pagination'])
         'token':    userManager.getUser().token,
         'action':   'list'
       };
-      $http.post('user',
+      $http.post(API_PREFIX + 'user',
         data
       )
       .success(function(data, status, headers, config) {

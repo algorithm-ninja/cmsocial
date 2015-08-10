@@ -17,7 +17,7 @@
  */
 'use strict';
 
-angular.module('cmsocial.navbar', ['cmsocial.user'])
+angular.module('cmsocial')
   .directive('navbar', function() {
     return {
       restrict: 'E',

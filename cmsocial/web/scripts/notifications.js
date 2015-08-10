@@ -17,7 +17,7 @@
  */
 'use strict';
 
-angular.module('cmsocial.notifications', [])
+angular.module('cmsocial')
   .factory('notificationHub', function($timeout, l10n) {
 
     // Alert creation routine

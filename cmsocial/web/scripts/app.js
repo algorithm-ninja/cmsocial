@@ -1,32 +1,20 @@
-/* Contest Management System
- * Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
- * Copyright © 2013 William Di Luigi <williamdiluigi@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 'use strict';
 
-
-// Declare app level module which depends on filters, and services
-angular.module('cmsocial', [
-    'ui.router', 'cmsocial.l10n', 'cmsocial.navbar', 'cmsocial.tasks', 'cmsocial.task',
-    'cmsocial.user', 'cmsocial.footer', 'cmsocial.notifications', 'cmsocial.signup',
-    'cmsocial.tests', 'cmsocial.forum', 'cmsocial.ranking'
+angular
+  .module('cmsocial', [
+    'ngAnimate',
+    'ngCookies',
+    'ngResource',
+    'ngRoute',
+    'ngSanitize',
+    'ngTouch',
+    'ui.router'
   ])
+  .constant("API_PREFIX", "/api/")
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
-    $locationProvider.html5Mode(false);//.hashPrefix('!');
-    // FIXME: ui-router ignora hashPrefix per i campi href, quindi *per adesso* lo togliamo
+    $locationProvider.html5Mode(false)//.hashPrefix('!')
+    // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
+
     $urlRouterProvider
       .when('/tasks/', '/tasks/1')
       .when('/forum/{forumId}/', '/forum/{forumId}/1')
@@ -34,7 +22,8 @@ angular.module('cmsocial', [
       .when('/task/{taskName}', '/task/{taskName}/statement')
       .when('/user/{userId}', '/user/{userId}/profile')
       .when('/ranking/', '/ranking/1')
-      .otherwise('/overview');
+      .otherwise('/overview')
+
     $stateProvider
       .state('overview', {
         url: '/overview',

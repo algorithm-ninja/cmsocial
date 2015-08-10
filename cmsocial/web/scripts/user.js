@@ -1,26 +1,8 @@
-/* Contest Management System
- * Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
- * Copyright © 2013 William Di Luigi <williamdiluigi@gmail.com>
- * Copyright © 2014 Luca Chiodini <luca@chiodini.org>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 'use strict';
 
 /* Signin page */
 
-angular.module('cmsocial.user', [])
+angular.module('cmsocial')
   .factory('userbarManager', function() {
     var activeTab = 0;
     return {
@@ -43,7 +25,7 @@ angular.module('cmsocial.user', [])
       return $stateParams.userId === userManager.getUser().username;
     };
   })
-  .factory('userManager', function($http, $timeout, $sce, notificationHub, l10n) {
+  .factory('userManager', function($http, $timeout, $sce, notificationHub, l10n, API_PREFIX) {
     var getIt = function() {
       return JSON.parse(localStorage.getItem('user')) || {};
     };
@@ -51,7 +33,7 @@ angular.module('cmsocial.user', [])
     var heartbeat = function() {
       heartbeat_timeout = $timeout(heartbeat, 60000);
       if(getIt().hasOwnProperty("token")) {
-        $http.post('heartbeat', {
+        $http.post(API_PREFIX + 'heartbeat', {
             'username': getIt().username,
             'token':    getIt().token
           })
@@ -76,28 +58,7 @@ angular.module('cmsocial.user', [])
         return getIt().hasOwnProperty("token");
       },
       getGravatar: function(user, size) {
-        return $sce.trustAsUrl('http://gravatar.com/avatar/'+user.mail_hash+'?d=identicon&s='+size);
-      },
-      getForumToolbar: function(user) {
-        var al = user.access_level;
-        if (al === null) return [];
-        var t1 = ['p','pre','quote'];
-        if (al < 4) {
-          t1.unshift('h3');
-          t1.unshift('h2');
-          t1.unshift('h1');
-        }
-        var t2 = ['bold','italics','underline','ul','ol','undo','redo','clear'];
-        var t3 = ['justifyLeft','justifyCenter','justifyRight'];
-        var t4 = ['html','insertImage','insertLink','unlink'];
-        var ret = [];
-        ret.push(t1);
-        ret.push(t2);
-        if (al < 4) {
-          ret.push(t3); // FIXME: non lo mostro a tutti solo perche' sembra non funzionare :/
-          ret.push(t4);
-        }
-        return ret;
+        return $sce.trustAsUrl('http://gravatar.com/avatar/' + user.mail_hash + '?d=identicon&s=' + size);
       },
       signin: function(user) {
         localStorage.setItem('user', JSON.stringify(user));
@@ -108,14 +69,14 @@ angular.module('cmsocial.user', [])
     };
   })
   .controller('SignCtrl', function($scope, $http, $state, userManager,
-        notificationHub, l10n) {
+        notificationHub, l10n, API_PREFIX) {
     $scope.user = {'username': '', 'password': ''};
     $scope.isLogged = userManager.isLogged;
     $scope.signin = function() {
       // temporary fix to get username & password
       $scope.user.username = $("#username").val();
       $scope.user.password = $("#password").val();
-      $http.post('user', {
+      $http.post(API_PREFIX + 'user', {
           'action':   'login',
           'username': $scope.user.username,
           'password': $scope.user.password,
@@ -144,8 +105,8 @@ angular.module('cmsocial.user', [])
     };
   })
   .controller('SSOCtrl', function($scope, $http, notificationHub, $location,
-      userManager, l10n, $state) {
-    $http.post('sso', {
+      userManager, l10n, $state, API_PREFIX) {
+    $http.post(API_PREFIX + 'sso', {
       'username': userManager.getUser().username,
       'token': userManager.getUser().token,
       'payload': $location.$$search.sso,
@@ -165,12 +126,12 @@ angular.module('cmsocial.user', [])
     });
   })
   .controller('UserpageCtrl', function($scope, $http, notificationHub,
-      $stateParams, $state, $timeout, userbarManager, l10n) {
+      $stateParams, $state, $timeout, userbarManager, l10n, API_PREFIX) {
     userbarManager.setActiveTab(1);
     $timeout(function() {
       $('.my-tooltip').tooltip(); // enable tooltips
     });
-    $http.post('user', {
+    $http.post(API_PREFIX + 'user', {
       'action':   'get',
       'username': $stateParams.userId
     })
@@ -187,9 +148,9 @@ angular.module('cmsocial.user', [])
     });
   })
   .controller('UsertalksCtrl', function($scope, $http, notificationHub,
-      $stateParams, $state, $timeout, userbarManager, userManager) {
+      $stateParams, $state, $timeout, userbarManager, userManager, API_PREFIX) {
     userbarManager.setActiveTab(2);
-    $http.post('talk', {
+    $http.post(API_PREFIX + 'talk', {
       'action':   'list',
       'username': userManager.getUser().username,
       'token':    userManager.getUser().token,
@@ -216,8 +177,8 @@ angular.module('cmsocial.user', [])
     };
   })
   .controller('TalkRedirectCtrl', function($scope, $state, $stateParams,
-      $http, userbarManager, userManager, notificationHub, l10n) {
-    $http.post('talk', {
+      $http, userbarManager, userManager, notificationHub, l10n, API_PREFIX) {
+    $http.post(API_PREFIX + 'talk', {
       'action':   'get',
       'username': userManager.getUser().username,
       'token':    userManager.getUser().token,
@@ -234,13 +195,13 @@ angular.module('cmsocial.user', [])
   })
   .controller('TalkCtrl', function($scope, $state, $stateParams,
       $http, $window, $timeout, userbarManager, userManager,
-      notificationHub, l10n) {
+      notificationHub, l10n, API_PREFIX) {
     userbarManager.setActiveTab(2);
     $scope.userToolbar = userManager.getForumToolbar(userManager.getUser());
     $scope.me = userManager;
     $scope.sendMessage = function() {
       //~ console.log($stateParams.talkId);
-      $http.post('pm', {
+      $http.post(API_PREFIX + 'pm', {
         'action': 'new',
         'id': $stateParams.talkId,
         'username': userManager.getUser().username,
@@ -264,7 +225,7 @@ angular.module('cmsocial.user', [])
     var msgPerPage = 15;
     var lastLast, lastTot;
     $scope.downloadMore = function() {
-      $http.post('pm', {
+      $http.post(API_PREFIX + 'pm', {
         'action':   'list',
         'id':       $stateParams.talkId,
         'username': userManager.getUser().username,
@@ -299,7 +260,7 @@ angular.module('cmsocial.user', [])
       });
     };
     $scope.downloadMsg = function() {
-      $http.post('pm', {
+      $http.post(API_PREFIX + 'pm', {
         'action':   'list',
         'id':       $stateParams.talkId,
         'username': userManager.getUser().username,
@@ -332,7 +293,7 @@ angular.module('cmsocial.user', [])
       });
     };
     $scope.checkNew = function() {
-      $http.post('pm', {
+      $http.post(API_PREFIX + 'pm', {
         'action':   'list',
         'id':       $stateParams.talkId,
         'username': userManager.getUser().username,
@@ -363,7 +324,7 @@ angular.module('cmsocial.user', [])
     $scope.downloadMsg();
   })
   .controller('EdituserCtrl', function($scope, $state, $stateParams,
-      $http, userbarManager, userManager, notificationHub, l10n) {
+      $http, userbarManager, userManager, notificationHub, l10n, API_PREFIX) {
     if (userManager.getUser().username !== $stateParams.userId) {
       $state.go('overview');
     }
@@ -388,7 +349,7 @@ angular.module('cmsocial.user', [])
         data['password'] = $scope.user.password2;
       }
       data['email'] = $scope.user.email;
-      $http.post('user', data)
+      $http.post(API_PREFIX + 'user', data)
         .success(function(data, status, headers, config) {
           if (data.success == 1) {
             if (data.hasOwnProperty('token'))

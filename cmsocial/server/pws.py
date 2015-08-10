@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 import os
@@ -27,7 +26,7 @@ from cms.db.filecacher import FileCacher
 from cms.db import SessionGen, User, Submission, File, Task
 
 from cmsocial.db.test import Test, TestScore
-from cmsocial.db.socialtask import TaskScore, Tag, TaskTag
+from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
 from cmsocial.db.location import Institute, Region, Province, City
 
 from cmscommon.datetime import make_timestamp, make_datetime
@@ -104,8 +103,6 @@ class APIHandler(object):
 
     def wsgi_app(self, environ, start_response):
         route = self.router.bind_to_environ(environ)
-
-        __import__("pdb").set_trace()
 
         try:
             endpoint, args = route.match()
@@ -240,9 +237,6 @@ class APIHandler(object):
 
     # Handlers that do not require JSON data
     def file_handler(self, environ, filename):
-        return
-
-        __import__("pdb").set_trace()
         path = os.path.join(
             pkg_resources.resource_filename('cmsocial', 'web'),
             filename)
@@ -360,7 +354,6 @@ class APIHandler(object):
         })
 
     def user_handler(self):
-        __import__("pdb").set_trace()
         if local.data['action'] == 'new':
             try:
                 username = local.data['username']
@@ -473,9 +466,9 @@ class APIHandler(object):
 
     def task_handler(self):
         if local.data['action'] == 'list':
-            query = local.session.query(Task)\
-                .filter(Task.access_level >= local.access_level)\
-                .order_by(desc(Task.id))
+            query = local.session.query(SocialTask)\
+                .filter(SocialTask.access_level >= local.access_level)\
+                .order_by(desc(SocialTask.id))
 
             if 'tag' in local.data and local.data['tag'] is not None:
                 tags = local.data['tag'].split(',')[:5]  # Ignore requests with more that 5 tags
@@ -484,12 +477,12 @@ class APIHandler(object):
                 local.resp['tags'] = []
                 for tag in targets:
                     local.resp['tags'].append(tag.name)
-                    query = query.filter(Task.tasktags.any(tag=tag))
+                    query = query.filter(SocialTask.tasktags.any(tag=tag))
 
             if 'search' in local.data and local.data['search'] is not None:
                 sq = '%%%s%%' % local.data['search']
-                query = query.filter(or_(Task.title.ilike(sq),
-                                         Task.name.ilike(sq)))
+                query = query.filter(or_(SocialTask.title.ilike(sq),
+                                         SocialTask.name.ilike(sq)))
 
             tasks, local.resp['num'] = self.sliced_query(query)
             local.resp['tasks'] = []
@@ -511,7 +504,8 @@ class APIHandler(object):
                 local.resp['tasks'].append(task)
 
         elif local.data['action'] == 'get':
-            t = local.session.query(Task)\
+            t = local.session.query(SocialTask)\
+                .join(Task)\
                 .filter(Task.name == local.data['name'])\
                 .filter(Task.access_level >= local.access_level).first()
             if t is None:

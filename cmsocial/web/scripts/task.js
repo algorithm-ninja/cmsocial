@@ -1,26 +1,8 @@
-/* Contest Management System
- * Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
- * Copyright © 2013 Luca Versari <veluca93@gmail.com>
- * Copyright © 2013 William Di Luigi <williamdiluigi@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 'use strict';
 
 /* Task page */
 
-angular.module('cmsocial.task', [])
+angular.module('cmsocial')
   .factory('taskbarManager', function() {
     var activeTab = 0;
     return {
@@ -34,7 +16,7 @@ angular.module('cmsocial.task', [])
   })
   .controller('TaskbarCtrl', function($scope, $stateParams, $http, $state,
         $rootScope, $timeout, userManager, notificationHub, taskbarManager,
-        l10n) {
+        l10n, API_PREFIX) {
     delete $rootScope.task;
     $timeout(function() {
       $(".my-popover").popover(); // enable popovers
@@ -50,7 +32,7 @@ angular.module('cmsocial.task', [])
       });
     };
     $scope.tagAdd = function() {
-      $http.post('tag', {
+      $http.post(API_PREFIX + 'tag', {
         'action': 'add',
         'tag': $scope.tag.newtag,
         'task': $rootScope.task.name,
@@ -71,7 +53,7 @@ angular.module('cmsocial.task', [])
     };
     $scope.tagDelete = function(tag) {
       if (confirm("Are you sure?")) {
-        $http.post('tag', {
+        $http.post(API_PREFI + 'tag', {
           'action': 'remove',
           'tag': tag,
           'task': $rootScope.task.name,
@@ -93,7 +75,7 @@ angular.module('cmsocial.task', [])
     };
     $scope.newTag = function() {
       $(".newtagstuff").show();
-      $http.post('tag', {
+      $http.post(API_PREFIX + 'tag', {
         'action': 'list'
       })
       .success(function(data, status, headers, config) {
@@ -107,7 +89,7 @@ angular.module('cmsocial.task', [])
       });
     };
     $scope.loadTask = function() {
-      $http.post('task', {
+      $http.post(API_PREFIX + 'task', {
         'name': $stateParams.taskName,
         'username': userManager.getUser().username,
         'token': userManager.getUser().token,
@@ -139,7 +121,7 @@ angular.module('cmsocial.task', [])
       notificationHub, userManager, taskbarManager, l10n) {
     taskbarManager.setActiveTab(3);
     $scope.getStats = function() {
-      $http.post('task', {
+      $http.post(API_PREFIX + 'task', {
         'name': $stateParams.taskName,
         'username': userManager.getUser().username,
         'token': userManager.getUser().token,
@@ -200,7 +182,7 @@ angular.module('cmsocial.task', [])
       data['action'] = 'new';
       data['task_name'] = $scope.taskName;
       delete $scope.files;
-      $http.post('submission',
+      $http.post(API_PREFIX + 'submission',
         data
       )
       .success(function(data, status, headers, config) {
