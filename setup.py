@@ -40,7 +40,7 @@ setup(
             "cmsocialServer=cmsocial.server.pws:main",
             "cmsocialInitDB=cmsocial.db:init_db",
             "cmsocialSyncTasks=cmsocial.scripts.synctasks:main",
-            # "cmsocialSyncUsers=cmsocial.scripts.syncusers:main"
+            "cmsocialSyncUsers=cmsocial.scripts.syncusers:main"
         ]
     },
     keywords="ioi programming contest grader management system",

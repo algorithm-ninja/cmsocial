@@ -30,7 +30,9 @@ class SocialUser(Base):
     # User.id == SocialUser.id
     id = Column(
         Integer,
-        primary_key=True)
+        ForeignKey("users.id"),
+        primary_key=True
+    )
 
     # Access level
     access_level = Column(
@@ -65,4 +67,5 @@ class SocialUser(Base):
                         passive_deletes=True))
 
     # List of tasktags (not "approved" yet) created by this user
-    tasktags = relationship("TaskTag")
+    # FIXME: the following causes a circular dependency
+    # tasktags = relationship("TaskTag")

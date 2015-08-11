@@ -27,6 +27,7 @@ from cms.db import SessionGen, User, Submission, File, Task
 
 from cmsocial.db.test import Test, TestScore
 from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
+from cmsocial.db.socialuser import SocialUser
 from cmsocial.db.location import Institute, Region, Province, City
 
 from cmscommon.datetime import make_timestamp, make_datetime
@@ -421,13 +422,15 @@ class APIHandler(object):
                 taskinfo['title'] = ts.task.title
                 local.resp['scores'].append(taskinfo)
         elif local.data['action'] == 'list':
+            # FIXME: we had the following filter before, not sure why
+            # .filter(User.hidden == False)
             query = local.session.query(User)\
-                .filter(User.hidden == False)\
-                .order_by(desc(User.score))\
-                .order_by(desc(User.id))
+                .join(SocialUser)\
+                .order_by(desc(SocialUser.score))\
+                .order_by(desc(SocialUser.id))
             if 'institute' in local.data:
                 query = query\
-                    .filter(User.institute_id == local.data['institute'])
+                    .filter(SocialUser.institute_id == local.data['institute'])
             users, local.resp['num'] = self.sliced_query(query)
             local.resp['users'] = map(self.get_user_info, users)
         elif local.data['action'] == 'update':
@@ -466,9 +469,11 @@ class APIHandler(object):
 
     def task_handler(self):
         if local.data['action'] == 'list':
-            query = local.session.query(SocialTask)\
-                .filter(SocialTask.access_level >= local.access_level)\
-                .order_by(desc(SocialTask.id))
+            query = local.session.query(Task)\
+                .join(SocialTask)\
+                .filter(SocialTask.access_level >= local.access_level)
+                # FIXME: what default order do we use?
+                #.order_by(desc(SocialTask.id))
 
             if 'tag' in local.data and local.data['tag'] is not None:
                 tags = local.data['tag'].split(',')[:5]  # Ignore requests with more that 5 tags
@@ -481,8 +486,8 @@ class APIHandler(object):
 
             if 'search' in local.data and local.data['search'] is not None:
                 sq = '%%%s%%' % local.data['search']
-                query = query.filter(or_(SocialTask.title.ilike(sq),
-                                         SocialTask.name.ilike(sq)))
+                query = query.filter(or_(Task.title.ilike(sq),
+                                         Task.name.ilike(sq)))
 
             tasks, local.resp['num'] = self.sliced_query(query)
             local.resp['tasks'] = []
