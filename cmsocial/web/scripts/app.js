@@ -1,5 +1,13 @@
 'use strict';
 
+/**
+ * @ngdoc overview
+ * @name cmsocial
+ * @description
+ * # cmsocial
+ *
+ * Main module of the application.
+ */
 angular
   .module('cmsocial', [
     'ngAnimate',
@@ -10,15 +18,13 @@ angular
     'ngTouch',
     'ui.router'
   ])
-  .constant("API_PREFIX", "/api/")
+  .constant('API_PREFIX', '/* @echo API_PREFIX */')  // The correct value will be injected by grunt
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
     $locationProvider.html5Mode(false)//.hashPrefix('!')
     // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
 
     $urlRouterProvider
       .when('/tasks/', '/tasks/1')
-      .when('/forum/{forumId}/', '/forum/{forumId}/1')
-      .when('/topic/{topicId}/', '/topic/{topicId}/1')
       .when('/task/{taskName}', '/task/{taskName}/statement')
       .when('/user/{userId}', '/user/{userId}/profile')
       .when('/ranking/', '/ranking/1')

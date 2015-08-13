@@ -12,6 +12,9 @@ module.exports = function (grunt) {
   // Time how long tasks take. Can help when optimizing build times
   require('time-grunt')(grunt);
 
+  // Where to read <%= cmsocial.* %> stuff from
+  var CONFIG_PATH = "../config/cmsocial.ini"
+
   // Automatically load required Grunt tasks
   require('jit-grunt')(grunt, {
     useminPrepare: 'grunt-usemin',
@@ -22,14 +25,21 @@ module.exports = function (grunt) {
   // Add "grunt less" task (I don't know why it's not seen by jit-grunt)
   grunt.loadNpmTasks('grunt-contrib-less');
 
+  // Add "grunt preprocess" task (Same..)
+  grunt.loadNpmTasks('grunt-preprocess');
+
   // Configurable paths for the application
   var appConfig = {
     app: require('./bower.json').appPath || 'app',
-    dist: 'dist'
+    dist: 'dist',
+    tmp: '.tmp'
   };
 
   // Define the configuration for all the tasks
   grunt.initConfig({
+
+    // CMSocial settings
+    cmsocial: require('ini').parse(require('fs').readFileSync(CONFIG_PATH, 'utf-8')),
 
     // Project settings
     yeoman: appConfig,
@@ -64,7 +74,7 @@ module.exports = function (grunt) {
         },
         files: [
           '<%= yeoman.app %>/{,*/}*.html',
-          '.tmp/styles/{,*/}*.css',
+          '<%= yeoman.tmp %>/styles/{,*/}*.css',
           '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
       }
@@ -83,7 +93,7 @@ module.exports = function (grunt) {
           open: true,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              connect.static('<%= yeoman.tmp %>'),
               connect().use(
                 '/bower_components',
                 connect.static('./bower_components')
@@ -102,7 +112,7 @@ module.exports = function (grunt) {
           port: 9001,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              connect.static('<%= yeoman.tmp %>'),
               connect.static('test'),
               connect().use(
                 '/bower_components',
@@ -147,13 +157,13 @@ module.exports = function (grunt) {
         files: [{
           dot: true,
           src: [
-            '.tmp',
+            '<%= yeoman.tmp %>',
             '<%= yeoman.dist %>/{,*/}*',
             '!<%= yeoman.dist %>/.git{,*/}*'
           ]
         }]
       },
-      server: '.tmp'
+      server: '<%= yeoman.tmp %>'
     },
 
     // Add vendor prefixed styles
@@ -167,17 +177,17 @@ module.exports = function (grunt) {
         },
         files: [{
           expand: true,
-          cwd: '.tmp/styles/',
+          cwd: '<%= yeoman.tmp %>/styles/',
           src: '{,*/}*.css',
-          dest: '.tmp/styles/'
+          dest: '<%= yeoman.tmp %>/styles/'
         }]
       },
       dist: {
         files: [{
           expand: true,
-          cwd: '.tmp/styles/',
+          cwd: '<%= yeoman.tmp %>/styles/',
           src: '{,*/}*.css',
-          dest: '.tmp/styles/'
+          dest: '<%= yeoman.tmp %>/styles/'
         }]
       }
     },
@@ -262,7 +272,7 @@ module.exports = function (grunt) {
     //   dist: {
     //     files: {
     //       '<%= yeoman.dist %>/styles/main.css': [
-    //         '.tmp/styles/{,*/}*.css'
+    //         '<%= yeoman.tmp %>/styles/{,*/}*.css'
     //       ]
     //     }
     //   }
@@ -328,7 +338,7 @@ module.exports = function (grunt) {
         },
         cwd: '<%= yeoman.app %>',
         src: 'views/{,*/}*.html',
-        dest: '.tmp/templateCache.js'
+        dest: '<%= yeoman.tmp %>/templateCache.js'
       }
     },
 
@@ -338,9 +348,9 @@ module.exports = function (grunt) {
       dist: {
         files: [{
           expand: true,
-          cwd: '.tmp/concat/scripts',
+          cwd: '<%= yeoman.tmp %>/concat/scripts',
           src: '*.js',
-          dest: '.tmp/concat/scripts'
+          dest: '<%= yeoman.tmp %>/concat/scripts'
         }]
       }
     },
@@ -372,7 +382,7 @@ module.exports = function (grunt) {
           ]
         }, {
           expand: true,
-          cwd: '.tmp/images',
+          cwd: '<%= yeoman.tmp %>/images',
           dest: '<%= yeoman.dist %>/images',
           src: ['generated/*']
         }, {
@@ -390,7 +400,7 @@ module.exports = function (grunt) {
       styles: {
         expand: true,
         cwd: '<%= yeoman.app %>/styles',
-        dest: '.tmp/styles/',
+        dest: '<%= yeoman.tmp %>/styles/',
         src: '{,*/}*.css'
       }
     },
@@ -422,16 +432,29 @@ module.exports = function (grunt) {
     less: {
       development: {
         options: {
-          paths: ["<%= yeoman.app %>/styles"]
+          paths: ['<%= yeoman.app %>/styles']
         },
-        files: {"<%= yeoman.app %>/styles/main.css": "<%= yeoman.app %>/styles/main.less"}
+        files: {'<%= yeoman.app %>/styles/main.css': '<%= yeoman.app %>/styles/main.less'}
       },
       production: {
         options: {
-          paths: ["<%= yeoman.app %>/styles"],
+          paths: ['<%= yeoman.app %>/styles'],
           cleancss: true
         },
-        files: {"<%= yeoman.app %>/styles/main.css": "<%= yeoman.app %>/styles/main.less"}
+        files: {'<%= yeoman.app %>/styles/main.css': '<%= yeoman.app %>/styles/main.less'}
+      }
+    },
+
+    // Preprocess files (e.g. to copy configuration data from server-side to client-side)
+    preprocess: {
+      options: {
+        context: {
+          API_PREFIX: '<%= cmsocial.core.api_prefix %>'
+        }
+      },
+      js: {
+        src: '<%= yeoman.app %>/scripts/app.js',
+        dest: '<%= yeoman.app %>/scripts/app.processed.js'
       }
     }
   });
@@ -444,6 +467,7 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'clean:server',
+      'preprocess',
       'wiredep',
       'concurrent:server',
       'autoprefixer:server',
@@ -459,6 +483,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test', [
     'clean:server',
+    'preprocess',
     'wiredep',
     'concurrent:test',
     'autoprefixer',
@@ -468,6 +493,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'preprocess',
     'wiredep',
     'useminPrepare',
     'concurrent:dist',
