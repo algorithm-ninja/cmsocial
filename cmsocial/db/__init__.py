@@ -4,6 +4,7 @@ def init_db():
     from cms.db import Base
     from .socialtask import SocialTask
     from .socialuser import SocialUser
+    from .test import Test
 
     # Issue CREATE queries
     Base.metadata.create_all()
