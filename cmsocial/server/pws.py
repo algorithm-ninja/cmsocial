@@ -212,9 +212,11 @@ class APIHandler(object):
     def hashpw(self, pw):
         return self.hash(pw + config.secret_key)
 
-    def get_institute_info(self, institute):
+    def get_institute_info(self, institute_id):
         info = dict()
-        if institute is not None:
+        if institute_id is not None:
+            institute = local.session.query(Institute)\
+                .filter(Institute.id == institute_id).first()
             info['id'] = institute.id
             info['name'] = institute.name
             info['city'] = institute.city.name
@@ -224,13 +226,14 @@ class APIHandler(object):
 
     def get_user_info(self, user):
         info = dict()
+        __import__("pdb").set_trace()
         info['username'] = user.username
         info['access_level'] = user.access_level
         info['join_date'] = make_timestamp(user.registration_time)
         info['mail_hash'] = self.hash(user.email, 'md5')
-        info['post_count'] = len(user.posts)
+        #info['post_count'] = len(user.posts)
         info['score'] = user.score
-        info['institute'] = self.get_institute_info(user.institute)
+        info['institute'] = self.get_institute_info(user.institute_id)
         info['first_name'] = user.first_name
         info['last_name'] = user.last_name
         info['tasks_solved'] = -1
@@ -424,7 +427,16 @@ class APIHandler(object):
         elif local.data['action'] == 'list':
             # FIXME: we had the following filter before, not sure why
             # .filter(User.hidden == False)
+            __import__("pdb").set_trace()
             query = local.session.query(User)\
+                .add_columns(User.username)\
+                .add_columns(User.first_name)\
+                .add_columns(User.last_name)\
+                .add_columns(User.email)\
+                .add_columns(SocialUser.access_level)\
+                .add_columns(SocialUser.score)\
+                .add_columns(SocialUser.registration_time)\
+                .add_columns(SocialUser.institute_id)\
                 .join(SocialUser)\
                 .order_by(desc(SocialUser.score))\
                 .order_by(desc(SocialUser.id))
@@ -509,10 +521,10 @@ class APIHandler(object):
                 local.resp['tasks'].append(task)
 
         elif local.data['action'] == 'get':
-            t = local.session.query(SocialTask)\
-                .join(Task)\
+            t = local.session.query(Task)\
+                .join(SocialTask)\
                 .filter(Task.name == local.data['name'])\
-                .filter(Task.access_level >= local.access_level).first()
+                .filter(SocialTask.access_level >= local.access_level).first()
             if t is None:
                 return 'Not found'
             local.resp['id'] = t.id

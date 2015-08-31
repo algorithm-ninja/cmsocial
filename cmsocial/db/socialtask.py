@@ -30,46 +30,59 @@ class SocialTask(Base):
     """
     __tablename__ = 'social_tasks'
 
-    # Task.id == SocialTask.id
     id = Column(
         Integer,
         ForeignKey('tasks.id'),
         primary_key=True
     )
 
+    task = relationship(
+        "Task",
+        backref=backref(
+            "social_tasks",
+            uselist=False
+        )
+    )
+
     # Access level required
     access_level = Column(
         Integer,
         nullable=False,
-        default=7)
+        default=7
+    )
 
     # Stats
     nsubs = Column(
         Integer,
         nullable=False,
-        default=0)
+        default=0
+    )
 
     nsubscorrect = Column(
         Integer,
         nullable=False,
-        default=0)
+        default=0
+    )
 
     nusers = Column(
         Integer,
         nullable=False,
-        default=0)
+        default=0
+    )
 
     nuserscorrect = Column(
         Integer,
         nullable=False,
-        default=0)
+        default=0
+    )
 
     # The list of tasktags which tag this task
     tasktags = relationship('TaskTag')
 
 
 class TaskTag(Base):
-    __tablename__ = 'tasktags'
+    __tablename__ = 'task_tags'
+
     task_id = Column(
         Integer,
         ForeignKey('social_tasks.id'),
@@ -99,20 +112,24 @@ class TaskTag(Base):
 
 class Tag(Base):
     __tablename__ = 'tags'
+
     id = Column(
         Integer,
-        primary_key=True)
+        primary_key=True
+    )
 
     name = Column(
         String,
         nullable=False,
-        unique=True)
+        unique=True
+    )
 
     hidden = Column(Boolean)
 
     description = Column(
         String,
-        nullable=False)
+        nullable=False
+    )
 
     # List of tasktags which tag tasks by using this tag
     tasktags = relationship("TaskTag")
@@ -120,43 +137,65 @@ class Tag(Base):
 
 class TaskScore(Base):
     __tablename__ = 'taskscores'
+
     __table_args__ = (
         UniqueConstraint('user_id', 'task_id'),
     )
+
     id = Column(
         Integer,
-        primary_key=True)
+        primary_key=True
+    )
 
     user_id = Column(
         Integer,
-        ForeignKey(SocialUser.id,
-                   onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey(
+            SocialUser.id,
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
         nullable=False,
-        index=True)
+        index=True
+    )
+
     user = relationship(
         SocialUser,
-        backref=backref('taskscores',
-                        cascade="all, delete-orphan",
-                        passive_deletes=True))
+        backref=backref(
+            'taskscores',
+            cascade="all, delete-orphan",
+            passive_deletes=True
+        )
+    )
 
     task_id = Column(
         Integer,
-        ForeignKey(Task.id,
-                   onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey(
+            Task.id,
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
         nullable=False,
-        index=True)
+        index=True
+    )
+
     task = relationship(
         Task,
-        backref=backref('taskscores',
-                        cascade="all, delete-orphan",
-                        passive_deletes=True))
+        backref=backref(
+            'taskscores',
+            cascade="all, delete-orphan",
+            passive_deletes=True
+        )
+    )
 
     score = Column(
         Integer,
         nullable=False,
         default=0,
-        index=True)
+        index=True
+    )
+
     time = Column(
         Float,
         nullable=False,
-        default=0)
+        default=0
+    )

@@ -34,11 +34,20 @@ class SocialUser(Base):
         primary_key=True
     )
 
+    user = relationship(
+        "User",
+        backref=backref(
+            "social_users",
+            uselist=False
+        )
+    )
+
     # Access level
     access_level = Column(
         Integer,
         nullable=False,
-        default=6)
+        default=6
+    )
 
     # Score
     score = Column(
@@ -56,15 +65,23 @@ class SocialUser(Base):
     # Institute
     institute_id = Column(
         Integer,
-        ForeignKey(Institute.id,
-                   onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey(
+            Institute.id,
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
         nullable=True,
-        index=True)
+        index=True
+    )
+
     institute = relationship(
         Institute,
-        backref=backref("users",
-                        cascade="all, delete-orphan",
-                        passive_deletes=True))
+        backref=backref(
+            "users",
+            cascade="all, delete-orphan",
+            passive_deletes=True
+        )
+    )
 
     # List of tasktags (not "approved" yet) created by this user
     # FIXME: the following causes a circular dependency
