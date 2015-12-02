@@ -1,0 +1,9 @@
+<div>
+  <div class="container">
+    <hr>
+    <small>
+      Source code for this online judge system can be found <a href="https://github.com/algorithm-ninja/cmsocial" rel="author noreferrer" target="_blank">here</a>. It is based on <a href="http://github.com/cms-dev/cms/" rel="noreferrer" target="_blank">Contest Management System</a>. Both are released under the <a href="http://www.gnu.org/licenses/agpl" rel="license noreferrer" target="_blank">GNU Affero General Public License</a>.
+    </small>
+  </div>
+</div>
+

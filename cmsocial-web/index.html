@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <!-- TODO: fetch title from configuration -->
-    <title>CMSocial</title>
+    <title>[[title]]</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -33,7 +33,7 @@
        r=n.getElementsByTagName(g)[0],a.src=u,r.parentNode.insertBefore(a,r)
        }(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-       ga('create', 'UA-XXXXX-X');
+       ga('create', '[[analytics]]');
        ga('send', 'pageview');
     </script>
 
@@ -56,17 +56,6 @@
 
     <!-- build:js(.tmp) scripts/scripts.js -->
     <script src="scripts/app.processed.js"></script>
-    <script src="scripts/l10n.js"></script>
-    <script src="scripts/navbar.js"></script>
-    <script src="scripts/tasks.js"></script>
-    <script src="scripts/task.js"></script>
-    <script src="scripts/tests.js"></script>
-    <script src="scripts/user.js"></script>
-    <script src="scripts/signup.js"></script>
-    <script src="scripts/footer.js"></script>
-    <script src="scripts/notifications.js"></script>
-    <script src="scripts/pagination.js"></script>
-    <script src="scripts/ranking.js"></script>
     <!-- endbuild -->
   </body>
 </html>

@@ -93,6 +93,7 @@ class APIHandler(object):
         self.evaluation_service = parent.evaluation_service
         self.EMAIL_REG = re.compile(r'[^@]+@[^@]+\.[^@]+')
         self.USERNAME_REG = re.compile(r'^[A-Za-z0-9_\.]+$')
+        self.file_root = pkg_resources.resource_filename('cmsocial', 'web')
 
     @responder
     def __call__(self, environ, start_response):
@@ -242,7 +243,7 @@ class APIHandler(object):
     # Handlers that do not require JSON data
     def file_handler(self, environ, filename):
         path = os.path.join(
-            pkg_resources.resource_filename('cmsocial', 'web'),
+            self.file_root,
             filename)
 
         response = Response()

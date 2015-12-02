@@ -13,16 +13,16 @@ import os
 
 from setuptools import setup, find_packages
 
+files = []
+
+for root, dirs, fs in os.walk(os.path.join("cmsocial", "web")):
+    for f in fs:
+        files.append(os.path.join(root[9:], f))
 
 PACKAGE_DATA = {
-    "cmsocial": [
-        os.path.join("assets", "*.*"),
-        os.path.join("assets", "css", "*.*"),
-        os.path.join("assets", "js", "*.*"),
-        os.path.join("assets", "views", "*.*"),
-        os.path.join("assets", "views", "*.*"),
-    ],
+    "cmsocial": files
 }
+
 
 
 setup(

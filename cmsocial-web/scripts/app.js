@@ -18,7 +18,7 @@ angular
     'ngTouch',
     'ui.router'
   ])
-  .constant('API_PREFIX', '/* @echo API_PREFIX */')  // The correct value will be injected by grunt
+  .constant('API_PREFIX', '[[api_prefix]]')  // The correct value will be injected by grunt
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
     $locationProvider.html5Mode(false)//.hashPrefix('!')
     // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
