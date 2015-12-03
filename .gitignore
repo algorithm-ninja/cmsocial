@@ -22,8 +22,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-node_modules
-tmp
+node_modules/
+tmp/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
