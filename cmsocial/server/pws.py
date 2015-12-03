@@ -537,7 +537,7 @@ class APIHandler(object):
                 att.append((name, obj.digest))
             local.resp['attachments'] = att
             local.resp['tags'] = []
-            for tasktag in t.tasktags:
+            for tasktag in t.social_task.tasktags:
                 if not tasktag.tag.hidden:
                     local.resp['tags'].append({
                         'name': tasktag.tag.name,

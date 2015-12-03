@@ -39,7 +39,7 @@ class SocialTask(Base):
     task = relationship(
         "Task",
         backref=backref(
-            "social_tasks",
+            "social_task",
             uselist=False
         )
     )
