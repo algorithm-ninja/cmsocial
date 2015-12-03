@@ -1254,7 +1254,7 @@ class PracticeWebServer(Service):
         handler = APIHandler(self)
 
         self.wsgi_app = SharedDataMiddleware(handler, {
-            '/': ('cmsocial', 'web')
+            '/': handler.file_root
         })
 
     def run(self):

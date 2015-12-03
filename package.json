@@ -3,8 +3,7 @@
   "private": true,
   "devDependencies": {
     "bower": ">=1.0.0 <2.0.0",
-    "google-cdn": "^1.0.0",
-    "google-cdn-data": "^0.1.17",
+    "cdnify": "^0.1.4",
     "jshint-stylish": "^1.0.0",
     "karma-jasmine": "*",
     "karma-phantomjs-launcher": "*"
