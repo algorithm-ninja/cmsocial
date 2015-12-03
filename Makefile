@@ -33,7 +33,7 @@ config-files: $(DEST)/custom_images $(DEST)/favicon.ico $(DEST)/views/footer.htm
 ifeq ($(ONLINE), 1)
 js-deps:
 else
-js-deps: $(DEST)/bower_components
+js-deps: $(DEST)/node_modules
 endif
 
 config/%: | config/%.sample
@@ -82,17 +82,17 @@ $(DEST)/scripts/app.processed.js: $(TMPJS)
 tmp/%.js: cmsocial-web/%.js | tmp
 	./instantiate.sh $< > $@
 
-$(DEST)/bower_components: $(DEST)/bower.json node_modules
-	node_modules/.bin/bower install
+$(DEST)/node_modules: $(DEST)/package.json node_modules
+	rsync -av --delete node_modules $(DEST)/
 
-$(DEST)/bower.json: bower.json
+$(DEST)/package.json: package.json
 	cp $^ $@
 
 $(DEST)/%: cmsocial-web/%
 	cp $^ $@
 
 clean:
-	rm -rf tmp/ $(DEST) build
+	rm -rf tmp/ $(DEST) build/ cmsocial.egg-info/ dist/
 
 distclean: clean
 	rm -rf node_modules
