@@ -15,11 +15,12 @@ WEBDIRS=$(shell find cmsocial-web -type d)
 TMPDIRS=$(patsubst cmsocial-web%,tmp%,$(WEBDIRS))
 DESTDIRS=$(patsubst cmsocial-web%,$(DEST)%,$(WEBDIRS))
 
-JS=$(shell find cmsocial-web -type f -name '*.js')
+JS=$(shell find cmsocial-web -type f -name '*.js' | sort)
 LESS=$(shell find cmsocial-web -type f -name '*.less')
 HTML=$(shell find cmsocial-web -type f -name '*.html')
 DESTHTML=$(patsubst cmsocial-web/%,$(DEST)/%,$(HTML))
 CSS=$(patsubst cmsocial-web/%.less,tmp/%.css,$(LESS))
+TMPJS=$(patsubst cmsocial-web/%.js,tmp/%.js,$(JS))
 
 .PHONY: all dirs other-files config-files js-deps clean distclean
 
@@ -72,11 +73,14 @@ $(DEST)/%.html: cmsocial-web/%.html | $(DEST)
 $(DEST)/styles/main.css: $(CSS)
 	cat $^ > $@
 
-tmp/%.css: cmsocial-web/%.less node_modules
+tmp/%.css: cmsocial-web/%.less node_modules | tmp
 	node_modules/.bin/lessc $< $@
 
-$(DEST)/scripts/app.processed.js: $(JS)
+$(DEST)/scripts/app.processed.js: $(TMPJS)
 	cat $^ > $@
+
+tmp/%.js: cmsocial-web/%.js | tmp
+	./instantiate.sh $< > $@
 
 $(DEST)/bower_components: $(DEST)/bower.json node_modules
 	cd $(DEST) && $(MAKEROOT)/node_modules/.bin/bower install
