@@ -3,10 +3,12 @@
   "private": true,
   "devDependencies": {
     "bower": ">=1.0.0 <2.0.0",
+    "browser-sync": "^2.10.0",
     "cdnify": "^0.1.4",
     "jshint-stylish": "^1.0.0",
     "karma-jasmine": "*",
-    "karma-phantomjs-launcher": "*"
+    "karma-phantomjs-launcher": "*",
+    "proxy-middleware": "^0.15.0"
   },
   "dependencies": {
     "angular": "^1.4.8",

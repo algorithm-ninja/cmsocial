@@ -1,4 +1,4 @@
-DEST=cmsocial/web
+DEST=cmsocial-web.build
 MAKEROOT=$(shell pwd)
 SHELL := /bin/bash
 
@@ -41,6 +41,7 @@ config/%: | config/%.sample
 
 node_modules: package.json
 	npm install
+	touch node_modules
 
 dirs: $(DEST) tmp
 

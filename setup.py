@@ -13,28 +13,15 @@ import os
 
 from setuptools import setup, find_packages
 
-files = []
-
-for root, dirs, fs in os.walk(os.path.join("cmsocial", "web")):
-    for f in fs:
-        files.append(os.path.join(root[9:], f))
-
-PACKAGE_DATA = {
-    "cmsocial": files
-}
-
-
-
 setup(
     name="cmsocial",
-    version="0.1",
+    version="0.1.0",
     author="algorithm-ninja",
     author_email="algorithm@ninja",
     url="https://github.com/algorithm-ninja/cmsocial",
     download_url="https://github.com/algorithm-ninja/cmsocial/archive/master.tar.gz",
     description="A web application that builds a social coding platform upon CMS",
     packages=find_packages(),
-    package_data=PACKAGE_DATA,
     entry_points={
         "console_scripts": [
             "cmsocialServer=cmsocial.server.pws:main",
