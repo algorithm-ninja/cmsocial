@@ -227,7 +227,6 @@ class APIHandler(object):
 
     def get_user_info(self, user):
         info = dict()
-        __import__("pdb").set_trace()
         info['username'] = user.username
         info['access_level'] = user.access_level
         info['join_date'] = make_timestamp(user.registration_time)
@@ -428,7 +427,6 @@ class APIHandler(object):
         elif local.data['action'] == 'list':
             # FIXME: we had the following filter before, not sure why
             # .filter(User.hidden == False)
-            __import__("pdb").set_trace()
             query = local.session.query(User)\
                 .add_columns(User.username)\
                 .add_columns(User.first_name)\
@@ -476,9 +474,6 @@ class APIHandler(object):
     def heartbeat_handler(self):
         if local.user is None:
             return 'Unauthorized'
-        local.resp['unreadtalks'] = local.session.query(Talk)\
-            .filter(Talk.receiver_id == local.user.id)\
-            .filter(Talk.read == False).count()
 
     def task_handler(self):
         if local.data['action'] == 'list':

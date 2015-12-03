@@ -83,7 +83,7 @@ tmp/%.js: cmsocial-web/%.js | tmp
 	./instantiate.sh $< > $@
 
 $(DEST)/bower_components: $(DEST)/bower.json node_modules
-	cd $(DEST) && $(MAKEROOT)/node_modules/.bin/bower install
+	node_modules/.bin/bower install
 
 $(DEST)/bower.json: bower.json
 	cp $^ $@

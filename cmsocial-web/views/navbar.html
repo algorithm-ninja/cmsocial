@@ -32,11 +32,8 @@
           <a ui-sref="ranking.page({ pageNum: 1 })"><i class="fa fa-trophy fa-lg"></i> {{'Ranking' | l10n}}</a>
         </li>
         <li>
-          <a ng-if="!me.isLogged()" href="http://cms.di.unipi.it:8000"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
-          <a ng-if="me.isLogged()" href="http://cms.di.unipi.it:8000/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
-        </li>
-        <li ng-class="{active: isActiveTab(2)}">
-          <a ui-sref="forums"><i class="fa fa-comments fa-lg"></i> <small>{{'Forum vecchio (read only)' | l10n}}</small></a>
+          <a ng-if="!me.isLogged()" href="[[forum_url]]"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
+          <a ng-if="me.isLogged()" href="[[forum_url]]/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
         </li>
         <li ng-class="{active: isActiveTab(5)}" ng-if="!me.isLogged()">
           <a ui-sref="signup"><i class="fa fa-pencil fa-lg"></i> {{'Sign up' | l10n}}</a>
@@ -63,7 +60,6 @@
           <a class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-user fa-lg"></i>
             <i>{{me.getUser().username}}</i>
-            <span ng-if="me.getUser().unreadtalks" class="badge">{{me.getUser().unreadtalks}}</span>
             <b class="caret"></b>
           </a>
           <ul class="dropdown-menu">
@@ -71,12 +67,6 @@
               <a ui-sref="user.profile({userId: me.getUser().username})">
                 <i class="fa fa-list-ol fa-fw"></i>
                 {{'My user profile' | l10n}}
-              </a>
-            </li>
-            <li>
-              <a ui-sref="user.talks({userId: me.getUser().username})">
-                <i class="fa fa-comments fa-fw"></i> {{'Messages' | l10n}}
-                <span ng-if="me.getUser().unreadtalks" class="badge">{{me.getUser().unreadtalks}}</span>
               </a>
             </li>
             <li class="divider"></li>

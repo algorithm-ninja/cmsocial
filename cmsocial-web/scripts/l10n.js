@@ -222,24 +222,6 @@ angular.module('cmsocial')
     {it: 'Problemi sottomessi'},
     'no submissions':
     {it: 'nessuna sottoposizione'},
-    'Send message':
-    {it: 'Invia messaggio'},
-    'Talks':
-    {it: 'Conversazioni'},
-    'Messages':
-    {it: 'Messaggi'},
-    'Talk with':
-    {it: 'Conversazione con'},
-    'Load previous messages':
-    {it: 'Carica messaggi precedenti'},
-    'Check new messages':
-    {it: 'Controlla nuovi messaggi'},
-    'Message sent':
-    {it: 'Messaggio inviato'},
-    'No new messages':
-    {it: 'Nessun nuovo messaggio'},
-    'You must enter some text':
-    {it: 'Devi inserire il testo'},
 
     // Tasklist page
     'search':
@@ -313,61 +295,7 @@ angular.module('cmsocial')
 
     // Forum
     'Forums':
-    {it: 'Forum'},
-    'Topics':
-    {it: 'Argomenti'},
-    'Top.': // abbreviation of: Topics
-    {it: 'Arg.'},
-    'Posts':
-    {it: 'Messaggi'},
-    'Last post':
-    {it: 'Ultimo messaggio'},
-    'by': // as in: postX by userY
-    {it: 'di'},
-    'No posts':
-    {it: 'Non ci sono messaggi'},
-    'Create new topic':
-    {it: 'Crea un nuovo argomento'},
-    'Post to this topic':
-    {it: 'Rispondi a questo argomento'},
-    'Answers':
-    {it: 'Risposte'},
-    'Answ.': // abbreviation of: Answers
-    {it: 'Risp.'},
-    'Clicks':
-    {it: 'Visite'},
-    'posts':
-    {it: 'messaggi'},
-    'User\'s score':
-    {it: 'Punteggio dell\'utente'},
-    'signed up':
-    {it: 'iscrizione'},
-    'Get permalink':
-    {it: 'Ottieni link permanente'},
-    'quote':
-    {it: 'cita'},
-    'edit':
-    {it: 'modifica'},
-    'delete':
-    {it: 'elimina'},
-    'Are you sure you want to delete this post?':
-    {it: 'Sei sicuro di voler eliminare questo post?'},
-    'Last answer':
-    {it: 'Ultima risposta'},
-    'No answers':
-    {it: 'Non ci sono risposte'},
-    'Go to post':
-    {it: 'Vai al messaggio'},
-    'New topic':
-    {it: 'Nuovo argomento'},
-    'Enter topic title...':
-    {it: 'Scrivi un titolo...'},
-    'New post':
-    {it: 'Nuova risposta'},
-    'Edit this post':
-    {it: 'Modifica questa risposta'},
-    'Go to user\'s page':
-    {it: 'Vai alla pagina utente'},
+    {it: 'Forum'}
   })
   .factory('l10n', function(words) {
     // Detect browser language (ISO 639) and save it in localStorage

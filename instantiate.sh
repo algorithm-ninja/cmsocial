@@ -14,7 +14,7 @@ while read L; do
     SECTION=$(echo $L | grep -o "$IDENTIFIER")
   fi
 
-  if [ $SECTION = 'core' ]
+  if [ $SECTION = 'core' ] || [ $SECTION = 'forum' ]
   then
     if echo $L | grep "^$IDENTIFIER = .*$" > /dev/null
     then
