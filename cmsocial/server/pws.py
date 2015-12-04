@@ -266,13 +266,15 @@ class APIHandler(object):
 
         response = Response()
         response.status_code = 200
-
         response.mimetype = 'application/octet-stream'
-        if 'filename' in args:
-            response.headers.add_header(
-                b'Content-Disposition', b'attachment',
-                filename=args['filename'])
-            mimetype = mimetypes.guess_type(args['filename'])[0]
+
+        if 'name' in args:
+            if not args["name"].endswith(".pdf"):
+                # Don't do this on pdf files because it breaks the native pdf reader
+                response.headers.add_header(
+                    b'Content-Disposition', b'attachment',
+                    filename=args['name'])
+            mimetype = mimetypes.guess_type(args['name'])[0]
             if mimetype is not None:
                 response.mimetype = mimetype
 
@@ -546,16 +548,17 @@ class APIHandler(object):
 
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
+                .join(SocialTask)\
                 .filter(Task.name == local.data['name'])\
-                .filter(Task.access_level >= local.access_level).first()
+                .filter(SocialTask.access_level >= local.access_level).first()
             if t is None:
                 return 'Not found'
-            local.resp['nsubs'] = t.nsubs
-            local.resp['nusers'] = t.nusers
-            local.resp['nsubscorrect'] = t.nsubscorrect
-            local.resp['nuserscorrect'] = t.nuserscorrect
+            local.resp['nsubs'] = t.social_task.nsubs
+            local.resp['nusers'] = t.social_task.nusers
+            local.resp['nsubscorrect'] = t.social_task.nsubscorrect
+            local.resp['nuserscorrect'] = t.social_task.nuserscorrect
             best = local.session.query(TaskScore)\
-                .filter(TaskScore.task == t)\
+                .filter(TaskScore.task == t.social_task)\
                 .filter(TaskScore.score == 100)\
                 .order_by(TaskScore.time)\
                 .slice(0, 10).all()

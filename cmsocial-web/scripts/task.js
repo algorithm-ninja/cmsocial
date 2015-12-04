@@ -53,7 +53,7 @@ angular.module('cmsocial')
     };
     $scope.tagDelete = function(tag) {
       if (confirm("Are you sure?")) {
-        $http.post(API_PREFI + 'tag', {
+        $http.post(API_PREFIX + 'tag', {
           'action': 'remove',
           'tag': tag,
           'task': $rootScope.task.name,
@@ -88,8 +88,7 @@ angular.module('cmsocial')
         notificationHub.serverError(status);
       });
     };
-    $scope.loadTask = function() {
-      $http.post(API_PREFIX + 'task', {
+    $scope.loadTask = $http.post(API_PREFIX + 'task', {
         'name': $stateParams.taskName,
         'username': userManager.getUser().username,
         'token': userManager.getUser().token,
@@ -118,7 +117,7 @@ angular.module('cmsocial')
     taskbarManager.setActiveTab(2);
   })
   .controller('StatsCtrl', function($scope, $stateParams, $http,
-      notificationHub, userManager, taskbarManager, l10n) {
+      notificationHub, userManager, taskbarManager, l10n, API_PREFIX) {
     taskbarManager.setActiveTab(3);
     $scope.getStats = function() {
       $http.post(API_PREFIX + 'task', {

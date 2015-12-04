@@ -9,6 +9,7 @@
     "jshint-stylish": "^1.0.0",
     "karma-jasmine": "*",
     "karma-phantomjs-launcher": "*",
+    "pdfjs-dist": "^1.3.56",
     "proxy-middleware": "^0.15.0"
   },
   "dependencies": {
