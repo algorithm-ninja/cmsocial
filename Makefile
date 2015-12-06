@@ -83,11 +83,9 @@ $(DEST)/scripts/app.processed.js: $(TMPJS)
 tmp/%.js: cmsocial-web/%.js | tmp
 	./instantiate.sh $< > $@
 
-$(DEST)/node_modules: $(DEST)/package.json node_modules
+$(DEST)/node_modules: node_modules
 	rsync -av --delete node_modules $(DEST)/
-
-$(DEST)/package.json: package.json
-	cp $^ $@
+	touch $(DEST)/node_modules
 
 $(DEST)/%: cmsocial-web/%
 	cp $^ $@
