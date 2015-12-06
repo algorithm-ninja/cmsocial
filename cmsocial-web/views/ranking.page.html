@@ -1,6 +1,6 @@
 <div class="list-group ranking">
   <a ng-repeat="user in users" class="list-group-item" ui-sref="user({ userId: user.username })">
-    <img class="img-circle user-thumbnail" src="http://gravatar.com/avatar/{{user.mail_hash}}?d=identicon&s=40"></i>
+    <img class="img-circle user-thumbnail" src="//gravatar.com/avatar/{{user.mail_hash}}?d=identicon&s=40"></i>
     <span data-field="username">{{user.username}}</span>
     <span data-field="real-name">({{user.first_name}} {{user.last_name}})</span>
     <tt data-field="score" class="pull-right"><i class="fa fa-star"></i>&thinsp;{{user.score}}</tt>
