@@ -68,7 +68,7 @@ class SocialUser(Base):
         ForeignKey(
             Institute.id,
             onupdate="CASCADE",
-            ondelete="CASCADE"
+            ondelete="SET NULL"
         ),
         nullable=True,
         index=True
