@@ -32,7 +32,10 @@ class SocialTask(Base):
 
     id = Column(
         Integer,
-        ForeignKey('tasks.id'),
+        ForeignKey('tasks.id'
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
         primary_key=True
     )
 

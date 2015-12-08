@@ -30,7 +30,10 @@ class SocialUser(Base):
     # User.id == SocialUser.id
     id = Column(
         Integer,
-        ForeignKey("users.id"),
+        ForeignKey("users.id"
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
         primary_key=True
     )
 
