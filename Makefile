@@ -65,10 +65,10 @@ $(DEST)/views/footer.html: config/footer.html | $(DEST)
 $(DEST)/views/homepage.html: config/homepage.html | $(DEST)
 	cp $^ $@
 
-$(DEST)/index.html: cmsocial-web/index.html node_modules | $(DEST)
+$(DEST)/index.html: cmsocial-web/index.html node_modules config/cmsocial.ini | $(DEST)
 	./instantiate.sh <(node_modules/.bin/cdnify $(CDNFLAGS) $<) > $@
 
-$(DEST)/%.html: cmsocial-web/%.html | $(DEST)
+$(DEST)/%.html: cmsocial-web/%.html config/cmsocial.ini | $(DEST)
 	./instantiate.sh $< > $@
 
 $(DEST)/styles/main.css: $(CSS)
@@ -80,7 +80,7 @@ tmp/%.css: cmsocial-web/%.less node_modules | tmp
 $(DEST)/scripts/app.processed.js: $(TMPJS)
 	cat $^ > $@
 
-tmp/%.js: cmsocial-web/%.js | tmp
+tmp/%.js: cmsocial-web/%.js config/cmsocial.ini | tmp
 	./instantiate.sh $< > $@
 
 $(DEST)/node_modules: node_modules

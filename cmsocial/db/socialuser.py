@@ -30,7 +30,7 @@ class SocialUser(Base):
     # User.id == SocialUser.id
     id = Column(
         Integer,
-        ForeignKey("users.id"
+        ForeignKey("users.id",
             onupdate="CASCADE",
             ondelete="CASCADE"
         ),
@@ -40,7 +40,7 @@ class SocialUser(Base):
     user = relationship(
         "User",
         backref=backref(
-            "social_users",
+            "social_user",
             uselist=False
         )
     )

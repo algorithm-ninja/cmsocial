@@ -133,7 +133,7 @@ angular.module('cmsocial')
   })
   .controller('SubmissionsCtrl', function($scope, $stateParams, $location,
       $http, $timeout, $rootScope, userManager, notificationHub,
-      subsDatabase, taskbarManager, l10n) {
+      subsDatabase, taskbarManager, l10n, API_PREFIX) {
     taskbarManager.setActiveTab(4);
     subsDatabase.load($stateParams.taskName);
     $scope.areThereSubs = function(name) {

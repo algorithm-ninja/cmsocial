@@ -23,7 +23,7 @@ from sqlalchemy.sql import or_, and_
 from cms import config, ServiceCoord, SOURCE_EXT_TO_LANGUAGE_MAP
 from cms.io import Service
 from cms.db.filecacher import FileCacher
-from cms.db import SessionGen, User, Submission, File, Task
+from cms.db import SessionGen, User, Submission, File, Task, Participation
 
 from cmsocial.db.test import Test, TestScore
 from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
@@ -82,7 +82,6 @@ class Server(gevent.wsgi.WSGIServer):
 class APIHandler(object):
     def __init__(self, parent):
         self.router = Map([
-            Rule('/', methods=['GET', 'POST'], endpoint='root'),
             Rule('/files/<digest>', methods=['GET', 'POST'],
                  endpoint='dbfile'),
             Rule('/files/<digest>/<name>', methods=['GET', 'POST'],
@@ -93,7 +92,6 @@ class APIHandler(object):
         self.evaluation_service = parent.evaluation_service
         self.EMAIL_REG = re.compile(r'[^@]+@[^@]+\.[^@]+')
         self.USERNAME_REG = re.compile(r'^[A-Za-z0-9_\.]+$')
-        self.file_root = pkg_resources.resource_filename('cmsocial', 'web')
 
     @responder
     def __call__(self, environ, start_response):
@@ -112,9 +110,7 @@ class APIHandler(object):
             return NotFound()
 
         try:
-            if endpoint == 'root':
-                return self.file_handler(environ, 'index.html')
-            elif endpoint == 'dbfile':
+            if endpoint == 'dbfile':
                 return self.dbfile_handler(environ, args)
         except HTTPException as e:
             return e
@@ -139,13 +135,14 @@ class APIHandler(object):
             try:
                 username = data['username']
                 token = data['token']
-                local.user = self.get_user(username, token)
+                local.participation = self.get_participation(username, token)
+                local.user = local.participation.user
             except (BadRequest, KeyError):
                 local.user = None
             if local.user is None:
                 local.access_level = 7  # Access level of unlogged user
             else:
-                local.access_level = local.user.access_level
+                local.access_level = local.user.social_user.access_level
 
             try:
                 local.data = data
@@ -175,9 +172,11 @@ class APIHandler(object):
         num = query.count()
         return (res, num)
 
-    def get_user(self, username, token):
+    def get_participation(self, username, token):
         try:
-            return local.session.query(User)\
+            return local.session.query(Participation)\
+                .join(User)\
+                .filter(Participation.contest_id == 1)\
                 .filter(User.username == username)\
                 .filter(User.password == token).first()
         except UnicodeDecodeError:
@@ -228,36 +227,18 @@ class APIHandler(object):
     def get_user_info(self, user):
         info = dict()
         info['username'] = user.username
-        info['access_level'] = user.access_level
-        info['join_date'] = make_timestamp(user.registration_time)
+        info['access_level'] = user.social_user.access_level
+        info['join_date'] = make_timestamp(user.social_user.registration_time)
         info['mail_hash'] = self.hash(user.email, 'md5')
         #info['post_count'] = len(user.posts)
-        info['score'] = user.score
-        info['institute'] = self.get_institute_info(user.institute_id)
+        info['score'] = user.social_user.score
+        info['institute'] = self.get_institute_info(user.social_user.institute_id)
         info['first_name'] = user.first_name
         info['last_name'] = user.last_name
         info['tasks_solved'] = -1
         return info
 
     # Handlers that do not require JSON data
-    def file_handler(self, environ, filename):
-        path = os.path.join(
-            self.file_root,
-            filename)
-
-        response = Response()
-        response.status_code = 200
-        response.mimetype = 'application/octet-stream'
-        mimetype = mimetypes.guess_type(filename)[0]
-        if mimetype is not None:
-            response.mimetype = mimetype
-        response.last_modified = \
-            datetime.utcfromtimestamp(os.path.getmtime(path))\
-                    .replace(microsecond=0)
-        response.response = wrap_file(environ, io.open(path, 'rb'))
-        response.direct_passthrough = True
-        return response
-
     def dbfile_handler(self, environ, args):
         try:
             fobj = self.file_cacher.get_file(args['digest'])
@@ -406,7 +387,7 @@ class APIHandler(object):
 
             token = self.hashpw(password)
 
-            user = self.get_user(username, token)
+            user = self.get_participation(username, token).user
             if user is None:
                 return 'login.error'
             else:
@@ -420,24 +401,14 @@ class APIHandler(object):
             local.resp = self.get_user_info(user)
             # Append scores of tried tasks
             local.resp['scores'] = []
-            for ts in user.taskscores:
+            for ts in user.social_user.taskscores:
                 taskinfo = dict()
                 taskinfo['name'] = ts.task.name
                 taskinfo['score'] = ts.score
                 taskinfo['title'] = ts.task.title
                 local.resp['scores'].append(taskinfo)
         elif local.data['action'] == 'list':
-            # FIXME: we had the following filter before, not sure why
-            # .filter(User.hidden == False)
             query = local.session.query(User)\
-                .add_columns(User.username)\
-                .add_columns(User.first_name)\
-                .add_columns(User.last_name)\
-                .add_columns(User.email)\
-                .add_columns(SocialUser.access_level)\
-                .add_columns(SocialUser.score)\
-                .add_columns(SocialUser.registration_time)\
-                .add_columns(SocialUser.institute_id)\
                 .join(SocialUser)\
                 .order_by(desc(SocialUser.score))\
                 .order_by(desc(SocialUser.id))
@@ -481,9 +452,8 @@ class APIHandler(object):
         if local.data['action'] == 'list':
             query = local.session.query(Task)\
                 .join(SocialTask)\
-                .filter(SocialTask.access_level >= local.access_level)
-                # FIXME: what default order do we use?
-                #.order_by(desc(SocialTask.id))
+                .filter(SocialTask.access_level >= local.access_level)\
+                .order_by(desc(SocialTask.id))
 
             if 'tag' in local.data and local.data['tag'] is not None:
                 tags = local.data['tag'].split(',')[:5]  # Ignore requests with more that 5 tags
@@ -562,7 +532,7 @@ class APIHandler(object):
                 .filter(TaskScore.score == 100)\
                 .order_by(TaskScore.time)\
                 .slice(0, 10).all()
-            local.resp['best'] = [{'username': b.user.username,
+            local.resp['best'] = [{'username': b.user.user.username,
                                    'time': b.time} for b in best]
         else:
             return 'Bad request'
@@ -745,7 +715,7 @@ class APIHandler(object):
             if local.user is None:
                 return 'Unauthorized'
             subs = local.session.query(Submission)\
-                .filter(Submission.user_id == local.user.id)\
+                .filter(Submission.participation_id == local.participation.id)\
                 .filter(Submission.task_id == task.id)\
                 .order_by(desc(Submission.timestamp)).all()
             submissions = []
@@ -775,7 +745,7 @@ class APIHandler(object):
                 .filter(Submission.id == local.data['id']).first()
             if s is None:
                 return 'Not found'
-            if local.user is None or s.user_id != local.user.id:
+            if local.user is None or s.participation_id != local.participation.id:
                 return 'Unauthorized'
             submission = dict()
             submission['id'] = s.id
@@ -819,7 +789,7 @@ class APIHandler(object):
             if local.user is None:
                 return 'Unauthorized'
             lastsub = local.session.query(Submission)\
-                .filter(Submission.user_id == local.user.id)\
+                .filter(Submission.participation_id == local.participation.id)\
                 .order_by(desc(Submission.timestamp)).first()
             if lastsub is not None and \
                make_datetime() - lastsub.timestamp < timedelta(seconds=20):
@@ -827,8 +797,9 @@ class APIHandler(object):
 
             try:
                 task = local.session.query(Task)\
+                    .join(SocialTask)\
                     .filter(Task.name == local.data['task_name'])\
-                    .filter(Task.access_level >= local.access_level).first()
+                    .filter(SocialTask.access_level >= local.access_level).first()
             except KeyError:
                 return 'Not found'
 
@@ -898,7 +869,7 @@ class APIHandler(object):
             timestamp = make_datetime()
             submission = Submission(timestamp,
                                     sub_lang,
-                                    user=local.user,
+                                    participation=local.participation,
                                     task=task)
             for f in files:
                 digest = self.file_cacher.put_file_content(
@@ -936,305 +907,6 @@ class APIHandler(object):
         else:
             return 'Bad request'
 
-    def forum_handler(self):
-        if local.data['action'] == 'list':
-            forums = local.session.query(Forum)\
-                .filter(Forum.access_level >= local.access_level)\
-                .order_by(Forum.id).all()
-            local.resp['forums'] = []
-            for f in forums:
-                forum = dict()
-                forum['id'] = f.id
-                forum['description'] = f.description
-                forum['title'] = f.title
-                forum['topics'] = f.ntopic
-                forum['posts'] = f.npost
-                if len(f.topics) > 0:
-                    forum['lastpost'] = {
-                        'username':     f.topics[0].last_writer.username,
-                        'timestamp':    make_timestamp(f.topics[0].timestamp),
-                        'topic_title':  f.topics[0].title,
-                        'topic_id':     f.topics[0].id,
-                        'num':          f.topics[0].npost
-                    }
-                local.resp['forums'].append(forum)
-        elif local.data['action'] == 'new':
-            return "Not anymore"
-            if local.access_level > 1:
-                return 'Unauthorized'
-            if local.data['title'] is None or \
-               len(local.data['title']) < 4:
-                return "Title is too short"
-            if local.data['description'] is None or \
-               len(local.data['description']) < 4:
-                return "Description is too short"
-            forum = Forum(title=local.data['title'],
-                          description=local.data['description'],
-                          access_level=7,
-                          ntopic=0,
-                          npost=0)
-            local.session.add(forum)
-            local.session.commit()
-        else:
-            return 'Bad request'
-
-    def topic_handler(self):
-        if local.data['action'] == 'list':
-            forum = local.session.query(Forum)\
-                .filter(Forum.access_level >= local.access_level)\
-                .filter(Forum.id == local.data['forum']).first()
-            if forum is None:
-                return 'Not found'
-            noAnswer = 'noAnswer' in local.data and local.data['noAnswer']
-            local.resp['title'] = forum.title
-            local.resp['description'] = forum.description
-            query = local.session.query(Topic)\
-                .filter(Topic.forum_id == forum.id)\
-                .order_by(desc(Topic.sticky), desc(Topic.timestamp))
-            topics, local.resp['num'] = self.sliced_query(query)
-            local.resp['numUnsolved'] = local.session.query(Topic)\
-                .filter(Topic.forum_id == forum.id)\
-                .filter(Topic.solved == False).count()
-            local.resp['topics'] = []
-            for t in topics:
-                if noAnswer and t.solved is True:
-                    continue
-                topic = dict()
-                topic['id'] = t.id
-                topic['status'] = t.status
-                topic['title'] = t.title
-                topic['timestamp'] = make_timestamp(t.creation_timestamp)
-                topic['posts'] = t.npost
-                topic['views'] = t.nview
-                topic['author_username'] = t.author.username
-                topic['sticky'] = t.sticky
-                topic['solved'] = t.solved
-                topic['lastpost'] = {
-                    'username':  t.last_writer.username,
-                    'timestamp': make_timestamp(t.timestamp)
-                }
-                local.resp['topics'].append(topic)
-        elif local.data['action'] == 'new':
-            return "Not anymore"
-            if local.user is None:
-                return 'Unauthorized'
-            forum = local.session.query(Forum)\
-                .filter(Forum.access_level >= local.access_level)\
-                .filter(Forum.id == local.data['forum']).first()
-            if forum is None:
-                return 'Not found'
-            if local.data['title'] is None or len(local.data['title']) < 4:
-                return "forum.title_short"
-            if local.data['text'] is None or len(local.data['text']) < 4:
-                return "post.text_short"
-            if local.data['sticky'] is None or \
-                (local.data['sticky'] != False and local.data['sticky'] != True):
-                raise KeyError
-            topic = Topic(status='open',
-                          title=local.data['title'],
-                          timestamp=make_datetime(),
-                          creation_timestamp=make_datetime(),
-                          solved=False)
-            topic.forum = forum
-            topic.last_writer = local.user
-            topic.author = local.user
-            topic.npost = 1
-            topic.sticky = local.data['sticky']
-            post = Post(text=local.data['text'],
-                        timestamp=make_datetime())
-            post.author = local.user
-            post.topic = topic
-            post.forum = forum
-            local.session.add(topic)
-            local.session.add(post)
-            forum.ntopic = len(forum.topics)
-            forum.npost = local.session.query(Post)\
-                .filter(Post.forum_id == forum.id).count()
-            local.session.commit()
-        else:
-            raise KeyError
-
-    def post_handler(self):
-        if local.data['action'] == 'list':
-            topic = local.session.query(Topic)\
-                .filter(Topic.id == local.data['topic']).first()
-            if topic is None or topic.forum.access_level < local.access_level:
-                return 'Not found'
-            topic.nview += 1
-            local.session.commit()
-            query = local.session.query(Post)\
-                .filter(Post.topic_id == topic.id)\
-                .order_by(Post.timestamp)
-            posts, local.resp['num'] = self.sliced_query(query)
-            local.resp['title'] = topic.title
-            local.resp['forumId'] = topic.forum.id
-            local.resp['forumTitle'] = topic.forum.title
-            local.resp['posts'] = []
-            for p in posts:
-                post = dict()
-                post['id'] = p.id
-                post['text'] = p.text
-                post['timestamp'] = make_timestamp(p.timestamp)
-                post['author'] = self.get_user_info(p.author)
-                local.resp['posts'].append(post)
-        elif local.data['action'] == 'new':
-            return "Not anymore"
-            if local.user is None:
-                return 'Unauthorized'
-            topic = local.session.query(Topic)\
-                .filter(Topic.id == local.data['topic']).first()
-            if topic is None or topic.forum.access_level < local.access_level:
-                return 'Not found'
-            if local.data['text'] is None or len(local.data['text']) < 4:
-                return "Text is too short"
-            post = Post(text=local.data['text'],
-                        timestamp=make_datetime())
-            post.author = local.user
-            post.topic = topic
-            post.forum = topic.forum
-            topic.timestamp = post.timestamp
-            topic.last_writer = local.user
-            local.session.add(post)
-            topic.forum.npost = local.session.query(Post)\
-                .filter(Post.forum_id == topic.forum.id).count()
-            topic.npost = local.session.query(Post)\
-                .filter(Post.topic_id == topic.id).count()
-            local.session.commit()
-        elif local.data['action'] == 'delete':
-            return "Not anymore"
-            if local.user is None:
-                return 'Unauthorized'
-            post = local.session.query(Post)\
-                .filter(Post.id == local.data['id']).first()
-            if post is None:
-                return 'Not found'
-            if post.author != local.user and local.user.access_level > 2:
-                return 'Unauthorized'
-            forum = post.topic.forum
-            if post.topic.posts[0] == post:
-                local.session.delete(post.topic)
-                local.resp['success'] = 2
-            else:
-                local.session.delete(post)
-                post.topic.npost = local.session.query(Post)\
-                    .filter(Post.topic_id == post.topic.id).count()
-            forum.npost = local.session.query(Post)\
-                .filter(Post.forum_id == forum.id).count()
-            forum.ntopic = local.session.query(Topic)\
-                .filter(Topic.forum_id == forum.id).count()
-            local.session.commit()
-        elif local.data['action'] == 'edit':
-            return "Not anymore"
-            if local.user is None:
-                return 'Unauthorized'
-            post = local.session.query(Post)\
-                .filter(Post.id == local.data['id']).first()
-            if post is None:
-                return 'Not found'
-            if post.author != local.user and local.user.access_level > 2:
-                return 'Unauthorized'
-            if local.data['text'] is None or len(local.data['text']) < 4:
-                return 'Text is too short'
-            post.text = local.data['text']
-            local.session.commit()
-        else:
-            return 'Bad request'
-
-    def talk_handler(self):
-        if local.data['action'] == 'list':
-            query = local.session.query(Talk)\
-                .filter(or_(
-                    Talk.sender_id == local.user.id,
-                    Talk.receiver_id == local.user.id))\
-                .filter(Talk.pms.any())\
-                .order_by(desc(Talk.timestamp))
-            talks, local.resp['num'] = self.sliced_query(query)
-            local.resp['talks'] = list()
-            for t in talks:
-                talk = dict()
-                talk['sender'] = self.get_user_info(t.sender)
-                talk['receiver'] = self.get_user_info(t.receiver)
-                talk['id'] = t.id
-                talk['timestamp'] = make_timestamp(t.timestamp)
-                talk['read'] = t.read
-                if len(t.pms) > 0:
-                    talk['last_pm_sender'] = t.pms[0].sender.username
-                    txt = t.pms[0].text
-                    if len(txt) > 100:
-                        txt = txt[:97] + '...'
-                    talk['last_pm_text'] = txt
-                local.resp['talks'].append(talk)
-        elif local.data['action'] == 'get':
-            if local.user is None:
-                return 'Unauthorized'
-            other = local.session.query(User)\
-                .filter(User.username == local.data['other']).first()
-            talk = local.session.query(Talk)\
-                .filter(or_(
-                    and_(
-                        Talk.sender_id == local.user.id,
-                        Talk.receiver_id == other.id),
-                    and_(
-                        Talk.sender_id == other.id,
-                        Talk.receiver_id == local.user.id))).first()
-            if talk is None:
-                talk = Talk(timestamp=make_datetime())
-                talk.sender = local.user
-                talk.receiver = other
-                local.session.add(talk)
-                local.session.commit()
-            local.resp['id'] = talk.id
-        else:
-            return 'Bad request'
-
-    def pm_handler(self):
-        if local.data['action'] == 'list':
-            query = local.session.query(PrivateMessage)\
-                .filter(PrivateMessage.talk_id == local.data['id'])\
-                .order_by(desc(PrivateMessage.timestamp))
-            pms, local.resp['num'] = self.sliced_query(query)
-            talk = local.session.query(Talk)\
-                .filter(Talk.id == local.data['id']).first()
-            if talk is None:
-                return 'Invalid talk'
-            if local.user not in (talk.sender, talk.receiver):
-                return 'Unauthorized'
-            if local.data['first'] == 0 and len(talk.pms) and \
-               local.user != talk.pms[0].sender:
-                talk.read = True
-                local.session.commit()
-            local.resp['sender'] = talk.sender.username
-            local.resp['receiver'] = talk.receiver.username
-            local.resp['pms'] = list()
-            for p in reversed(pms):
-                pm = dict()
-                pm['timestamp'] = make_timestamp(p.timestamp)
-                pm['sender'] = self.get_user_info(p.sender)
-                pm['text'] = p.text
-                local.resp['pms'].append(pm)
-        elif local.data['action'] == 'new':
-            return "Not anymore"
-            if local.user is None:
-                return 'Unauthorized'
-            talk = local.session.query(Talk)\
-                .filter(Talk.id == local.data['id']).first()
-            if talk is None:
-                return 'Not found'
-            if 'text' not in local.data or len(local.data['text']) < 1:
-                return 'You must enter some text'
-            pm = PrivateMessage(text=local.data['text'],
-                                timestamp=make_datetime())
-            pm.sender_id = local.user.id
-            pm.talk = talk
-            if talk.sender_id != pm.sender_id:
-                talk.sender, talk.receiver = talk.receiver, talk.sender
-            talk.timestamp = pm.timestamp
-            talk.read = False
-            local.session.add(pm)
-            local.session.commit()
-        else:
-            return 'Bad request'
-
 
 class PracticeWebServer(Service):
     '''Service that runs the web server for practice.
@@ -1249,11 +921,7 @@ class PracticeWebServer(Service):
         self.evaluation_service = self.connect_to(
             ServiceCoord('EvaluationService', 0))
 
-        handler = APIHandler(self)
-
-        self.wsgi_app = SharedDataMiddleware(handler, {
-            '/': handler.file_root
-        })
+        self.wsgi_app = APIHandler(self)
 
     def run(self):
         server = Server((self.address, self.port), self.wsgi_app)
