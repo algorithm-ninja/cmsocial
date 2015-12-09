@@ -11,6 +11,12 @@ else
 CDNFLAGS=--use-local
 endif
 
+ifeq ($(PROD), 1)
+STRIPDEBUG=sed '/<!-- *start  *debug *-->/,/<!-- *end  *debug *-->/d'
+else
+STRIPDEBUG=cat
+endif
+
 WEBDIRS=$(shell find cmsocial-web -type d)
 TMPDIRS=$(patsubst cmsocial-web%,tmp%,$(WEBDIRS))
 DESTDIRS=$(patsubst cmsocial-web%,$(DEST)%,$(WEBDIRS))
@@ -66,10 +72,10 @@ $(DEST)/views/homepage.html: config/homepage.html | $(DEST)
 	cp $^ $@
 
 $(DEST)/index.html: cmsocial-web/index.html node_modules config/cmsocial.ini | $(DEST)
-	./instantiate.sh <(node_modules/.bin/cdnify $(CDNFLAGS) $<) > $@
+	./instantiate.sh <(node_modules/.bin/cdnify $(CDNFLAGS) $<) | $(STRIPDEBUG) > $@
 
 $(DEST)/%.html: cmsocial-web/%.html config/cmsocial.ini | $(DEST)
-	./instantiate.sh $< > $@
+	./instantiate.sh $< | $(STRIPDEBUG) > $@
 
 $(DEST)/styles/main.css: $(CSS)
 	cat $^ > $@
@@ -81,7 +87,7 @@ $(DEST)/scripts/app.processed.js: $(TMPJS)
 	cat $^ > $@
 
 tmp/%.js: cmsocial-web/%.js config/cmsocial.ini | tmp
-	./instantiate.sh $< > $@
+	./instantiate.sh $< | $(STRIPDEBUG) > $@
 
 $(DEST)/node_modules: node_modules
 	rsync -av --delete node_modules $(DEST)/
