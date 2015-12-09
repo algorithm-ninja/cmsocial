@@ -1,1 +1,2 @@
-sqlalchemy==0.9
+sqlalchemy==1.0.9
+-e git://github.com/cms-dev/cms.git@354f577f3ba2d7f9397d8619b22abda3767287bf#egg=cms
