@@ -16,7 +16,8 @@ angular
     'ngRoute',
     'ngSanitize',
     'ngTouch',
-    'ui.router'
+    'ui.router',
+    'ui.ace'
   ])
   .constant('API_PREFIX', '[[api_prefix]]')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {

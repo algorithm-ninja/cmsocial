@@ -92,6 +92,10 @@ angular.module('cmsocial')
     // Submissions page
     'Submit a solution':
     {it: 'Invia una sottoposizione'},
+    'Select the language':
+    {it: 'Scegli il linguaggio:'},
+    'Write your code here':
+    {it: 'Scrivi qui il tuo codice'},
     'Previous submissions':
     {it: 'Sottoposizioni precedenti'},
     'ID':

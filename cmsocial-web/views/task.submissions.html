@@ -3,6 +3,18 @@
     <h3 class="panel-title">{{'Submit a solution' | l10n}}</h3>
   </div>
   <div class="panel-body">
+    <form class="col-sm-12" ng-submit="loadAce()" id="aceform" ng-if="task.submission_format.length == 1">
+      <div class="row vertical-center">
+        <label for="langSelect" class="control-label col-lg-4 text-right">{{'Select the language:' | l10n}}</label>
+        <div class="col-lg-4">
+          <select id="langSelect" ng-model="language" ng-options="m for m in languages" ng-change="languageChanged(language)"></select>
+        </div>
+        <div class="col-lg-4">
+          <button type="submit" class="btn btn-success">{{'Submit' | l10n}}</button>
+        </div>
+      </div>
+      <div ui-ace="aceOption" ng-model="aceModel"></div>
+    </form>
     <form class="col-sm-6 form-horizontal" ng-submit="loadFiles('submitform')" id="submitform">
       <div class="form-group" ng-repeat="file in task.submission_format">
         <label class="control-label col-lg-3" for="{{file}}">{{file | repext}}</label>

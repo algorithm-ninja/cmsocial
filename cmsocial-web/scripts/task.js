@@ -140,6 +140,33 @@ angular.module('cmsocial')
       return $rootScope.submissions[name] !== undefined
           && $rootScope.submissions[name].length > 0;
     };
+    var aceModeMap = {"C": "c_cpp", "C++": "c_cpp", "Pascal": "pascal"}
+    var langExtMap = {"C": ".c", "C++": ".cpp", "Pascal": ".pas"}
+    $scope.languages = ["C", "C++", "Pascal"];
+    $scope.language = $scope.languages[1];
+    $scope.aceOption = {
+      mode: aceModeMap[$scope.language],
+      showPrintMargin: false,
+      onLoad: function (_ace) {
+        $scope.aceSession = _ace.getSession();
+        $scope.languageChanged = function (newL) {
+          $scope.language = newL;
+          $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
+        };
+      },
+      onChange: function (_ace) {
+        $scope.aceModel = _ace.getSession().getDocument().getValue();
+      }
+    };
+    $scope.aceModel = l10n.get("Write your code here");
+    $scope.loadAce = function () {
+      $scope.files = {}
+      $scope.files[$rootScope.task.submission_format[0]] = {
+        'filename': "ace" + langExtMap[$scope.language],
+        'data': btoa($scope.aceSession.getDocument().getValue())
+      }
+      $scope.submitFiles();
+    }
     $scope.loadFiles = function(formid) {
       var input = $("#" + formid + " input");
       $scope.files = {};
