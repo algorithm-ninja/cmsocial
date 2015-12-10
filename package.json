@@ -27,6 +27,7 @@
     "bootstrap": "^3.3.6",
     "font-awesome": "^4.5.0",
     "jquery": "^2.1.4",
-    "less": "^2.5.3"
+    "less": "^2.5.3",
+    "uglifyjs": "^2.4.10"
   }
 }

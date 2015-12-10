@@ -13,8 +13,10 @@ endif
 
 ifeq ($(PROD), 1)
 STRIPDEBUG=sed '/<!-- *start  *debug *-->/,/<!-- *end  *debug *-->/d'
+UGLIFY=node_modules/.bin/uglifyjs -c -m --
 else
 STRIPDEBUG=cat
+UGLIFY=cat
 endif
 
 WEBDIRS=$(shell find cmsocial-web -type d)
@@ -83,8 +85,8 @@ $(DEST)/styles/main.css: $(CSS)
 tmp/%.css: cmsocial-web/%.less node_modules | tmp
 	node_modules/.bin/lessc $< $@
 
-$(DEST)/scripts/app.processed.js: $(TMPJS)
-	cat $^ > $@
+$(DEST)/scripts/app.processed.js: $(TMPJS) | node_modules
+	${UGLIFY} $^ > $@
 
 tmp/%.js: cmsocial-web/%.js config/cmsocial.ini | tmp
 	./instantiate.sh $< | $(STRIPDEBUG) > $@
