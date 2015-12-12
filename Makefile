@@ -13,7 +13,7 @@ endif
 
 ifeq ($(PROD), 1)
 STRIPDEBUG=sed '/<!-- *start  *debug *-->/,/<!-- *end  *debug *-->/d'
-UGLIFY=node_modules/.bin/uglifyjs -c -m --
+UGLIFY=node_modules/.bin/uglifyjs -c --
 else
 STRIPDEBUG=cat
 UGLIFY=cat
