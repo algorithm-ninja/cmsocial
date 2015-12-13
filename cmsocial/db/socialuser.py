@@ -56,12 +56,28 @@ class SocialUser(Base):
     score = Column(
         Integer,
         nullable=False,
-        default=0)
+        default=0
+    )
 
     registration_time = Column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow())
+        default=datetime.utcnow()
+    )
+
+    # The last time this user requested a testcase
+    last_help_time = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcfromtimestamp(0)
+    )
+
+    # Total number of helps received
+    help_count = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
 
     # CUSTOM FIELDS:
 

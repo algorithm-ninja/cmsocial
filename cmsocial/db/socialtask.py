@@ -54,6 +54,13 @@ class SocialTask(Base):
         default=7
     )
 
+    # Whether users can download full testcases
+    help_available = Column(
+        Boolean,
+        nullable=False,
+        default=False
+    )
+
     # Stats
     nsubs = Column(
         Integer,

@@ -15,6 +15,7 @@ import pkg_resources
 
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
+from shutil import copyfileobj, rmtree
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
@@ -23,7 +24,8 @@ from sqlalchemy.sql import or_, and_
 from cms import config, ServiceCoord, SOURCE_EXT_TO_LANGUAGE_MAP
 from cms.io import Service
 from cms.db.filecacher import FileCacher
-from cms.db import SessionGen, User, Submission, File, Task, Participation
+
+from cms.db import SessionGen, User, Submission, File, Task, Participation, Testcase
 
 from cmsocial.db.test import Test, TestScore
 from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
@@ -499,6 +501,7 @@ class APIHandler(object):
             local.resp['id'] = t.id
             local.resp['name'] = t.name
             local.resp['title'] = t.title
+            local.resp['help_available'] = t.social_task.help_available
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.iteritems()])
             local.resp['submission_format'] =\
@@ -610,6 +613,67 @@ class APIHandler(object):
             local.session.commit()
         else:
             return 'Bad request'
+
+    def help_handler(self):
+        if local.user is None:
+            return 'Unauthorized'
+
+        task = local.session.query(Task)\
+            .filter(Task.name == local.data['task'])\
+            .first()
+
+        if task is None:
+            return "Bad request"
+
+        if local.data['action'] == 'check':
+            testcases = local.session.query(Testcase)\
+                .filter(Testcase.dataset == task.active_dataset)\
+                .all()
+
+            local.resp['testcases'] = [{'codename': t.codename} for t in testcases]
+
+        elif local.data['action'] == 'get':
+            # Make sure that this task allows requests
+            if not task.help_available:
+                return 'Questo task non accetta richieste di testcase.'
+
+            # Make sure that the user is allowed to request
+            if datetime.utcnow() - local.user.last_help_time < timedelta(hours=1):
+                return "Hai già fatto una richiesta nell'ultima ora."
+
+            testcase = local.session.query(Testcase)\
+                .filter(Testcase.dataset == task.active_dataset)\
+                .filter(Testcase.codename == local.data['testcase'])\
+                .first()
+
+            if testcase is None:
+                return "Bad request"
+
+            # Log this so we can kind of "keep track" of the requests...
+            logger.info("User \"%s\" requested testcase %s for task \"%s\"." % (
+                local.user.username, local.data['testcase'], local.data['task']
+            ))
+            local.user.last_help_time = datetime.utcnow()
+            local.user.help_count += 1
+            local.session.commit()
+
+            # Start to prepare everything
+            input_file = self.file_cacher.get_file(testcase.input)
+            output_file = self.file_cacher.get_file(testcase.output)
+
+            # XXX: it would be better if there was a static method to create an "empty" Archive
+            dp = tempfile.mkdtemp()
+            fo, fp = tempfile.mkstemp(suffix=".zip")
+            copyfileobj(input_file, open(os.path.join(dp, "input.txt"), "w"))
+            copyfileobj(output_file, open(os.path.join(dp, "output.txt"), "w"))
+            os.remove(fp)  # because patool requires that fp doesn't exist
+            Archive.create_from_dir(dp, fp)
+            rmtree(dp)
+            archive = Archive(fp, delete_source=True)
+
+            local.resp['zip'] = b64encode(open(fp).read())
+
+            archive.cleanup()
 
     def test_handler(self):
         if local.data['action'] == 'list':
