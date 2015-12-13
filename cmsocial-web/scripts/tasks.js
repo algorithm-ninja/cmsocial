@@ -201,14 +201,14 @@ angular.module('cmsocial')
     $scope.getTags();
   })
   .controller('HelpCtrl', function($scope, $stateParams, $http,
-      notificationHub, userManager) {
+      notificationHub, userManager, API_PREFIX) {
     $scope.data = {
       testcase: '000',
       task:     $stateParams.taskName,
       loading:  false,
       done:     false
     };
-    $http.post('help', {
+    $http.post(API_PREFIX + 'help', {
       'username': userManager.getUser().username,
       'token':    userManager.getUser().token,
       'task':     $scope.data.task,
@@ -222,7 +222,7 @@ angular.module('cmsocial')
     });
     $scope.askHelp = function() {
       $scope.data.loading = true;
-      $http.post('help', {
+      $http.post(API_PREFIX + 'help', {
         'task':     $scope.data.task,
         'testcase': $scope.data.testcase,
         'username': userManager.getUser().username,
