@@ -109,6 +109,11 @@ angular
         templateUrl: 'views/signup.html',
         controller: 'SignupCtrl'
       })
+      .state('help', {
+        url: '/help/{taskName}',
+        templateUrl: 'views/help.html',
+        controller: 'HelpCtrl'
+      })
       .state('tests', {
         url: '/tests',
         templateUrl: 'views/tests.html',
