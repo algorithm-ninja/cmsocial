@@ -390,10 +390,11 @@ class APIHandler(object):
 
             token = self.hashpw(password)
 
-            user = self.get_participation(username, token).user
-            if user is None:
+            participation = self.get_participation(username, token)
+            if participation is None:
                 return 'login.error'
             else:
+                user = participation.user
                 local.resp['token'] = token
                 local.resp['user'] = self.get_user_info(user)
         elif local.data['action'] == 'get':
@@ -634,11 +635,11 @@ class APIHandler(object):
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
-            if not task.help_available:
+            if not task.social_task.help_available:
                 return 'Questo task non accetta richieste di testcase.'
 
             # Make sure that the user is allowed to request
-            if datetime.utcnow() - local.user.last_help_time < timedelta(hours=1):
+            if datetime.utcnow() - local.user.social_user.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
@@ -653,8 +654,8 @@ class APIHandler(object):
             logger.info("User \"%s\" requested testcase %s for task \"%s\"." % (
                 local.user.username, local.data['testcase'], local.data['task']
             ))
-            local.user.last_help_time = datetime.utcnow()
-            local.user.help_count += 1
+            local.user.social_user.last_help_time = datetime.utcnow()
+            local.user.social_user.help_count += 1
             local.session.commit()
 
             # Start to prepare everything
