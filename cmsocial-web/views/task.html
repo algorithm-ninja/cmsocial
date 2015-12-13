@@ -29,6 +29,9 @@
         <i class="fa fa-tags fa-lg"></i> {{'Tags' | l10n}}
       </a>
     </li>
+    <li class="pull-right" ng-show="task.help_available">
+      <a ui-sref="help({ taskName: task.name })"><i class="fa fa-question fa-lg"></i> Aiuto</a>
+    </li>
   </ul>
   <div class="modal fade" id="tags_detail" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog">
