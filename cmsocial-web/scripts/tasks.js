@@ -200,3 +200,46 @@ angular.module('cmsocial')
     };
     $scope.getTags();
   })
+  .controller('HelpCtrl', function($scope, $stateParams, $http,
+      notificationHub, userManager) {
+    $scope.data = {
+      testcase: '000',
+      task:     $stateParams.taskName,
+      loading:  false,
+      done:     false
+    };
+    $http.post('help', {
+      'username': userManager.getUser().username,
+      'token':    userManager.getUser().token,
+      'task':     $scope.data.task,
+      'action':   'check'
+    })
+    .success(function(data, status, headers, config) {
+      $scope.testcases = data['testcases'];
+    })
+    .error(function(data, status, headers, config) {
+      notificationHub.serverError(status);
+    });
+    $scope.askHelp = function() {
+      $scope.data.loading = true;
+      $http.post('help', {
+        'task':     $scope.data.task,
+        'testcase': $scope.data.testcase,
+        'username': userManager.getUser().username,
+        'token':    userManager.getUser().token,
+        'action':   'get'
+      })
+      .success(function(data, status, headers, config) {
+        if (data.success == 1) {
+          document.getElementById("testcase-download").href = "data:application/zip;base64," + data['zip'];
+          $scope.data.done = true;
+        } else {
+          notificationHub.createAlert("warning", data.error, 5);
+        }
+        $scope.data.loading = false;
+      })
+      .error(function(data, status, headers, config) {
+        notificationHub.serverError(status);
+      });
+    };
+  });
