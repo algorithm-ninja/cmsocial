@@ -1,0 +1,65 @@
+<div class="container">
+  <legend>Richiesta di testcase per il task <i>{{data.task}}.</i></legend>
+  <p>
+    Da questa pagina è possibile richiedere testcase. L'utilizzo di questa
+    funzionalità è, per certi versi, scoraggiato: il modo migliore infatti
+    è <b>generare in modo autonomo casi di test e identificare quelli che
+    il proprio programma sbaglia attraverso un controllo incrociato</b>.
+    Se ci si basa sui casi di test ufficiali, infatti, è possibile che il
+    programma che viene sviluppato soffra di
+    <a href="http://it.wikipedia.org/wiki/Overfitting">overfitting</a>
+    (ovvero dipenda dai dati di test ufficiali, piuttosto che essere
+    corretto in senso generale).
+  </p>
+  <p>
+    Il controllo incrociato si può fare scrivendo una seconda soluzione
+    che sia <i>sicuramente corretta</i> (ad esempio se il task richiede
+    di trovare una disposizione ottimale di certi oggetti, una soluzione
+    <i>sicuramente corretta</i> è una che va a provare <i>tutte</i> le
+    possibili disposizioni e restituisce la migliore). Questa seconda
+    soluzione quindi può tranquillamente avere un tempo di esecuzione
+    esponenziale nella grandezza dell'input (basta testare casi piccoli
+    finché non se ne trova uno che fallisce il controllo incrociato).
+  </p>
+  <p>
+    Capiamo le vostre esigenze, per questo se lo desiderate potete
+    usufruire di questo servizio senza incorrere in penalizzazioni
+    relative al Corso Competenze Digitali, con un limite di un'ora tra
+    una richiesta e l'altra in modo che possiate pensare con calma prima
+    di richiedere altri testcase. Questo metodo aiuta anche a tenere il
+    forum più ordinato.
+  </p>
+  <p>
+    <h4 style="margin-top: 20px">Nota bene:</h4>
+    <ol>
+      <li>non si può eseguire più di una richiesta nell'arco di un'ora.</li>
+      <li>per tutta la durata della mini-olimpiade <i>non sarà possibile</i> richiedere testcase per i task che ne fanno parte.</li>
+      <li>questa pagina richiede che si utilizzi un browser abbastanza recente (come si può vedere <a href="http://caniuse.com/#feat=datauri">qui</a>, Internet Explorer è sconsigliato).</li>
+    </ol>
+  </p>
+  <div class="well" style="margin-top: 15px">
+    <div class="row" ng-hide="data.done">
+      <div class="col-sm-3">
+        <select ng-model="data.testcase" class="form-control">
+          <option ng-repeat="t in testcases | orderBy:'codename'" value="{{t.codename}}">{{t.codename}}</option>
+        </select>
+      </div>
+      <div class="col-sm-3" ng-show="data.loading">
+        Attendere... <img src="assets/ico/loader.gif">
+      </div>
+      <div class="col-sm-3" ng-hide="data.loading">
+        <button id="testcase-request" type="submit" class="btn btn-primary ng-binding" ng-click="askHelp()">Richiedi testcase</button>
+      </div>
+    </div>
+    <div class="row" ng-show="data.done">
+      <div class="container">
+        <i>Richiesta confermata ed eseguita con successo.</i>
+      </div>
+    </div>
+    <div class="row" ng-show="data.done">
+      <div class="col-sm-3">
+        <a id="testcase-download" class="btn btn-success">Scarica testcase!</a>
+      </div>
+    </div>
+  </div>
+</div>
