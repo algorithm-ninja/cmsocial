@@ -5,7 +5,9 @@ BEGIN;
     access_level      INTEGER NOT NULL,
     score             INTEGER NOT NULL,
     registration_time TIMESTAMP NOT NULL,
-    institute_id      INTEGER REFERENCES institutes(id) ON UPDATE CASCADE ON DELETE SET NULL
+    institute_id      INTEGER REFERENCES institutes(id) ON UPDATE CASCADE ON DELETE SET NULL,
+    last_help_time    TIMESTAMP NOT NULL DEFAULT to_timestamp(0),
+    help_count        INTEGER NOT NULL DEFAULT 0
   );
   CREATE INDEX "ix_social_users_institute_id" ON social_users (institute_id);
 
@@ -42,7 +44,8 @@ BEGIN;
     nsubs             INTEGER NOT NULL,
     nsubscorrect      INTEGER NOT NULL,
     nusers            INTEGER NOT NULL,
-    nuserscorrect     INTEGER NOT NULL
+    nuserscorrect     INTEGER NOT NULL,
+    help_available    BOOLEAN NOT NULL DEFAULT 'f'
   );
   CREATE UNIQUE INDEX tasks_name_key ON tasks(name);
   -- Create/alter tables for other stuff
@@ -113,4 +116,4 @@ BEGIN;
   ALTER TABLE task_tags DROP CONSTRAINT tasktags_tag_id_fkey;
   ALTER TABLE task_tags ADD CONSTRAINT task_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES tags(id);
 
-COMMIT;
+ROLLBACK;
