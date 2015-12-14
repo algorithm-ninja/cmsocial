@@ -1,0 +1,11 @@
+<div class="container">
+  <legend>Problemi per tecnica</legend>
+  <div class="tag-group">
+    <span class="tag-group-item" ng-repeat="tag in tags" style="padding: 5px;">
+      <a ui-sref="tasklist.page({tag: tag, pageNum: 1})" class="label btn-info">
+        <i class="fa fa-tag"></i>
+        {{tag}}
+      </a>
+    </span>
+  </div>
+</div>

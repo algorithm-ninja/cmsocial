@@ -1,0 +1,75 @@
+<div class="container">
+  <div class="col-sm-5">
+    <legend>IOI</legend>
+    <div class="well">
+      <div ng-repeat="year in ioi" style="margin-bottom: 10px">
+        <em>Anno IOI: {{year}}</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year != 2010">
+            <a ui-sref="tasklist.page({tag: 'ioi' + year + ',territoriali', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> selezioni territoriali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year == 2010">
+            <a class="label btn-warning" title="non svolte">
+              <i class="fa fa-tag"></i> selezioni territoriali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year != 2009">
+            <a ui-sref="tasklist.page({tag: 'ioi' + year + ',nazionali', pageNum: 1})" class="label btn-info" ng-if="year != 2017">
+              <i class="fa fa-tag"></i> selezioni nazionali
+            </a>
+            <a href="http://bit.ly/IqT6zt" class="label btn-info" ng-if="year == 2017">
+              <i class="fa fa-tag"></i> selezioni nazionali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year == 2009">
+            <a class="label btn-warning" title="non svolte">
+              <i class="fa fa-tag"></i> selezioni nazionali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'ioi' + year + ',ioi', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> ioi
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-5">
+    <legend>Altre gare</legend>
+    <div class="well">
+      <div style="margin-bottom: 10px">
+        <em>OIS: Olimpiadi di Informatica a Squadre</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'ois', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> ois
+            </a>
+          </span>
+        </div>
+      </div>
+      <div style="margin-bottom: 10px">
+        <em>GATOR: Gara di Allenamento Tor Vergata</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'gator', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> gator
+            </a>
+          </span>
+        </div>
+      </div>
+      <div style="margin-bottom: 10px">
+        <em>ABC: Algoritmi Bergamo Contest</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'abc', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> abc
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

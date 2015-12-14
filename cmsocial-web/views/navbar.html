@@ -15,8 +15,9 @@
             <i class="fa fa-archive fa-lg"></i> {{'Task & quiz archive' | l10n}} <b class="caret"></b>
           </a>
           <ul class="dropdown-menu">
-            <li><a ui-sref="tasklist.page({pageNum: 1})"><i class="fa fa-list-ol fa-fw"></i> {{'All tasks' | l10n}}</a></li>
-            <li><a ui-sref="tags"><i class="fa fa-tag fa-fw"></i> {{'Task categories' | l10n}}</a></li>
+            <li><a ui-sref="tasklist.page({pageNum: 1, tag: null, q: null})"><i class="fa fa-list-ol fa-fw"></i> {{'All tasks' | l10n}}</a></li>
+            <li><a ui-sref="tecniche"><i class="fa fa-rocket fa-fw"></i> {{'Problemi per tecnica' | l10n}}</a></li>
+            <li><a ui-sref="eventi"><i class="fa fa-trophy fa-fw"></i> {{'Problemi per evento' | l10n}}</a></li>
 <!--
             <li><a href="#"><i class="fa fa-flask fa-fw"></i> Tutti i problemi, per tecnica</a></li>
             <li><a href="#"><i class="fa fa-ban fa-fw"></i> Fase nazionale OII, per anno</a></li>

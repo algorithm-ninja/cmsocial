@@ -114,7 +114,7 @@ angular.module('cmsocial')
     .success(function(data, status, headers, config) {
       if (data.success === 1) {
         // TODO Change this to something configurable
-        window.location.replace('http://cms.di.unipi.it:8080/session/sso_login?' + data.parameters);
+        window.location.replace('http://cms.di.unipi.it:8000/session/sso_login?' + data.parameters);
       } else {
         notificationHub.createAlert('danger', l10n.get('Sign on failed - please make sure to be logged in on the main website!'), 3);
         $state.go('overview');

@@ -186,7 +186,7 @@ angular.module('cmsocial')
     };
     $scope.getTasks();
   })
-  .controller('TagsPage', function($scope, $http, notificationHub) {
+  .controller('TagsPage', function($scope, $http, notificationHub, API_PREFIX) {
     $scope.getTags = function() {
       $http.post(API_PREFIX + 'tag', {
         'action':   'list'
@@ -242,4 +242,34 @@ angular.module('cmsocial')
         notificationHub.serverError(status);
       });
     };
-  });
+  })
+  .controller('TecnichePage', function($scope, $http, notificationHub, API_PREFIX) {
+    $scope.tags = [];
+    $http.post(API_PREFIX + 'tag', {
+      'action': 'list'
+    })
+    .success(function(data, status, headers, config) {
+      var tags = data['tags'];
+      for (var idx in tags) {
+        if (tags[idx].indexOf("ioi") === 0 ||
+            tags[idx] == "nazionali" ||
+            tags[idx] == "territoriali" ||
+            tags[idx] == "gator" ||
+            tags[idx] == "ois" ||
+            tags[idx] == "abc") {
+          // skip
+        } else {
+          $scope.tags.push(tags[idx]);
+        }
+      }
+    })
+    .error(function(data, status, headers, config) {
+      notificationHub.serverError(status);
+    });
+  })
+  .controller('EventiPage', function($scope, $http, notificationHub) {
+    $scope.ioi = [];
+    for (var i=2016; i>=2004; i--) {
+      $scope.ioi.push(i);
+    }
+  })
