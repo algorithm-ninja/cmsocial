@@ -13,10 +13,16 @@
         <i class="fa fa-home fa-lg"></i> {{user.institute.name}} ({{user.institute.province}})
       </span>
       <br />
+      <span>
+        <i class="fa fa-trophy fa-lg"></i> {{user.score}} punti
+      </span>
+      <br />
+<!--
       <span ng-if="!isMe()">
         <i class="fa fa-comment fa-lg"></i> <a ui-sref="talkRedirect({userId: myName(), recipientName: user.username})">{{'Send message' | l10n}}</a>
         <br />
       </span>
+-->
     </div>
     <div class="col-xs-6">
       <div ng-if="isMe()" class="pull-right well well-lg">

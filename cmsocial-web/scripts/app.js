@@ -110,6 +110,15 @@ angular
         templateUrl: 'views/signup.html',
         controller: 'SignupCtrl'
       })
+      .state('resources', {
+        url: '/resources',
+        templateUrl: 'views/resources.html',
+        controller: 'ResourcesCtrl'
+      })
+      .state('taskdesc', {
+        url: '/taskdesc',
+        templateUrl: 'views/taskdesc.html'
+      })
       .state('help', {
         url: '/help/{taskName}',
         templateUrl: 'views/help.html',
@@ -124,6 +133,31 @@ angular
         url: '/test/{testName}',
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
+      })
+      .state('video_pas', {
+        url: '/resources/pascal',
+        templateUrl: 'views/resources.videos.html',
+        controller: 'VideoPas'
+      })
+      .state('video_cpp', {
+        url: '/resources/cpp',
+        templateUrl: 'views/resources.videos.html',
+        controller: 'VideoCpp'
+      })
+      .state('video_dos', {
+        url: '/resources/dos',
+        templateUrl: 'views/resources.videos.html',
+        controller: 'VideoDos'
+      })
+      .state('video_alg', {
+        url: '/resources/algoritmi',
+        templateUrl: 'views/resources.videos.html',
+        controller: 'VideoAlg'
+      })
+      .state('video_sel', {
+        url: '/resources/scolastiche',
+        templateUrl: 'views/resources.videos.html',
+        controller: 'VideoSel'
       })
   })
   .controller('HomepageCtrl', function($scope, navbarManager, userManager) {

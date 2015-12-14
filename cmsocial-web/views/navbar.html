@@ -10,33 +10,41 @@
     </div>
     <div class="navbar-collapse collapse" ng-controller="SignCtrl">
       <ul class="nav navbar-nav">
-        <li class="dropdown">
+        <li ng-class="{active: isActiveTab(5)}" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown">
-            <i class="fa fa-archive fa-lg"></i> {{'Task & quiz archive' | l10n}} <b class="caret"></b>
+            <i class="fa fa-align-justify fa-lg"></i> Materiale <b class="caret"></b>
           </a>
           <ul class="dropdown-menu">
-            <li><a ui-sref="tasklist.page({pageNum: 1})"><i class="fa fa-list-ol fa-fw"></i> {{'All tasks' | l10n}}</a></li>
-            <li><a ui-sref="tags"><i class="fa fa-tag fa-fw"></i> {{'Task categories' | l10n}}</a></li>
-<!--
-            <li><a href="#"><i class="fa fa-flask fa-fw"></i> Tutti i problemi, per tecnica</a></li>
-            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Fase nazionale OII, per anno</a></li>
-            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Fase territoriale OII, per anno</a></li>
-            <li class="divider"></li>
-            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Problemi creati dagli utenti</a></li>
-            <li class="divider"></li>
--->
-            <li><a ui-sref="tests"><i class="fa fa-pencil fa-fw"></i> {{'Quizzes' | l10n}}</a></li>
+            <li><a ui-sref="resources"><i class="fa fa-list-ol fa-fw"></i> Materiale didattico</a></li>
+            <li><a ui-sref="video_pas"><i class="fa fa-youtube-play fa-fw"></i> Videocorso Pascal (+ come inviare i sorgenti per la valutazione)</a></li>
+            <li><a ui-sref="video_cpp"><i class="fa fa-youtube-play fa-fw"></i> Videocorso C (+ come inviare i sorgenti per la valutazione)</a></li>
+            <li><a ui-sref="video_dos"><i class="fa fa-youtube-play fa-fw"></i> Videocorso Prompt dei comandi in Windows</a></li>
+            <li><a ui-sref="video_alg"><i class="fa fa-youtube-play fa-fw"></i> Videocorso di Algoritmi e Strutture Dati</a></li>
+            <li><a ui-sref="video_sel"><i class="fa fa-youtube-play fa-fw"></i> Soluzioni commentate di selezioni scolastiche</a></li>
           </ul>
         </li>
-        <li ng-class="{active: isActiveTab(4)}">
-          <a ui-sref="ranking.page({ pageNum: 1 })"><i class="fa fa-trophy fa-lg"></i> {{'Ranking' | l10n}}</a>
+        <li ng-show="me.isLogged()" class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-archive fa-lg"></i> Problemi di programmazione <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a ui-sref="tasklist.page({pageNum: 1})"><i class="fa fa-list-ol fa-fw"></i> Tutti i problemi</a></li>
+            <li><a ui-sref="tags"><i class="fa fa-tag fa-fw"></i> Categorie</a></li>
+            <li><a ui-sref="taskdesc"><i class="fa fa-list-alt fa-fw"></i> Descrizione dei problemi</a></li>
+            <li><a ui-sref="ranking.page({ pageNum: 1 })"><i class="fa fa-trophy fa-lg"></i> Classifica</a></li>
+          </ul>
+        </li>
+        <li ng-show="me.isLogged()" class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-pencil fa-fw"></i> Quiz <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a ui-sref="tests"><i class="fa fa-pencil fa-fw"></i> Scolastiche</a></li>
+          </ul>
         </li>
         <li>
           <a ng-if="!me.isLogged()" href="[[forum_url]]"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
           <a ng-if="me.isLogged()" href="[[forum_url]]/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
-        </li>
-        <li ng-class="{active: isActiveTab(5)}" ng-if="!me.isLogged()">
-          <a ui-sref="signup"><i class="fa fa-pencil fa-lg"></i> {{'Sign up' | l10n}}</a>
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">

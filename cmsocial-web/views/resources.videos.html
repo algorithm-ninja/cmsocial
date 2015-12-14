@@ -1,0 +1,23 @@
+<div class="container">
+  <h2><i class="fa fa-youtube-play fa-lg"></i> {{title}}</h2><br>
+  <div class="panel panel-default" ng-repeat="lez in videolezioni">
+    <div class="panel-heading" onclick="$(this).next().slideToggle('fast')" style="cursor:pointer">
+      <h3 class="panel-title">{{lez.title}}</h3>
+    </div>
+    <div class="panel-body" style="display:none">
+      <div class="col-lg-7">
+        <div class="video-cont">
+          <iframe width="640" height="360" ng-src="{{lez.youtube}}" frameborder="0" allowfullscreen></iframe>
+        </div>
+      </div>
+      <div class="col-lg-5" ng-if="lez.files.length" style="padding:15px">
+        <span>File a supporto del video:</span>
+        <ul class="list-group">
+          <a class="list-group-item" ng-repeat="file in lez.files" href="{{file.url}}">
+            <i class="fa fa-angle-right fa-fw"></i>{{file.title}}
+          </a>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
