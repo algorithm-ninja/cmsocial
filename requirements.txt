@@ -1,2 +1,2 @@
 sqlalchemy==1.0.9
--e git://github.com/algorithm-ninja/cms.git@2cae169aaad92c26aed9d57a867a7c4a84a5820d#egg=cms
+-e git://github.com/algorithm-ninja/cms.git@33fc34c76ad560a57dc641cca20fa32e4dc28a8b#egg=cms
