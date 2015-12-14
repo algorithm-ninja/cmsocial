@@ -229,7 +229,7 @@ angular.module('cmsocial')
         scope.loadTask.then(function() {
           var goodBrowser = !!$window.Worker;
           var hasBuiltInPdf = !("ActiveXObject" in window) && !/iPhone|iPod|Android|BlackBerry|Opera Mini|Phone|Mobile/i.test(navigator.userAgent);
-          var pdfURL = location.pathname.replace(/[^\/]*$/, '') + API_PREFIX.substr(1) + 'files/' + scope.task.statements.it + '/testo.pdf';
+          var pdfURL = location.pathname.replace(/[^\/]*$/, '') + API_PREFIX + 'files/' + scope.task.statements.it + '/testo.pdf';
           var downloadButton = '<a href="' + pdfURL + '" class="btn btn-success" style="margin-top:5px;">Download PDF</a>';
           if (goodBrowser && hasBuiltInPdf)
             element.replaceWith('<object data="' + pdfURL + '" type="application/pdf" class="' + attrs.class +
