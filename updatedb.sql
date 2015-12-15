@@ -47,7 +47,7 @@ BEGIN;
     nuserscorrect     INTEGER NOT NULL,
     help_available    BOOLEAN NOT NULL DEFAULT 'f'
   );
-  CREATE UNIQUE INDEX tasks_name_key ON tasks(name);
+  ALTER TABLE tasks ADD CONSTRAINT tasks_name_key UNIQUE (name);
   -- Create/alter tables for other stuff
   CREATE UNIQUE INDEX "contests_name_key" ON contests(name);
   ALTER TABLE contests ADD COLUMN submissions_download_allowed BOOLEAN NOT NULL DEFAULT 't';
