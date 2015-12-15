@@ -25,7 +25,7 @@ from cms import config, ServiceCoord, SOURCE_EXT_TO_LANGUAGE_MAP
 from cms.io import Service
 from cms.db.filecacher import FileCacher
 
-from cms.db import SessionGen, User, Submission, File, Task, Participation, Testcase
+from cms.db import SessionGen, User, Submission, File, Task, Participation, Testcase, Contest
 
 from cmsocial.db.test import Test, TestScore
 from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
@@ -94,6 +94,7 @@ class APIHandler(object):
         self.evaluation_service = parent.evaluation_service
         self.EMAIL_REG = re.compile(r'[^@]+@[^@]+\.[^@]+')
         self.USERNAME_REG = re.compile(r'^[A-Za-z0-9_\.]+$')
+        self.CONTEST_ID = 1
 
     @responder
     def __call__(self, environ, start_response):
@@ -178,7 +179,7 @@ class APIHandler(object):
         try:
             return local.session.query(Participation)\
                 .join(User)\
-                .filter(Participation.contest_id == 1)\
+                .filter(Participation.contest_id == self.CONTEST_ID)\
                 .filter(User.username == username)\
                 .filter(User.password == token).first()
         except UnicodeDecodeError:
@@ -370,13 +371,26 @@ class APIHandler(object):
                 last_name=lastname,
                 username=username,
                 password=token,
-                email=email,
+                email=email
+            )
+            social_user = SocialUser(
                 access_level=6,
                 registration_time=make_datetime()
             )
-            user.institute_id = institute
+            contest = local.session.query(Contest)\
+                .filter(Contest.id == self.CONTEST_ID)\
+                .first()
+            participation = Participation(
+                user=user,
+                contest=contest
+            )
+            social_user.user = user
+            social_user.institute_id = institute
+
             try:
                 local.session.add(user)
+                local.session.add(social_user)
+                local.session.add(participation)
                 local.session.commit()
             except IntegrityError:
                 return 'signup.user_exists'
