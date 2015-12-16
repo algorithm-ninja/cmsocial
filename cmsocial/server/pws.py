@@ -265,6 +265,7 @@ class APIHandler(object):
         response.response = wrap_file(environ, fobj)
         response.direct_passthrough = True
         response.cache_control.max_age = 31536000
+        response.cache_control.public = True
         return response
 
     # Handlers that require JSON data
