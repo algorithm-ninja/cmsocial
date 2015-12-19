@@ -235,7 +235,7 @@ angular.module('cmsocial')
             element.replaceWith('<object data="' + pdfURL + '" type="application/pdf" class="' + attrs.class +
               '">' + l10n.get('Your browser is outdated or your PDF plugin is deactivated') + '<br>' + downloadButton + '</object>');
           else if (goodBrowser)
-            element.replaceWith('<iframe seamless src="assets/pdfjs/web/viewer.html?file=' + pdfURL +
+            element.replaceWith('<iframe seamless src="pdfjs/web/viewer.html?file=' + pdfURL +
               '" class="' + attrs.class +'"/>');
           else
             element.raplaceWith(downloadButton);
