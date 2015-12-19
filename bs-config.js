@@ -16,7 +16,7 @@ const ini = require('ini')
 var config = ini.parse(fs.readFileSync('config/cmsocial.ini', 'utf-8'))
 
 proxyOptions = url.parse('http://localhost:8888')
-proxyOptions.route = config.core.api_prefix
+proxyOptions.route = "/" + config.core.api_prefix
 
 module.exports = {
     "server": {
