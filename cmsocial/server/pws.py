@@ -253,7 +253,12 @@ class APIHandler(object):
         response.mimetype = 'application/octet-stream'
 
         if 'name' in args:
-            if not args["name"].endswith(".pdf"):
+            if args["name"].endswith(".pdf"):
+                # Add header to allow the official pdf.js to work
+                # TODO: support also the "https" URL for this
+                response.headers.add_header(b'Access-Control-Allow-Origin',
+                        b'http://mozilla.github.io')
+            else:
                 # Don't do this on pdf files because it breaks the native pdf reader
                 response.headers.add_header(
                     b'Content-Disposition', b'attachment',
