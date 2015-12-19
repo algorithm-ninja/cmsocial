@@ -222,7 +222,7 @@ angular.module('cmsocial')
       subsDatabase.subDetails(id);
     };
   })
-  .directive('pdf', function($window, l10n, API_PREFIX) {
+  .directive('pdf', function($window, l10n, API_PREFIX, HOSTNAME) {
     return {
       restrict: 'E',
       link: function(scope, element, attrs) {
@@ -235,7 +235,7 @@ angular.module('cmsocial')
             element.replaceWith('<object data="' + pdfURL + '" type="application/pdf" class="' + attrs.class +
               '">' + l10n.get('Your browser is outdated or your PDF plugin is deactivated') + '<br>' + downloadButton + '</object>');
           else if (goodBrowser)
-            element.replaceWith('<iframe seamless src="assets/pdfjs/web/viewer.html?file=' + pdfURL +
+            element.replaceWith('<iframe seamless src="https://mozilla.github.io/pdf.js/web/viewer.html?file=' + HOSTNAME + pdfURL +
               '" class="' + attrs.class +'"/>');
           else
             element.raplaceWith(downloadButton);
