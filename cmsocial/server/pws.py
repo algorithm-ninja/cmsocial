@@ -255,7 +255,6 @@ class APIHandler(object):
         if 'name' in args:
             if args["name"].endswith(".pdf"):
                 # Add header to allow the official pdf.js to work
-                # TODO: support also the "http" URL for this
                 response.headers.add_header(b'Access-Control-Allow-Origin',
                         b'https://mozilla.github.io')
             else:
