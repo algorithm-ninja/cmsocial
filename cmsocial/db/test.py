@@ -4,7 +4,7 @@ from sqlalchemy.schema import Column, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.types import Integer, Unicode, String
 from sqlalchemy.orm import relationship, backref
 
-from cms.db import Base
+from cmsocial.db.base import Base
 from cmsocial.db.socialuser import SocialUser
 
 

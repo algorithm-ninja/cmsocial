@@ -26,7 +26,6 @@ setup(
         "console_scripts": [
 #            "cmsocialServer=cmsocial.server.pws:main",   # we must rename this because of CMS's ResourceService
             "cmsPracticeWebServer=cmsocial.server.pws:main",
-            "cmsocialInitDB=cmsocial.db:init_db",
             "cmsocialSyncTasks=cmsocial.scripts.synctasks:main",
             "cmsocialSyncUsers=cmsocial.scripts.syncusers:main"
         ]

@@ -4,20 +4,20 @@ from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, Unicode
 from sqlalchemy.orm import relationship, backref
 
-from cms.db import Base
+from cmsocial.db.base import Base
 
 
 class Region(Base):
     __tablename__ = 'regions'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, unique=True)
     name = Column(Unicode)
 
 
 class Province(Base):
     __tablename__ = 'provinces'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, unique=True)
     name = Column(Unicode)
 
     region_id = Column(
@@ -36,7 +36,7 @@ class Province(Base):
 class City(Base):
     __tablename__ = 'cities'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, unique=True)
     name = Column(Unicode)
 
     province_id = Column(
@@ -55,7 +55,7 @@ class City(Base):
 class Institute(Base):
     __tablename__ = 'institutes'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, unique=True)
     name = Column(Unicode)
 
     city_id = Column(

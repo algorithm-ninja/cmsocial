@@ -15,9 +15,9 @@ from sqlalchemy.types import Boolean, Integer, String, Unicode, DateTime, \
     Interval
 from sqlalchemy.orm import relationship, backref
 
-from cms.db import Base, Contest
+from cms.db import Contest
 
-# CUSTOM FIELDS:
+from cmsocial.db.base import Base
 from cmsocial.db.location import Institute
 
 
@@ -34,7 +34,8 @@ class SocialUser(Base):
             onupdate="CASCADE",
             ondelete="CASCADE"
         ),
-        primary_key=True
+        primary_key=True,
+        unique=True
     )
 
     user = relationship(

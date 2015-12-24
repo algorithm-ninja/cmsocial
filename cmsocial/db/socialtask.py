@@ -17,10 +17,11 @@ from sqlalchemy.types import Boolean, Integer, Float, String, Unicode, \
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from cms.db import Base, Task
+from cms.db import Task
 from cms.db.smartmappedcollection import smart_mapped_collection
 from cms import SCORE_MODE_MAX, SCORE_MODE_MAX_TOKENED_LAST
 
+from cmsocial.db.base import Base
 from cmsocial.db.socialuser import SocialUser
 
 
@@ -36,7 +37,8 @@ class SocialTask(Base):
             onupdate="CASCADE",
             ondelete="CASCADE"
         ),
-        primary_key=True
+        primary_key=True,
+        unique=True
     )
 
     task = relationship(
@@ -125,7 +127,8 @@ class Tag(Base):
 
     id = Column(
         Integer,
-        primary_key=True
+        primary_key=True,
+        unique=True
     )
 
     name = Column(
@@ -154,7 +157,8 @@ class TaskScore(Base):
 
     id = Column(
         Integer,
-        primary_key=True
+        primary_key=True,
+        unique=True
     )
 
     user_id = Column(
