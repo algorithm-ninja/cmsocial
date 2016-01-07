@@ -281,7 +281,7 @@ angular.module('cmsocial')
       {
         title: '01 Dizionario mediante Liste 4: ricerca (2/2)',
         youtube: 'lUobj-OfnaM',
-        files: []
+        files: ['liste.h', 'liste.c', 'esempio_liste.c']
       },
       {
         title: '02 Dizionario mediante Array Dinamici 1: dimensione fissa',
@@ -291,12 +291,12 @@ angular.module('cmsocial')
       {
         title: '02 Dizionario mediante Array Dinamici 2: dimensione variabile',
         youtube: '_4rASmNwVho',
-        files: []
+        files: ['vettori.h', 'vettori.c', 'esempio_vettori.c']
       },
       {
         title: '03 Dizionario mediante Array Ordinati: ricerca binaria',
         youtube: 'MPiE3OIeJN8',
-        files: []
+        files: ['ricerca_binaria.c']
       },
       {
         title: '04 Tabella riassuntiva 1',
@@ -306,7 +306,7 @@ angular.module('cmsocial')
       {
         title: '05 Dizionario mediante Tabelle Hash 1: liste concatenate',
         youtube: '0O8O6Rt8Kes',
-        files: []
+        files: ['hash.h', 'hash.c', 'liste.h', 'liste.c', 'esempio_hash.c']
       },
       {
         title: '05 Dizionario mediante Tabelle Hash 2: indirizzamento aperto',
@@ -326,7 +326,7 @@ angular.module('cmsocial')
       {
         title: '06 Dizionario mediante Alberi Binari di Ricerca 3: cancellazione',
         youtube: 'xsDdLepnIqw',
-        files: []
+        files: ['abr.h', 'abr.c', 'esempio_abr.c']
       },
       {
         title: '07 Tabella riassuntiva 2',
