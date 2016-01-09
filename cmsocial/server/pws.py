@@ -537,7 +537,7 @@ class APIHandler(object):
                 if not tasktag.tag.hidden:
                     local.resp['tags'].append({
                         'name': tasktag.tag.name,
-                        'can_delete': local.user is tasktag.user and not tasktag.approved
+                        'can_delete': local.user.social_user is tasktag.user and not tasktag.approved
                     })
 
         elif local.data['action'] == 'stats':
