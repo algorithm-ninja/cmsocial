@@ -88,7 +88,8 @@ angular.module('cmsocial')
         notificationHub.serverError(status);
       });
     };
-    $scope.loadTask = $http.post(API_PREFIX + 'task', {
+    $scope.loadTask = function() {
+      return $http.post(API_PREFIX + 'task', {
         'name': $stateParams.taskName,
         'username': userManager.getUser().username,
         'token': userManager.getUser().token,
@@ -102,6 +103,7 @@ angular.module('cmsocial')
           notificationHub.serverError(result.status);
         }
       );
+    };
   })
   .controller('StatementCtrl', function($scope, $window, taskbarManager) {
     taskbarManager.setActiveTab(1);
@@ -226,7 +228,7 @@ angular.module('cmsocial')
     return {
       restrict: 'E',
       link: function(scope, element, attrs) {
-        scope.loadTask.then(function() {
+        scope.loadTask().then(function() {
           var goodBrowser = !!$window.Worker;
           var hasBuiltInPdf = !("ActiveXObject" in window) && !/iPhone|iPod|Android|BlackBerry|Opera Mini|Phone|Mobile/i.test(navigator.userAgent);
           var pdfURL = location.pathname.replace(/[^\/]*$/, '') + API_PREFIX + 'files/' + scope.task.statements.it + '/testo.pdf';

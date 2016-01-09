@@ -608,7 +608,7 @@ class APIHandler(object):
                 return 'Task does not exist'
             else:
                 try:
-                    local.session.add(TaskTag(task=task, tag=tag, user=local.user))
+                    local.session.add(TaskTag(task=task.social_task, tag=tag, user=local.user.social_user))
                     local.session.commit()
                 except IntegrityError:
                     return 'The task already has this tag'
