@@ -535,10 +535,13 @@ class APIHandler(object):
             local.resp['tags'] = []
             for tasktag in t.social_task.tasktags:
                 if not tasktag.tag.hidden:
-                    local.resp['tags'].append({
-                        'name': tasktag.tag.name,
-                        'can_delete': local.user.social_user is tasktag.user and not tasktag.approved
-                    })
+                    tag = {'name': tasktag.tag.name}
+                    if local.user is None:
+                        tag['can_delete'] = False
+                    else:
+                        tag['can_delete'] = (local.user.social_user is tasktag.user and not tasktag.approved) or \
+                                local.user.social_user.access_level == 0
+                    local.resp['tags'].append(tag)
 
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
