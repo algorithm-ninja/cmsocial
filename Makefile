@@ -67,11 +67,11 @@ $(DEST)/custom_images: config/custom_images | $(DEST)
 $(DEST)/favicon.ico: config/favicon.ico | $(DEST)
 	cp $^ $@
 
-$(DEST)/views/footer.html: config/footer.html | $(DEST)
-	cp $^ $@
+$(DEST)/views/footer.html: config/footer.html config/cmsocial.ini | $(DEST)
+	./instantiate.sh $< > $@
 
-$(DEST)/views/homepage.html: config/homepage.html | $(DEST)
-	cp $^ $@
+$(DEST)/views/homepage.html: config/homepage.html config/cmsocial.ini | $(DEST)
+	./instantiate.sh $< > $@
 
 $(DEST)/index.html: cmsocial-web/index.html node_modules config/cmsocial.ini | $(DEST)
 	./instantiate.sh <(node_modules/.bin/cdnify $(CDNFLAGS) $<) | $(STRIPDEBUG) > $@
