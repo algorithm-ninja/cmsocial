@@ -30,7 +30,7 @@ DESTHTML=$(patsubst cmsocial-web/%,$(DEST)/%,$(HTML))
 CSS=$(patsubst cmsocial-web/%.less,tmp/%.css,$(LESS))
 TMPJS=$(patsubst cmsocial-web/%.js,tmp/%.js,$(JS))
 
-.PHONY: all dirs other-files config-files js-deps clean distclean
+.PHONY: all dirs other-files config-files js-deps clean distclean jshint bsync
 
 all: $(DESTHTML) $(DEST)/styles/main.css $(DEST)/scripts/app.processed.js js-deps other-files config-files | dirs
 
@@ -103,3 +103,9 @@ clean:
 
 distclean: clean
 	rm -rf node_modules
+
+jshint:
+	./node_modules/.bin/jshint --reporter=node_modules/jshint-stylish $(JS)
+
+bsync:
+	./node_modules/.bin/browser-sync start --config bs-config.js

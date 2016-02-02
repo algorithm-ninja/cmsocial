@@ -2,14 +2,13 @@
   "name": "cmsocial",
   "private": true,
   "devDependencies": {
-    "bower": ">=1.0.0 <2.0.0",
     "browser-sync": "^2.10.0",
     "cdnify": "^0.1.4",
     "ini": "^1.3.4",
-    "jshint-stylish": "^1.0.0",
+    "jshint": "^2.9.1",
+    "jshint-stylish": "^2.1.0",
     "karma-jasmine": "*",
     "karma-phantomjs-launcher": "*",
-    "pdfjs-dist": "^1.3.56",
     "proxy-middleware": "^0.15.0"
   },
   "dependencies": {
