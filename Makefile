@@ -92,7 +92,7 @@ tmp/%.js: cmsocial-web/%.js config/cmsocial.ini | tmp
 	./instantiate.sh $< | $(STRIPDEBUG) > $@
 
 $(DEST)/node_modules: node_modules
-	rsync -av --delete node_modules $(DEST)/
+	ln -s ../node_modules $(DEST)/node_modules
 	touch $(DEST)/node_modules
 
 $(DEST)/%: cmsocial-web/%
