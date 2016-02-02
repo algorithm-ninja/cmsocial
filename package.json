@@ -28,6 +28,7 @@
     "font-awesome": "^4.5.0",
     "jquery": "^2.1.4",
     "less": "^2.5.3",
+    "mathjax": "github:mathjax/MathJax#master",
     "uglifyjs": "^2.4.10"
   }
 }
