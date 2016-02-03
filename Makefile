@@ -30,7 +30,7 @@ DESTHTML=$(patsubst cmsocial-web/%,$(DEST)/%,$(HTML))
 CSS=$(patsubst cmsocial-web/%.less,tmp/%.css,$(LESS))
 TMPJS=$(patsubst cmsocial-web/%.js,tmp/%.js,$(JS))
 
-.PHONY: all dirs other-files config-files js-deps clean distclean
+.PHONY: all dirs other-files config-files js-deps clean distclean jshint bsync
 
 all: $(DESTHTML) $(DEST)/styles/main.css $(DEST)/scripts/app.processed.js js-deps other-files config-files | dirs
 
@@ -67,11 +67,11 @@ $(DEST)/custom_images: config/custom_images | $(DEST)
 $(DEST)/favicon.ico: config/favicon.ico | $(DEST)
 	cp $^ $@
 
-$(DEST)/views/footer.html: config/footer.html | $(DEST)
-	cp $^ $@
+$(DEST)/views/footer.html: config/footer.html config/cmsocial.ini | $(DEST)
+	./instantiate.sh $< > $@
 
-$(DEST)/views/homepage.html: config/homepage.html | $(DEST)
-	cp $^ $@
+$(DEST)/views/homepage.html: config/homepage.html config/cmsocial.ini | $(DEST)
+	./instantiate.sh $< > $@
 
 $(DEST)/index.html: cmsocial-web/index.html node_modules config/cmsocial.ini | $(DEST)
 	./instantiate.sh <(node_modules/.bin/cdnify $(CDNFLAGS) $<) | $(STRIPDEBUG) > $@
@@ -92,7 +92,7 @@ tmp/%.js: cmsocial-web/%.js config/cmsocial.ini | tmp
 	./instantiate.sh $< | $(STRIPDEBUG) > $@
 
 $(DEST)/node_modules: node_modules
-	rsync -av --delete node_modules $(DEST)/
+	ln -s ../node_modules $(DEST)/node_modules
 	touch $(DEST)/node_modules
 
 $(DEST)/%: cmsocial-web/%
@@ -103,3 +103,9 @@ clean:
 
 distclean: clean
 	rm -rf node_modules
+
+jshint:
+	./node_modules/.bin/jshint --reporter=node_modules/jshint-stylish $(JS)
+
+bsync:
+	./node_modules/.bin/browser-sync start --config bs-config.js

@@ -19,10 +19,10 @@ proxyOptions = url.parse('http://localhost:8888')
 proxyOptions.route = "/" + config.core.api_prefix
 
 module.exports = {
-    "server": {
-      "baseDir": "cmsocial-web.build",
-      "middleware": [proxy(proxyOptions)]
-    },
-    "port": 3000,
-    "files": []  // TODO: add files to watch
+  "server": {
+    "baseDir": "cmsocial-web.build",
+    "middleware": [proxy(proxyOptions)]
+  },
+  "port": 3000,
+  "files": []  // TODO: add files to watch
 };
