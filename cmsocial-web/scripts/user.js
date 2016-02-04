@@ -162,6 +162,8 @@ angular.module('cmsocial')
       data['action'] = 'update';
       data['username'] = userManager.getUser().username;
       data['token'] = userManager.getUser().token;
+      data['email'] = $scope.user.email;
+
       if ($scope.user.password2.length > 0) {
         if ($scope.user.password3 !== $scope.user.password2)
           return notificationHub.createAlert('danger', l10n.get('Passwords don\'t match'), 2);
@@ -170,12 +172,16 @@ angular.module('cmsocial')
         data['old_password'] = $scope.user.password;
         data['password'] = $scope.user.password2;
       }
-      data['email'] = $scope.user.email;
+
       $http.post(API_PREFIX + 'user', data)
         .success(function(data, status, headers, config) {
           if (data.success == 1) {
-            if (data.hasOwnProperty('token'))
-              localStorage.setItem('token', data['token']);
+            if (data.hasOwnProperty('token')) {
+              var user_object = JSON.parse(localStorage.getItem('user'))
+              user_object['token'] = data['token']  // overwrite old password with new one
+              localStorage.setItem('user', JSON.stringify(user_object))
+            }
+
             notificationHub.createAlert('success', l10n.get('Changes recorded'), 2);
             $state.go('^.profile');
           } else if (data.success == 0) {
