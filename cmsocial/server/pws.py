@@ -767,8 +767,13 @@ class APIHandler(object):
                                 local.resp[i] = [0, 'empty']
                                 break
                             if q.type == 'number':
-                                an = float(ans[a])
-                                cor = float(correct[a])
+                                try:
+                                    an = float(ans[a])
+                                    cor = float(correct[a])
+                                except:
+                                    # Hack to make the answer wrong if the user triggers a TypeError
+                                    an = 1
+                                    cor = 2
                             else:
                                 an = ans[a].lower()
                                 cor = correct[a].lower()
