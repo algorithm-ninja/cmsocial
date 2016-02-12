@@ -24,6 +24,12 @@ angular.module('cmsocial')
     {it: 'Chiudi'},
     'Submit':
     {it: 'Invia'},
+    'Run':
+    {it: 'Esegui'},
+    'Load file':
+    {it: 'Carica file'},
+    'Reset':
+    {it: 'Resetta'},
     'Apply':
     {it: 'Applica'},
     'Update':
@@ -92,8 +98,8 @@ angular.module('cmsocial')
     // Submissions page
     'Submit a solution':
     {it: 'Invia una sottoposizione'},
-    'Select the language':
-    {it: 'Scegli il linguaggio:'},
+    'Language':
+    {it: 'Linguaggio:'},
     'Write your code here':
     {it: 'Scrivi qui il tuo codice'},
     'Previous submissions':
@@ -134,6 +140,8 @@ angular.module('cmsocial')
     {it: 'Memoria'},
     'Too frequent submissions!':
     {it: 'Sottoposizioni troppo frequenti!'},
+    'You have a pending submission':
+    {it: 'Hai una sottoposizione in sospeso'},
     'Some files are missing!':
     {it: 'Mancano alcuni file!'},
     'The files you sent are too big!':

@@ -6,10 +6,16 @@ angular.module('cmsocial')
   .service('subsDatabase', function($http, $rootScope, $timeout,
       notificationHub, userManager, l10n, API_PREFIX) {
     $rootScope.submissions = {};
+
+    var self = {};
+
+    self.submitCompleted = true;
+
     var updInterval = {};
     var updAttempts = {};
     var timeout;
-    this.load = function(name) {
+
+    self.load = function(name) {
       $http.post(API_PREFIX + 'submission', {
         'username': userManager.getUser().username,
         'token': userManager.getUser().token,
@@ -19,7 +25,7 @@ angular.module('cmsocial')
       .success(function(data, status, headers, config) {
         $rootScope.submissions[name] = [];
         for (var i=data['submissions'].length; i>0; i--)
-          addSub(name, data['submissions'][i-1]);
+          self.addSub(name, data['submissions'][i-1]);
       })
       .error(function(data, status, headers, config) {
         notificationHub.serverError(status);
@@ -27,6 +33,7 @@ angular.module('cmsocial')
       $timeout.cancel(timeout);
       updSubs();
     };
+
     function intervalFromAttempts(i) {
       if (i<10 || i==undefined)
         return 1;
@@ -42,7 +49,8 @@ angular.module('cmsocial')
         return 60;
       return i/4;
     }
-    function extendSub(sub) {
+
+    self.extendSub = function(sub) {
       sub.cl = 'empty';
       var date = new Date(sub.timestamp * 1000);
       sub.time = date.toLocaleString();
@@ -78,18 +86,21 @@ angular.module('cmsocial')
       }
       return sub;
     }
-    function addSub(name, sub) {
-      $rootScope.submissions[name].unshift(extendSub(sub));
+
+    self.addSub = function(name, sub) {
+      $rootScope.submissions[name].unshift(self.extendSub(sub));
     }
-    function replaceSub(id, sub) {
+
+    self.replaceSub = function(id, sub) {
       for (name in $rootScope.submissions)
         for (var i=0; i<$rootScope.submissions[name].length; i++)
           if ($rootScope.submissions[name][i]["id"] == id) {
-              $rootScope.submissions[name][i] = extendSub(sub);
+              $rootScope.submissions[name][i] = self.extendSub(sub);
               return;
           }
     }
-    function subDetails(id) {
+
+    self.subDetails = function(id) {
       $http.post(API_PREFIX + 'submission', {
         "username": userManager.getUser().username,
         "token": userManager.getUser().token,
@@ -97,7 +108,7 @@ angular.module('cmsocial')
         "id": id
       })
       .success(function(data, status, headers, config) {
-        replaceSub(id, data);
+        self.replaceSub(id, data);
         $rootScope.curSub = id;
         $rootScope.actualCurSub = data;
       })
@@ -105,6 +116,7 @@ angular.module('cmsocial')
         notificationHub.serverError(status);
       });
     }
+
     function updSubs() {
       timeout = $timeout(function() {
         for (var i in updInterval) {
@@ -121,7 +133,10 @@ angular.module('cmsocial')
               'id': i
             })
             .success(function(data, status, headers, config) {
-              replaceSub(data["id"], data);
+              self.replaceSub(data["id"], data);
+              if (data["score_details"] !== null) {
+                self.submitCompleted = true
+              }
             })
             .error(function(data, status, headers, config) {
               notificationHub.serverError(status);
@@ -131,11 +146,8 @@ angular.module('cmsocial')
         updSubs();
       }, 1000);
     }
-    this.addSub = addSub;
-    this.extendSub = extendSub;
-    this.replaceSub = replaceSub;
-    this.subDetails = subDetails;
-    return this;
+
+    return self;
   })
   .controller('TasklistSkel', function($scope, $state, $stateParams,
       navbarManager) {
