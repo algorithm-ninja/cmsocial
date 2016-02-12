@@ -1,7 +1,6 @@
 [core]
 # The secret must be an hexadecimal string
 secret = 485e77da5c9eff017bab1ce8ce3fc0
-hostname = http(s)://change.this.to.your.hostname
 api_prefix = api/
 title = CMSocial
 top_left_name = CMSocial
