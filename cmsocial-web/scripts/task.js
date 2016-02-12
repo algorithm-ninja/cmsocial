@@ -302,8 +302,15 @@ angular.module('cmsocial')
     return {
       restrict: 'A',
       link: function (scope, element, attrs) {
-        var onChangeHandler = scope.$eval(attrs.customOnChange);
-        element.bind('change', onChangeHandler);
+        var onChangeHandler = scope.$eval(attrs.customOnChange)
+        element.bind('change', onChangeHandler)
+
+        // XXX: ugly hack, needed to have a 'change' event fire even if the same
+        //      file is selected twice (e.g. you select, then click "reset",
+        //      then select again)
+        element.bind('click', function(e) {
+          e.target.value = null
+        })
       }
     };
   });
