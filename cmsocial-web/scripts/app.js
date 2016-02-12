@@ -20,7 +20,6 @@ angular
     'ui.ace'
   ])
   .constant('API_PREFIX', '[[api_prefix]]')
-  .constant('HOSTNAME', '[[hostname]]')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
     $locationProvider.html5Mode(false)//.hashPrefix('!')
     // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
