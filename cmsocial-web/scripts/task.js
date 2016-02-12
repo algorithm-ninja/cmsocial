@@ -177,7 +177,12 @@ angular.module('cmsocial')
         localStorage.setItem("source_code", $scope.aceModel)
       }
     };
-    $scope.aceModel = l10n.get("Write your code here");
+
+    if (localStorage.getItem("source_code") === null) {
+      localStorage.setItem("source_code", l10n.get("Write your code here"))
+    }
+    $scope.aceModel = localStorage.getItem("source_code")
+
     $scope.loadAce = function () {
       if (!subsDatabase.submitCompleted) {
         return notificationHub.createAlert('warning', 'You have a pending submission', 2)
@@ -186,7 +191,8 @@ angular.module('cmsocial')
       $scope.files = {}
       $scope.files[$rootScope.task.submission_format[0]] = {
         'filename': "ace" + langExtMap[$scope.language],
-        'data': btoa($scope.aceSession.getDocument().getValue())
+        'data': btoa(unescape(encodeURIComponent($scope.aceSession.getDocument().getValue())))
+        // HACK above: http://stackoverflow.com/a/26603875/747654
       }
       $scope.submitFiles();
     }
