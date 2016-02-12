@@ -17,7 +17,8 @@ angular
     'ngSanitize',
     'ngTouch',
     'ui.router',
-    'ui.ace'
+    'ui.ace',
+    'oblador.lazytube',
   ])
   .constant('API_PREFIX', '[[api_prefix]]')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
