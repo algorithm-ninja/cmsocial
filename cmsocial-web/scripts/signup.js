@@ -44,10 +44,10 @@ angular.module('cmsocial')
       'password': true,
       'password2': true,
       'email2': true,
-      'region': true,
-      'province': true,
-      'city': true,
-      'institute': true
+      // 'region': true,
+      // 'province': true,
+      // 'city': true,
+      // 'institute': true
     };
     $scope.user = {
       'username': '',
@@ -60,10 +60,10 @@ angular.module('cmsocial')
       'password':  'Password\'s too short',
       'password2': 'Passwords don\'t match',
       'email2':    'E-mails don\'t match',
-      'region':    'You must specify a region',
-      'province':  'You must specify a province',
-      'city':      'You must specify a city',
-      'institute': 'You must specify an institute'
+      // 'region':    'You must specify a region',
+      // 'province':  'You must specify a province',
+      // 'city':      'You must specify a city',
+      // 'institute': 'You must specify an institute'
     };
     $http.post(API_PREFIX + 'location', {
       'action': 'listregions'
@@ -92,18 +92,18 @@ angular.module('cmsocial')
       } else if ($scope.isBad['email2']) {
         $scope.signupform.email2.$dirty = true;
         $("#email2").focus(); return;
-      } else if ($scope.isBad['region']) {
-        $scope.signupform.region.$dirty = true;
-        $("#region").focus(); return;
-      } else if ($scope.isBad['province']) {
-        $scope.signupform.province.$dirty = true;
-        $("#province").focus(); return;
-      } else if ($scope.isBad['city']) {
-        $scope.signupform.city.$dirty = true;
-        $("#city").focus(); return;
-      } else if ($scope.isBad['institute']) {
-        $scope.signupform.institute.$dirty = true;
-        $("#institute").focus(); return;
+      // } else if ($scope.isBad['region']) {
+      //   $scope.signupform.region.$dirty = true;
+      //   $("#region").focus(); return;
+      // } else if ($scope.isBad['province']) {
+      //   $scope.signupform.province.$dirty = true;
+      //   $("#province").focus(); return;
+      // } else if ($scope.isBad['city']) {
+      //   $scope.signupform.city.$dirty = true;
+      //   $("#city").focus(); return;
+      // } else if ($scope.isBad['institute']) {
+      //   $scope.signupform.institute.$dirty = true;
+      //   $("#institute").focus(); return;
       }
       var data = $scope.user;
       data['action'] = 'new';
@@ -146,62 +146,62 @@ angular.module('cmsocial')
     $scope.checkPassword = function() {
       $scope.isBad['password'] = ($scope.user.password.length < 5);
     };
-    $scope.checkRegion = function() {
-      $scope.isBad['region'] = false;
-      $http.post(API_PREFIX + 'location', {
-        'action': 'listprovinces',
-        'id':     $scope.user.region
-      }).success(function(data, status, headers, config) {
-        $scope.provinces = data.provinces;
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
-    };
-    $scope.checkProvince = function() {
-      $scope.isBad['province'] = false;
-      $http.post(API_PREFIX + 'location', {
-        'action': 'listcities',
-        'id':     $scope.user.province
-      }).success(function(data, status, headers, config) {
-        $scope.cities = data.cities;
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
-    };
-    $scope.checkCity = function() {
-      $scope.isBad['city'] = false;
-      $http.post(API_PREFIX + 'location', {
-        'action': 'listinstitutes',
-        'id':     $scope.user.city
-      }).success(function(data, status, headers, config) {
-        $scope.institutes = data.institutes;
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
-    };
-    $scope.checkInstitute = function() {
-      $scope.isBad['institute'] = false;
-    };
-    $scope.resetProvince = function() {
-      $scope.isBad['province'] = true;
-      $scope.user.province = undefined;
-      $scope.signupform.province.$dirty = false;
-      $scope.resetCity();
-    };
-    $scope.resetCity = function() {
-      $scope.isBad['city'] = true;
-      $scope.user.city = undefined;
-      $scope.signupform.city.$dirty = false;
-      $scope.resetInstitute();
-    };
-    $scope.resetInstitute = function() {
-      $scope.isBad['institute'] = true;
-      $scope.user.institute = undefined;
-      $scope.signupform.institute.$dirty = false;
-    };
+    // $scope.checkRegion = function() {
+    //   $scope.isBad['region'] = false;
+    //   $http.post(API_PREFIX + 'location', {
+    //     'action': 'listprovinces',
+    //     'id':     $scope.user.region
+    //   }).success(function(data, status, headers, config) {
+    //     $scope.provinces = data.provinces;
+    //   })
+    //   .error(function(data, status, headers, config) {
+    //     notificationHub.serverError(status);
+    //   });
+    // };
+    // $scope.checkProvince = function() {
+    //   $scope.isBad['province'] = false;
+    //   $http.post(API_PREFIX + 'location', {
+    //     'action': 'listcities',
+    //     'id':     $scope.user.province
+    //   }).success(function(data, status, headers, config) {
+    //     $scope.cities = data.cities;
+    //   })
+    //   .error(function(data, status, headers, config) {
+    //     notificationHub.serverError(status);
+    //   });
+    // };
+    // $scope.checkCity = function() {
+    //   $scope.isBad['city'] = false;
+    //   $http.post(API_PREFIX + 'location', {
+    //     'action': 'listinstitutes',
+    //     'id':     $scope.user.city
+    //   }).success(function(data, status, headers, config) {
+    //     $scope.institutes = data.institutes;
+    //   })
+    //   .error(function(data, status, headers, config) {
+    //     notificationHub.serverError(status);
+    //   });
+    // };
+    // $scope.checkInstitute = function() {
+    //   $scope.isBad['institute'] = false;
+    // };
+    // $scope.resetProvince = function() {
+    //   $scope.isBad['province'] = true;
+    //   $scope.user.province = undefined;
+    //   $scope.signupform.province.$dirty = false;
+    //   $scope.resetCity();
+    // };
+    // $scope.resetCity = function() {
+    //   $scope.isBad['city'] = true;
+    //   $scope.user.city = undefined;
+    //   $scope.signupform.city.$dirty = false;
+    //   $scope.resetInstitute();
+    // };
+    // $scope.resetInstitute = function() {
+    //   $scope.isBad['institute'] = true;
+    //   $scope.user.institute = undefined;
+    //   $scope.signupform.institute.$dirty = false;
+    // };
     $scope.matchPassword = function() {
       $scope.isBad['password2'] = ($scope.user.password !== $scope.user.password2);
     };
