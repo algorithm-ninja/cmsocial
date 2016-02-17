@@ -264,8 +264,10 @@ angular.module('cmsocial')
             this.reset();
           });
         }
-        else
+        else {
           notificationHub.createAlert('danger', data['error'], 2);
+          subsDatabase.submitCompleted = true;  // stop loading
+        }
       })
       .error(function(data, status, headers, config) {
         notificationHub.serverError(status);
