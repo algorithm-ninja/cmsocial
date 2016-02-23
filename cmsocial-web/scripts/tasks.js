@@ -199,7 +199,7 @@ angular.module('cmsocial')
     };
     $scope.getTasks();
   })
-  .controller('TagsPage', function($scope, $http, notificationHub) {
+  .controller('TagsPage', function($scope, $http, notificationHub, API_PREFIX) {
     $scope.getTags = function() {
       $http.post(API_PREFIX + 'tag', {
         'action':   'list'
