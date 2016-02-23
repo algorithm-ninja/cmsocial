@@ -156,7 +156,8 @@ angular.module('cmsocial')
     $scope.pagination = {perPage: 15};
     $scope.reloadTasks = function() {
       var new_q = $scope.search.q;
-      if (new_q !== null && new_q.length < 1) {
+      // != instead of !== because we want to also check for undefined
+      if (new_q != null && new_q.length < 1) {
         new_q = null;
       }
       $state.go('^.page', {
