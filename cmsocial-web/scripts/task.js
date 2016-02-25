@@ -155,7 +155,12 @@ angular.module('cmsocial')
     var aceModeMap = {"C": "c_cpp", "C++": "c_cpp", "Pascal": "pascal"}
     var langExtMap = {"C": ".c", "C++": ".cpp", "Pascal": ".pas"}
     $scope.languages = ["C", "C++", "Pascal"];
-    $scope.language = $scope.languages[1];
+
+    if (!localStorage.getItem("preferred_language")) {
+      localStorage.setItem("preferred_language", "C++")
+    }
+
+    $scope.language = localStorage.getItem("preferred_language")
     $scope.aceOption = {
       mode: aceModeMap[$scope.language],
       showPrintMargin: false,
@@ -163,22 +168,50 @@ angular.module('cmsocial')
         $scope.aceSession = _ace.getSession();
         $scope.languageChanged = function (newL) {
           $scope.language = newL;
+          localStorage.setItem("preferred_language", newL)
           $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
         };
       },
       onChange: function (_ace) {
-        $scope.aceModel = _ace.getSession().getDocument().getValue();
+        $scope.aceModel = $scope.aceSession.getDocument().getValue();
+        localStorage.setItem("source_code", $scope.aceModel)
       }
     };
-    $scope.aceModel = l10n.get("Write your code here");
+
+    if (localStorage.getItem("source_code") === null) {
+      localStorage.setItem("source_code", l10n.get("Write your code here"))
+    }
+    $scope.aceModel = localStorage.getItem("source_code")
+
     $scope.loadAce = function () {
+      if (!subsDatabase.submitCompleted) {
+        return notificationHub.createAlert('warning', 'You have a pending submission', 2)
+      }
+
       $scope.files = {}
       $scope.files[$rootScope.task.submission_format[0]] = {
         'filename': "ace" + langExtMap[$scope.language],
-        'data': btoa($scope.aceSession.getDocument().getValue())
+        'data': btoa(unescape(encodeURIComponent($scope.aceSession.getDocument().getValue())))
+        // HACK above: http://stackoverflow.com/a/26603875/747654
       }
       $scope.submitFiles();
     }
+
+    $scope.resetAce = function () {
+      localStorage.setItem("source_code", l10n.get("Write your code here"))
+      $scope.aceSession.getDocument().setValue(localStorage.getItem("source_code"))
+    }
+
+    $scope.loadFile = function(event) {
+      var reader = new FileReader()
+
+      reader.onload = function(e) {
+        $scope.aceSession.getDocument().setValue(e.target.result)
+      }
+
+      reader.readAsText(event.target.files[0])
+    }
+
     $scope.loadFiles = function(formid) {
       var input = $("#" + formid + " input");
       $scope.files = {};
@@ -205,6 +238,11 @@ angular.module('cmsocial')
       }
       readFile(0);
     };
+
+    $scope.submitCompleted = function() {
+      return subsDatabase.submitCompleted
+    }
+
     $scope.submitFiles = function() {
       var data = {};
       data['username'] = userManager.getUser().username;
@@ -213,6 +251,9 @@ angular.module('cmsocial')
       data['action'] = 'new';
       data['task_name'] = $scope.taskName;
       delete $scope.files;
+
+      subsDatabase.submitCompleted = false;  // start loading
+
       $http.post(API_PREFIX + 'submission',
         data
       )
@@ -223,8 +264,10 @@ angular.module('cmsocial')
             this.reset();
           });
         }
-        else
+        else {
           notificationHub.createAlert('danger', data['error'], 2);
+          subsDatabase.submitCompleted = true;  // stop loading
+        }
       })
       .error(function(data, status, headers, config) {
         notificationHub.serverError(status);
@@ -234,7 +277,7 @@ angular.module('cmsocial')
       subsDatabase.subDetails(id);
     };
   })
-  .directive('pdf', function($window, l10n, API_PREFIX, HOSTNAME) {
+  .directive('pdf', function($window, l10n, API_PREFIX) {
     return {
       restrict: 'E',
       link: function(scope, element, attrs) {
@@ -247,11 +290,29 @@ angular.module('cmsocial')
             element.replaceWith('<object data="' + pdfURL + '" type="application/pdf" class="' + attrs.class +
               '">' + l10n.get('Your browser is outdated or your PDF plugin is deactivated') + '<br>' + downloadButton + '</object>');
           else if (goodBrowser)
-            element.replaceWith('<iframe seamless src="https://mozilla.github.io/pdf.js/web/viewer.html?file=' + HOSTNAME + pdfURL +
+            element.replaceWith('<iframe seamless src="https://mozilla.github.io/pdf.js/web/viewer.html?file=' + location.origin + pdfURL +
               '" class="' + attrs.class +'"/>');
           else
             element.raplaceWith(downloadButton);
         });
+      }
+    };
+  })
+  .directive('customOnChange', function() {
+    // XXX: This is needed until angular2, since the current angular assumes
+    //      the File API to be unavailable (thanks, IE9)
+    return {
+      restrict: 'A',
+      link: function (scope, element, attrs) {
+        var onChangeHandler = scope.$eval(attrs.customOnChange)
+        element.bind('change', onChangeHandler)
+
+        // XXX: ugly hack, needed to have a 'change' event fire even if the same
+        //      file is selected twice (e.g. you select, then click "reset",
+        //      then select again)
+        element.bind('click', function(e) {
+          e.target.value = null
+        })
       }
     };
   });

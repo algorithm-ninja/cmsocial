@@ -20,7 +20,7 @@
 /* Signup page */
 
 angular.module('cmsocial')
-  .controller('SignupCtrl', function ($scope, $http, $state,
+  .controller('SignupCtrl', function ($scope, $http, $state, md5,
       notificationHub, navbarManager, API_PREFIX) {
     navbarManager.setActiveTab(5);
     $(".avatar")
@@ -31,7 +31,7 @@ angular.module('cmsocial')
         console.log("Errore nel caricamento dell'immagine");
       });
     $("#email1").blur(function() {
-      var newSrc = 'http://gravatar.com/avatar/' + CryptoJS.MD5(this.value).toString() + '?d=identicon&s=200';
+      var newSrc = 'http://gravatar.com/avatar/' + md5.createHash(this.value).toString() + '?d=identicon&s=200';
       var avatar = $(".avatar");
       if (avatar.attr('src') != newSrc) {
         $(".avatar-loader").show();
