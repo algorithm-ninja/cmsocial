@@ -357,7 +357,7 @@ class APIHandler(object):
                 email = local.data['email']
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
-                #institute = int(local.data['institute'])
+                institute = int(local.data['institute'])
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
@@ -390,7 +390,7 @@ class APIHandler(object):
                 contest=contest
             )
             social_user.user = user
-            #social_user.institute_id = institute
+            social_user.institute_id = institute
 
             try:
                 local.session.add(user)
