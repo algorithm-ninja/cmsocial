@@ -918,13 +918,12 @@ class APIHandler(object):
                 for name in archive.namelist():
                     filename = os.path.basename(name)
                     body = open(os.path.join(unpacked_dir, filename), "r").read()
-                    self.request.files[filename] = [{
+                    local.data['files'][filename] = [{
                         'filename': filename,
                         'body': body
                     }]
 
-                files_sent = dict([(i['filename'], i)
-                                   for i in archive_contents])
+                files_sent = local.data['files']
 
                 archive.cleanup()
             else:
