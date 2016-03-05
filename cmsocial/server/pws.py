@@ -789,7 +789,7 @@ class APIHandler(object):
                     .filter(TestScore.user_id == local.user.id).first()
                 if testscore is None:
                     testscore = TestScore(score=score)
-                    testscore.user = local.user
+                    testscore.user = local.user.social_user
                     testscore.test = test
                     local.session.add(testscore)
                 else:
