@@ -46,10 +46,10 @@ angular.module('cmsocial')
       })
       .success(function(data, status, headers, config) {
         if (data.success === 0) {
-          notificationHub.createAlert('danger', data['error'], 3);
+          notificationHub.createAlert('danger', l10n.get(data['error']), 3);
         } else {
           $scope.loadTaskPromise = $scope.loadTask()
-          notificationHub.createAlert('success', 'Task correctly tagged', 2)
+          notificationHub.createAlert('success', l10n.get('Task correctly tagged'), 2)
         }
       })
       .error(function(data, status, headers, config) {
@@ -68,10 +68,10 @@ angular.module('cmsocial')
         })
         .success(function(data, status, headers, config) {
           if (data.success === 0) {
-            notificationHub.createAlert('danger', data['error'], 3);
+            notificationHub.createAlert('danger', l10n.get(data['error']), 3);
           } else {
             $scope.loadTaskPromise = $scope.loadTask()
-            notificationHub.createAlert('success', 'Task correctly untagged', 2)
+            notificationHub.createAlert('success', l10n.get('Task correctly untagged'), 2)
           }
         })
         .error(function(data, status, headers, config) {
@@ -265,7 +265,7 @@ angular.module('cmsocial')
           });
         }
         else {
-          notificationHub.createAlert('danger', data['error'], 2);
+          notificationHub.createAlert('danger', l10n.get(data['error']), 2);
           subsDatabase.submitCompleted = true;  // stop loading
         }
       })
