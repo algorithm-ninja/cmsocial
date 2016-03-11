@@ -94,6 +94,20 @@ angular.module('cmsocial')
     {it: 'La quantità di tempo, in secondi, disponibile per l\'esecuzione di un testcase.'},
     'Tags are useful to classify tasks by a common characteristic or technique, such as: <i>greedy</i>, <i>graphs</i>, and so on.':
     {it: 'I tag servono per classificare e raggruppare i problemi in base ad una caratteristica comune, ad esempio: <i>greedy</i>, <i>grafi</i>, e così via.'},
+    'Tag already exists':
+    {it: 'Il tag esiste già'},
+    'Tag does not exist':
+    {it: 'Tag inesistente'},
+    'Task does not exist':
+    {it: 'Problema inesistente'},
+    'The task already has this tag':
+    {it: 'Il problema ha già questo tag'},
+    'Task does not have tag':
+    {it: 'Il problema non ha tag'},
+    'Task correctly tagged':
+    {it: 'Tag aggiunto correttamente al problema'},
+    'Task correctly untagged':
+    {it: 'Tag rimosso correttamente dal problema'},
 
     // Submissions page
     'Submit a solution':
@@ -150,6 +164,8 @@ angular.module('cmsocial')
     {it: 'Linguaggio dei file inviati non riconosciuto!'},
     'The files you sent are in different languages!':
     {it: 'I file inviati sono in linguaggi diversi!'},
+    'Invalid archive!':
+    {it: 'Archivio non valido!'},
 
     // Stats page
     'Number of people who solved it:':
@@ -278,6 +294,8 @@ angular.module('cmsocial')
     {it: 'Descrizione troppo corta'},
     'Text is too short':
     {it: 'Testo troppo corto'},
+    'User already exists':
+    {it: 'Utente già esistente'},
 
     // Notifications
     'Welcome back':
@@ -304,6 +322,10 @@ angular.module('cmsocial')
     {it: 'Eliminazione completata'},
     'Connection error':
     {it: 'Errore di connessione'},
+    'Unauthorized':
+    {it: 'Non autorizzato'},
+    'Not found':
+    {it: 'Non trovato'},
 
     // Forum
     'Forums':
