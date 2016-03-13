@@ -30,6 +30,7 @@ from cms.db import SessionGen, User, Submission, File, Task, Participation, Test
 from cmsocial.db.test import Test, TestScore
 from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
 from cmsocial.db.socialuser import SocialUser
+from cmsocial.db.lesson import Lesson
 from cmsocial.db.location import Institute, Region, Province, City
 
 from cmscommon.datetime import make_timestamp, make_datetime
@@ -470,6 +471,34 @@ class APIHandler(object):
     def heartbeat_handler(self):
         if local.user is None:
             return 'Unauthorized'
+
+    def lessons_handler(self):
+        if local.data['action'] == 'list':
+            query = local.session.query(Lesson)\
+                .filter(Lesson.contest_id == self.CONTEST_ID)\
+                .filter(Lesson.access_level >= local.access_level)\
+                .order_by(desc(Lesson.id))
+            local.resp['lessons'] = []
+            for l in query:
+                data = dict()
+                data['title'] = l.title
+                data['tasks'] = []
+                for t in l.tasks:
+                    task = dict()
+                    task['num'] = t.num
+                    task['name'] = t.task.name
+                    task['title'] = t.task.title
+                    if local.user is not None:
+                        taskscore = local.session.query(TaskScore)\
+                            .filter(TaskScore.task_id == t.task.id)\
+                            .filter(TaskScore.user_id == local.user.id).first()
+                        if taskscore is not None:
+                            task['score'] = taskscore.score
+                    data['tasks'].append(task)
+                data['tasks'].sort(key=lambda x: x['num'])
+                local.resp['lessons'].append(data)
+        else:
+            return 'Bad Request'
 
     def task_handler(self):
         if local.data['action'] == 'list':

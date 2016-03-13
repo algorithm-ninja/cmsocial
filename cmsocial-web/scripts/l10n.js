@@ -168,6 +168,8 @@ angular.module('cmsocial')
     {it: 'Archivio problemi e quiz'},
     'All tasks':
     {it: 'Tutti i problemi'},
+    'Lessons':
+    {it: 'Lezioni'},
     'Task categories':
     {it: 'Problemi per categoria'},
     'Quizzes':
@@ -242,6 +244,8 @@ angular.module('cmsocial')
     {it: 'Ricerca per nome'},
     'no tasks found':
     {it: 'nessun problema trovato'},
+    'Exercise':
+    {it: 'Esercizio'},
 
     // Errors
     'Username is too short':
