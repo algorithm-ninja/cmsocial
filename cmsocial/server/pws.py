@@ -399,7 +399,7 @@ class APIHandler(object):
                 local.session.add(participation)
                 local.session.commit()
             except IntegrityError:
-                return 'signup.user_exists'
+                return 'User already exists'
         elif local.data['action'] == 'login':
             try:
                 username = local.data['username']
@@ -612,14 +612,14 @@ class APIHandler(object):
                     local.session.add(tag)
                     local.session.commit()
             except IntegrityError:
-                return 'tags.tag_exists'
+                return 'Tag already exists'
         elif local.data['action'] == 'delete':
             if local.access_level >= 4:
                 return 'Unauthorized'
             tag = local.session.query(Tag)\
                 .filter(Tag.name == local.data['tag']).first()
             if tag is None:
-                return 'tags.tag_doesnt_exist'
+                return 'Tag does not exist'
             elif tag.hidden is True and local.access_level > 0:
                 return 'Unauthorized'
             else:

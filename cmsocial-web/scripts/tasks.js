@@ -151,7 +151,7 @@ angular.module('cmsocial')
   })
   .controller('TasklistSkel', function($scope, $state, $stateParams,
       navbarManager) {
-    navbarManager.setActiveTab(0);
+    navbarManager.setActiveTab(1);
     $scope.search = {};
     $scope.pagination = {perPage: 15};
     $scope.reloadTasks = function() {
