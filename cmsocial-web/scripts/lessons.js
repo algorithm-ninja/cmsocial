@@ -3,8 +3,9 @@
 /* Lesson page */
 
 angular.module('cmsocial')
-  .controller('LessonsCtrl', function($scope, $state,
+  .controller('LessonsCtrl', function($scope, $state, navbarManager,
       $http, userManager, notificationHub, l10n, API_PREFIX) {
+    navbarManager.setActiveTab(2);
     $scope.getLessons = function() {
       var data = {
         'username': userManager.getUser().username,
