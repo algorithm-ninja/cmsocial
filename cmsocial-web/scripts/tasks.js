@@ -231,7 +231,16 @@ angular.module('cmsocial')
       })
       .success(function(data, status, headers, config) {
         if (data.success == 1) {
-          document.getElementById("testcase-download").href = "data:application/zip;base64," + data['zip'];
+          var input = document.getElementById("input-download");
+          input.href = API_PREFIX + "files/" + data['input'] + "/input.txt";
+          input.onclick = function() {
+             input.className = "btn btn-primary";
+          }
+          var output = document.getElementById("output-download");
+          output.href = API_PREFIX + "files/" + data['output'] + "/output.txt";
+          output.onclick = function() {
+             output.className = "btn btn-primary";
+          }
           $scope.data.done = true;
         } else {
           notificationHub.createAlert("warning", data.error, 5);

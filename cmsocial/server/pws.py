@@ -680,23 +680,9 @@ class APIHandler(object):
             local.user.social_user.help_count += 1
             local.session.commit()
 
-            # Start to prepare everything
-            input_file = self.file_cacher.get_file(testcase.input)
-            output_file = self.file_cacher.get_file(testcase.output)
-
-            # XXX: it would be better if there was a static method to create an "empty" Archive
-            dp = tempfile.mkdtemp()
-            fo, fp = tempfile.mkstemp(suffix=".zip")
-            copyfileobj(input_file, open(os.path.join(dp, "input.txt"), "w"))
-            copyfileobj(output_file, open(os.path.join(dp, "output.txt"), "w"))
-            os.remove(fp)  # because patool requires that fp doesn't exist
-            Archive.create_from_dir(dp, fp)
-            rmtree(dp)
-            archive = Archive(fp, delete_source=True)
-
-            local.resp['zip'] = b64encode(open(fp).read())
-
-            archive.cleanup()
+            # Return hashes
+            local.resp["input"] = testcase.input
+            local.resp["output"] = testcase.output
 
     def test_handler(self):
         if local.data['action'] == 'list':
