@@ -282,7 +282,7 @@ angular.module('cmsocial')
   })
   .controller('EventiPage', function($scope, $http, notificationHub) {
     $scope.ioi = [];
-    for (var i=2016; i>=2004; i--) {
+    for (var i=2017; i>=2004; i--) {
       $scope.ioi.push(i);
     }
   })
