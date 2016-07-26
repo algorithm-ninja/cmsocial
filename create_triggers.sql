@@ -115,9 +115,8 @@ BEGIN;
 	CREATE OR REPLACE FUNCTION on_user_insert() RETURNS TRIGGER AS $$
 	BEGIN
 		BEGIN
-		    -- TODO: fare meglio di un hard-coded 6
-			INSERT INTO social_users (id, access_level, score, registration_time, last_help_time, help_count)
-			VALUES (NEW.id, 6, 0, now(), '1970-01-01 00:00:00', 0);
+			INSERT INTO social_users (id, registration_time)
+			VALUES (NEW.id, now());
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;
@@ -141,5 +140,20 @@ BEGIN;
 	$$ LANGUAGE plpgsql;
 	DROP TRIGGER IF EXISTS task_insert ON tasks;
 	CREATE CONSTRAINT TRIGGER task_insert AFTER INSERT ON tasks DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_task_insert();
+
+	CREATE OR REPLACE FUNCTION on_participation_insert() RETURNS TRIGGER AS $$
+	BEGIN
+		BEGIN
+		    -- TODO: fare meglio di un hard-coded 6
+			INSERT INTO social_participations (id, access_level, score, last_help_time, help_count)
+			VALUES (NEW.id, 6, 0, '1970-01-01 00:00:00', 0);
+		EXCEPTION WHEN unique_violation THEN
+			RETURN NULL;
+		END;
+		RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	DROP TRIGGER IF EXISTS participation_insert ON participations;
+	CREATE CONSTRAINT TRIGGER participation_insert AFTER INSERT ON participations DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_participation_insert();
 COMMIT;
 

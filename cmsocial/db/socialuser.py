@@ -15,7 +15,7 @@ from sqlalchemy.types import Boolean, Integer, String, Unicode, DateTime, \
     Interval
 from sqlalchemy.orm import relationship, backref
 
-from cms.db import Contest
+from cms.db import Contest, Participation, User
 
 from cmsocial.db.base import Base
 from cmsocial.db.location import Institute
@@ -39,7 +39,7 @@ class SocialUser(Base):
     )
 
     user = relationship(
-        "User",
+        User,
         backref=backref(
             "social_user",
             uselist=False
@@ -80,6 +80,7 @@ class SocialUser(Base):
     # FIXME: the following causes a circular dependency
     # tasktags = relationship("TaskTag")
 
+
 class SocialParticipation:
     """Class to store stats and custom fields of a participation.
 
@@ -88,7 +89,7 @@ class SocialParticipation:
     # Participation.id == SocialParticipation.id
     id = Column(
         Integer,
-        ForeignKey("participations.id",
+        ForeignKey(Participation.id,
             onupdate="CASCADE",
             ondelete="CASCADE"
         ),
@@ -97,12 +98,13 @@ class SocialParticipation:
     )
 
     participation = relationship(
-        "Participation",
+        Participation,
         backref=backref(
             "social_participation",
             uselist=False
         )
     )
+
     # Access level
     access_level = Column(
         Integer,

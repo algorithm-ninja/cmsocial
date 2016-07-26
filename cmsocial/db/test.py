@@ -5,8 +5,7 @@ from sqlalchemy.types import Integer, Unicode, String
 from sqlalchemy.orm import relationship, backref
 
 from cmsocial.db.base import Base
-from cmsocial.db.socialuser import SocialUser
-
+from cms.db import Participation
 
 class Test(Base):
     """Class to store a test, like the first phase of the OII.
@@ -25,22 +24,6 @@ class Test(Base):
 
     # Maximum possible score
     max_score = Column(Integer, default=0)
-
-    # Contest the test belongs to
-    contest_id = Column(
-        Integer,
-        ForeignKey(Contest.id,
-                   onupdate="CASCADE", ondelete="CASCADE"),
-        nullable=False,
-        index=True)
-
-    contest = relationship(
-        Contest,
-        backref=backref(
-            "tests",
-            order_by=[id],
-            cascade="all, delete-orphan",
-            passive_deletes=True))
 
     def __init__(self):
         pass
@@ -112,7 +95,7 @@ class QuestionFile(Base):
 
 class TestScore(Base):
     __tablename__ = "testscores"
-    __table_args__ = (PrimaryKeyConstraint('test_id', 'user_id'),)
+    __table_args__ = (PrimaryKeyConstraint('test_id', 'participation_id'),)
 
     test_id = Column(
         Integer,
@@ -128,14 +111,16 @@ class TestScore(Base):
             cascade="all, delete-orphan",
             passive_deletes=True))
 
-    user_id = Column(
+    # I do not know what happens here, but if I refer to SocialParticipation.id
+    # then everything breaks down.
+    participation_id = Column(
         Integer,
-        ForeignKey(SocialUser.id,
+        ForeignKey(Participation.id,
                    onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
         index=True)
-    user = relationship(
-        SocialUser,
+    participation = relationship(
+        Participation,
         backref=backref(
             'test_scores',
             order_by=[test_id],
