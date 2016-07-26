@@ -1,15 +1,14 @@
 BEGIN;
 	CREATE OR REPLACE FUNCTION on_submission_insert() RETURNS TRIGGER AS $$
 	DECLARE
-		u_id integer;
+		p_id integer;
 	BEGIN
-		SELECT user_id INTO u_id
-		FROM participations
-		WHERE NEW.participation_id = participations.id;
+		SELECT participation_id INTO p_id
+		FROM participations;
 		
 		BEGIN
-			INSERT INTO taskscores (user_id, task_id, score, time)
-			VALUES (u_id, NEW.task_id, 0, 0);
+			INSERT INTO taskscores (participation_id, task_id, score, time)
+			VALUES (p_id, NEW.task_id, 0, 0);
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;
@@ -23,7 +22,7 @@ BEGIN;
 	<< vars >>
 	DECLARE
 		t_id integer;
-		u_id integer;
+		p_id integer;
 		nsubs integer;
 		nsubscorrect integer;
 		nusers integer;
@@ -33,9 +32,8 @@ BEGIN;
 		total_score integer;
 	BEGIN
 		-- Find task and user ID.
-		SELECT task_id, user_id INTO t_id, u_id
+		SELECT task_id, participation_id INTO t_id, p_id
 		FROM submissions
-		INNER JOIN participations ON participations.id = submissions.participation_id
 		WHERE submissions.id = NEW.submission_id;
 
 		-- Number of submissions
@@ -54,16 +52,14 @@ BEGIN;
 		SELECT max(score)::integer INTO max_score
 		FROM submission_results
 		INNER JOIN submissions ON submissions.id = submission_results.submission_id
-		INNER JOIN participations ON participations.id = participation_id
-		WHERE task_id = t_id AND user_id = u_id;
+		WHERE task_id = t_id AND participation_id = p_id;
 
 		-- Best time
 		WITH tc_info AS (
 			SELECT json_array_elements(score_details::json) AS s_details, submission_id AS id
 			FROM submission_results
 			INNER JOIN submissions ON submissions.id = submission_results.submission_id
-			INNER JOIN participations ON participations.id = participation_id
-			WHERE task_id = t_id AND user_id = u_id AND score::integer = 100
+			WHERE task_id = t_id AND participation_id = p_id AND score::integer = 100
 		)
 		SELECT min(s_time) INTO max_time
 		FROM (
@@ -86,7 +82,7 @@ BEGIN;
 
 		UPDATE taskscores
 		SET score = max_score, time = max_time
-		WHERE task_id = t_id AND user_id = u_id;
+		WHERE task_id = t_id AND participation_id = p_id;
 
 		-- Number of users that tried this task
 		SELECT count(id) INTO nusers
@@ -101,15 +97,15 @@ BEGIN;
 		-- Total score of user
 		SELECT sum(score) INTO total_score
 		FROM taskscores
-		WHERE user_id = u_id;
+		WHERE participation_id = p_id;
 
 		UPDATE social_tasks
 		SET nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
 		WHERE id = t_id;
 
-		UPDATE social_users
+		UPDATE social_participations
 		SET score = total_score
-		WHERE id = u_id;
+		WHERE id = p_id;
 		RETURN NEW;
 	END;
 	$$ LANGUAGE plpgsql;

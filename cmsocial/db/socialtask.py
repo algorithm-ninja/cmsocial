@@ -161,10 +161,10 @@ class TaskScore(Base):
         unique=True
     )
 
-    user_id = Column(
+    participation_id = Column(
         Integer,
         ForeignKey(
-            SocialUser.id,
+            SocialParticipation.id,
             onupdate="CASCADE",
             ondelete="CASCADE"
         ),
@@ -172,7 +172,7 @@ class TaskScore(Base):
         index=True
     )
 
-    user = relationship(
+    participation = relationship(
         SocialUser,
         backref=backref(
             'taskscores',

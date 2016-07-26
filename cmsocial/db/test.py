@@ -26,6 +26,22 @@ class Test(Base):
     # Maximum possible score
     max_score = Column(Integer, default=0)
 
+    # Contest the test belongs to
+    contest_id = Column(
+        Integer,
+        ForeignKey(Contest.id,
+                   onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+        index=True)
+
+    contest = relationship(
+        Contest,
+        backref=backref(
+            "tests",
+            order_by=[id],
+            cascade="all, delete-orphan",
+            passive_deletes=True))
+
     def __init__(self):
         pass
 

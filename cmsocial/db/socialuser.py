@@ -46,38 +46,11 @@ class SocialUser(Base):
         )
     )
 
-    # Access level
-    access_level = Column(
-        Integer,
-        nullable=False,
-        default=6
-    )
-
-    # Score
-    score = Column(
-        Integer,
-        nullable=False,
-        default=0
-    )
-
+    # Registration time
     registration_time = Column(
         DateTime,
         nullable=False,
         default=datetime.utcnow()
-    )
-
-    # The last time this user requested a testcase
-    last_help_time = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcfromtimestamp(0)
-    )
-
-    # Total number of helps received
-    help_count = Column(
-        Integer,
-        nullable=False,
-        default=0
     )
 
     # CUSTOM FIELDS:
@@ -106,3 +79,54 @@ class SocialUser(Base):
     # List of tasktags (not "approved" yet) created by this user
     # FIXME: the following causes a circular dependency
     # tasktags = relationship("TaskTag")
+
+class SocialParticipation:
+    """Class to store stats and custom fields of a participation.
+
+    """
+    __tablename__ = 'social_participations'
+    # Participation.id == SocialParticipation.id
+    id = Column(
+        Integer,
+        ForeignKey("participations.id",
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
+        primary_key=True,
+        unique=True
+    )
+
+    participation = relationship(
+        "Participation",
+        backref=backref(
+            "social_participation",
+            uselist=False
+        )
+    )
+    # Access level
+    access_level = Column(
+        Integer,
+        nullable=False,
+        default=6
+    )
+
+    # Score
+    score = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+
+    # The last time this user requested a testcase in this contest
+    last_help_time = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcfromtimestamp(0)
+    )
+
+    # Total number of helps received in this contest
+    help_count = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
