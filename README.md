@@ -5,6 +5,7 @@ A web application that builds a social coding platform upon [CMS](https://github
 
 ## Database creation instructions
 Creating the database is somewhat difficult. Here are the needed steps (after installing both cms and cmsocial):
+
     cmsInitDB
     python2 -c "import cmsocial.db; from cms.db import metadata; metadata.create_all()"
     psql -U cms < create_triggers.sql
