@@ -1,3 +1,3 @@
 sqlalchemy==0.9.10
 alembic==0.8.4
--e git://github.com/algorithm-ninja/cms.git@1681ee4841004190a293b290d93525a09acba9f3#egg=cms
+-e git://github.com/veluca93/cms.git@992523427af5737f7808a2bcd6de58c92dc56662#egg=cms
