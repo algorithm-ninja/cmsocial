@@ -141,6 +141,21 @@ BEGIN;
 	DROP TRIGGER IF EXISTS task_insert ON tasks;
 	CREATE CONSTRAINT TRIGGER task_insert AFTER INSERT ON tasks DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_task_insert();
 
+	CREATE OR REPLACE FUNCTION on_contest_insert() RETURNS TRIGGER AS $$
+	BEGIN
+		BEGIN
+		    -- TODO: fare meglio di un hard-coded 7
+			INSERT INTO social_contests (id, access_level, homepage)
+			VALUES (NEW.id, 7, 'views/homepage.html');
+		EXCEPTION WHEN unique_violation THEN
+			RETURN NULL;
+		END;
+		RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	DROP TRIGGER IF EXISTS contest_insert ON contestss;
+	CREATE CONSTRAINT TRIGGER contest_insert AFTER INSERT ON contests DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_contest_insert();
+
 	CREATE OR REPLACE FUNCTION on_participation_insert() RETURNS TRIGGER AS $$
 	BEGIN
 		BEGIN

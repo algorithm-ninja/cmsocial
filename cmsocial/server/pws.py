@@ -29,7 +29,7 @@ from cms.db import SessionGen, User, Submission, File, Task, Participation, Test
 
 from cmsocial.db.test import Test, TestScore
 from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
-from cmsocial.db.socialuser import SocialUser
+from cmsocial.db.socialuser import SocialUser, SocialParticipation
 from cmsocial.db.lesson import Lesson
 from cmsocial.db.location import Institute, Region, Province, City
 
@@ -95,7 +95,6 @@ class APIHandler(object):
         self.evaluation_service = parent.evaluation_service
         self.EMAIL_REG = re.compile(r'[^@]+@[^@]+\.[^@]+')
         self.USERNAME_REG = re.compile(r'^[A-Za-z0-9_\.]+$')
-        self.CONTEST_ID = 1
 
     @responder
     def __call__(self, environ, start_response):
@@ -139,14 +138,26 @@ class APIHandler(object):
             try:
                 username = data['username']
                 token = data['token']
-                local.participation = self.get_participation(username, token)
-                local.user = local.participation.user
+                try:
+                    local.contest_id = local.session.query(Contest)\
+                        .filter(Contest.name == data['contest']).first().id
+                except:
+                    local.contest_id = None
+                local.participation = self.get_participation(contest_id, username, token)
+                if local.participation is None:
+                    local.user = self.get_user(username, token)
+                else:
+                    local.user = local.participation.user
             except (BadRequest, KeyError):
                 local.user = None
             if local.user is None:
                 local.access_level = 7  # Access level of unlogged user
+                local.global_access_level = 7  # Access level of unlogged user
             else:
-                local.access_level = local.user.social_user.access_level
+                local.global_access_level = local.user.social_user.access_level
+                local.access_level = local.participation.social_participation.access_level
+                if local.access_level is None:
+                    local.access_level = local.global_access_level
 
             try:
                 local.data = data
@@ -176,11 +187,19 @@ class APIHandler(object):
         num = query.count()
         return (res, num)
 
-    def get_participation(self, username, token):
+    def get_participation(self, contest_id, username, token):
         try:
             return local.session.query(Participation)\
                 .join(User)\
-                .filter(Participation.contest_id == self.CONTEST_ID)\
+                .filter(Participation.contest_id == contest_id)\
+                .filter(User.username == username)\
+                .filter(User.password == token).first()
+        except UnicodeDecodeError:
+            return None
+
+    def get_user(self, username, token):
+        try:
+            return local.session.query(User)\
                 .filter(User.username == username)\
                 .filter(User.password == token).first()
         except UnicodeDecodeError:
@@ -234,7 +253,6 @@ class APIHandler(object):
         info['access_level'] = user.social_user.access_level
         info['join_date'] = make_timestamp(user.social_user.registration_time)
         info['mail_hash'] = self.hash(user.email, 'md5')
-        #info['post_count'] = len(user.posts)
         info['score'] = user.social_user.score
         info['institute'] = self.get_institute_info(user.social_user.institute_id)
         info['first_name'] = user.first_name
@@ -383,23 +401,36 @@ class APIHandler(object):
                 access_level=6,
                 registration_time=make_datetime()
             )
-            contest = local.session.query(Contest)\
-                .filter(Contest.id == self.CONTEST_ID)\
-                .first()
-            participation = Participation(
-                user=user,
-                contest=contest
-            )
             social_user.user = user
             social_user.institute_id = institute
 
             try:
                 local.session.add(user)
                 local.session.add(social_user)
-                local.session.add(participation)
                 local.session.commit()
             except IntegrityError:
                 return 'User already exists'
+        elif local.data['action'] == 'newparticipation':
+            if local.user is None:
+                return 'Unauthorized'
+            contest = local.session.query(Contest)\
+                .join(SocialContest)\
+                .filter(Contest.id == local.contest_id)\
+                .filter(SocialContest.access_level >= local.access_level)\
+                .first()
+            participation = Participation(
+                user=user,
+                contest=contest
+            )
+            social_participation = SocialParticipation()
+            social_participation.participation = participation
+
+            try:
+                local.session.add(participation)
+                local.session.add(social_participation)
+                local.session.commit()
+            except IntegrityError:
+                return 'Participation already exists'
         elif local.data['action'] == 'login':
             try:
                 username = local.data['username']
@@ -410,11 +441,10 @@ class APIHandler(object):
 
             token = self.hashpw(password)
 
-            participation = self.get_participation(username, token)
-            if participation is None:
+            user = self.get_user(username, token)
+            if user is None:
                 return 'login.error'
             else:
-                user = participation.user
                 local.resp['token'] = token
                 local.resp['user'] = self.get_user_info(user)
         elif local.data['action'] == 'get':
@@ -426,6 +456,8 @@ class APIHandler(object):
             # Append scores of tried tasks
             local.resp['scores'] = []
             for ts in user.social_user.taskscores:
+                if ts.contest_id != local.contest_id:
+                    continue
                 taskinfo = dict()
                 taskinfo['name'] = ts.task.name
                 taskinfo['score'] = ts.score
@@ -433,9 +465,11 @@ class APIHandler(object):
                 local.resp['scores'].append(taskinfo)
         elif local.data['action'] == 'list':
             query = local.session.query(User)\
-                .join(SocialUser)\
-                .order_by(desc(SocialUser.score))\
-                .order_by(desc(SocialUser.id))
+                .join(Participation)\
+                .join(SocialParticipation)\
+                .filter(Participation.contest_id == local.contest_id)\
+                .order_by(desc(SocialParticipation.score))\
+                .order_by(desc(User.id))
             if 'institute' in local.data:
                 query = query\
                     .filter(SocialUser.institute_id == local.data['institute'])
@@ -468,6 +502,30 @@ class APIHandler(object):
         else:
             return 'Bad request'
 
+    def contest_handler(self):
+        if local.data['action'] == 'list':
+            local.resp['contests'] = []
+            query = local.session.query(Contest)\
+                .join(SocialContest)\
+                .filter(SocialContest.access_level >= local.access_level)\
+                .order_by(Contest.description)
+            for c in query:
+                contest = dict()
+                contest['name'] = c.name
+                contest['description'] = c.description
+                local.resp['contests'].append(contest)
+        elif local.data['action'] == 'get':
+            contest = local.session.query(Contest)\
+                .filter(Contest.id == local.contest_id).first()
+            if contest is None:
+                return 'Not found'
+            local.resp['name'] = contest.name
+            local.resp['description'] = contest.description
+            local.resp['homepage'] = contest.social_contest.homepage
+            local.resp['languages'] = contest.languages.split(',')
+        else:
+            return 'Bad Request'
+
     def heartbeat_handler(self):
         if local.user is None:
             return 'Unauthorized'
@@ -475,7 +533,7 @@ class APIHandler(object):
     def lessons_handler(self):
         if local.data['action'] == 'list':
             query = local.session.query(Lesson)\
-                .filter(Lesson.contest_id == self.CONTEST_ID)\
+                .filter(Lesson.contest_id == local.contest_id)\
                 .filter(Lesson.access_level >= local.access_level)\
                 .order_by(desc(Lesson.id))
             local.resp['lessons'] = []
@@ -504,6 +562,7 @@ class APIHandler(object):
         if local.data['action'] == 'list':
             query = local.session.query(Task)\
                 .join(SocialTask)\
+                .filter(Task.contest_id == local.contest_id)\
                 .filter(SocialTask.access_level >= local.access_level)\
                 .order_by(desc(SocialTask.id))
 
@@ -530,10 +589,10 @@ class APIHandler(object):
                 task['name'] = t.name
                 task['title'] = t.title
 
-                if local.user is not None:
+                if local.participation is not None:
                     taskscore = local.session.query(TaskScore)\
                         .filter(TaskScore.task_id == t.id)\
-                        .filter(TaskScore.user_id == local.user.id).first()
+                        .filter(TaskScore.participation_id == local.participation.id).first()
 
                     if taskscore is not None:
                         task['score'] = taskscore.score
@@ -543,6 +602,7 @@ class APIHandler(object):
         elif local.data['action'] == 'get':
             t = local.session.query(Task)\
                 .join(SocialTask)\
+                .filter(Task.contest_id == local.contest_id)\
                 .filter(Task.name == local.data['name'])\
                 .filter(SocialTask.access_level >= local.access_level).first()
             if t is None:
@@ -667,11 +727,12 @@ class APIHandler(object):
             return 'Bad request'
 
     def help_handler(self):
-        if local.user is None:
+        if local.participation is None:
             return 'Unauthorized'
 
         task = local.session.query(Task)\
             .filter(Task.name == local.data['task'])\
+            .filter(Task.contest_id == local.contest_id)\
             .first()
 
         if task is None:
@@ -690,7 +751,7 @@ class APIHandler(object):
                 return 'Questo task non accetta richieste di testcase.'
 
             # Make sure that the user is allowed to request
-            if datetime.utcnow() - local.user.social_user.last_help_time < timedelta(hours=1):
+            if datetime.utcnow() - local.participation.social_participation.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
@@ -705,8 +766,8 @@ class APIHandler(object):
             logger.info("User \"%s\" requested testcase %s for task \"%s\"." % (
                 local.user.username, local.data['testcase'], local.data['task']
             ))
-            local.user.social_user.last_help_time = datetime.utcnow()
-            local.user.social_user.help_count += 1
+            local.participation.social_participation.last_help_time = datetime.utcnow()
+            local.participation.social_participation.help_count += 1
             local.session.commit()
 
             # Return hashes
@@ -717,6 +778,7 @@ class APIHandler(object):
         if local.data['action'] == 'list':
             tests = local.session.query(Test)\
                 .filter(Test.access_level >= local.access_level)\
+                .filter(Test.contest_id == local.contest_id)\
                 .order_by(Test.id).all()
             local.resp['tests'] = []
             for t in tests:
@@ -734,6 +796,7 @@ class APIHandler(object):
                 local.resp['tests'].append(test)
         elif local.data['action'] == 'get':
             test = local.session.query(Test)\
+                .filter(Test.contest_id == local.contest_id)\
                 .filter(Test.name == local.data['test_name'])\
                 .filter(Test.access_level >= local.access_level).first()
             if test is None:
@@ -754,6 +817,7 @@ class APIHandler(object):
                 local.resp['questions'].append(q)
         elif local.data['action'] == 'answer':
             test = local.session.query(Test)\
+                .filter(Test.contest_id == local.contest_id)\
                 .filter(Test.name == local.data['test_name'])\
                 .filter(Test.access_level >= local.access_level).first()
             if test is None:
@@ -796,15 +860,15 @@ class APIHandler(object):
                                 local.resp[i] = [q.wrong_score, 'wrong']
                     if local.resp.get(i, None) is None:
                         local.resp[i] = [q.score, 'correct']
-            if local.user is not None:
+            if local.participation is not None:
                 score = sum([local.resp[i][0] for i in
                              xrange(len(test.questions))])
                 testscore = local.session.query(TestScore)\
                     .filter(TestScore.test_id == test.id)\
-                    .filter(TestScore.user_id == local.user.id).first()
+                    .filter(TestScore.participation_id == local.participation.id).first()
                 if testscore is None:
                     testscore = TestScore(score=score)
-                    testscore.user = local.user.social_user
+                    testscore.participation = local.participation
                     testscore.test = test
                     local.session.add(testscore)
                 else:
@@ -817,10 +881,11 @@ class APIHandler(object):
     def submission_handler(self):
         if local.data['action'] == 'list':
             task = local.session.query(Task)\
+                .filter(Task.contest_id == local.contest_id)\
                 .filter(Task.name == local.data['task_name']).first()
             if task is None:
                 return 'Not found'
-            if local.user is None:
+            if local.participation is None:
                 return 'Unauthorized'
             subs = local.session.query(Submission)\
                 .filter(Submission.participation_id == local.participation.id)\
@@ -853,7 +918,7 @@ class APIHandler(object):
                 .filter(Submission.id == local.data['id']).first()
             if s is None:
                 return 'Not found'
-            if local.user is None or s.participation_id != local.participation.id:
+            if local.participation is None or s.participation_id != local.participation.id:
                 return 'Unauthorized'
             submission = dict()
             submission['id'] = s.id
@@ -894,7 +959,7 @@ class APIHandler(object):
                 submission['score_details'] = None
             local.resp = submission
         elif local.data['action'] == 'new':
-            if local.user is None:
+            if local.participation is None:
                 return 'Unauthorized'
             lastsub = local.session.query(Submission)\
                 .filter(Submission.participation_id == local.participation.id)\
@@ -906,9 +971,13 @@ class APIHandler(object):
             try:
                 task = local.session.query(Task)\
                     .join(SocialTask)\
+                    .filter(Task.contest_id == local.contest_id)\
                     .filter(Task.name == local.data['task_name'])\
                     .filter(SocialTask.access_level >= local.access_level).first()
             except KeyError:
+                return 'Not found'
+
+            if task is None:
                 return 'Not found'
 
             def decode_file(f):

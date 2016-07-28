@@ -53,6 +53,13 @@ class SocialUser(Base):
         default=datetime.utcnow()
     )
 
+    # Access level
+    access_level = Column(
+        Integer,
+        nullable=False,
+        default=6
+    )
+
     # CUSTOM FIELDS:
 
     # Institute
@@ -105,11 +112,10 @@ class SocialParticipation:
         )
     )
 
-    # Access level
+    # Access level for a given contest
     access_level = Column(
         Integer,
-        nullable=False,
-        default=6
+        nullable=True
     )
 
     # Score

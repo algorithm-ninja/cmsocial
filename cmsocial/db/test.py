@@ -5,7 +5,7 @@ from sqlalchemy.types import Integer, Unicode, String
 from sqlalchemy.orm import relationship, backref
 
 from cmsocial.db.base import Base
-from cms.db import Participation
+from cms.db import Participation, Contest
 
 class Test(Base):
     """Class to store a test, like the first phase of the OII.
@@ -24,6 +24,27 @@ class Test(Base):
 
     # Maximum possible score
     max_score = Column(Integer, default=0)
+
+    # "Contest" the test is part of
+    contest_id = Column(
+        Integer,
+        ForeignKey(
+            Contest.id,
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
+        nullable=False,
+        index=True
+    )
+
+    contest = relationship(
+        Contest,
+        backref=backref(
+            'tests',
+            cascade="all, delete-orphan",
+            passive_deletes=True
+        )
+    )
 
     def __init__(self):
         pass
