@@ -1,14 +1,9 @@
 BEGIN;
 	CREATE OR REPLACE FUNCTION on_submission_insert() RETURNS TRIGGER AS $$
-	DECLARE
-		p_id integer;
 	BEGIN
-		SELECT participation_id INTO p_id
-		FROM participations;
-		
 		BEGIN
 			INSERT INTO taskscores (participation_id, task_id, score, time)
-			VALUES (p_id, NEW.task_id, 0, 0);
+			VALUES (NEW.participation_id, NEW.task_id, 0, 0);
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;
@@ -115,8 +110,9 @@ BEGIN;
 	CREATE OR REPLACE FUNCTION on_user_insert() RETURNS TRIGGER AS $$
 	BEGIN
 		BEGIN
-			INSERT INTO social_users (id, registration_time)
-			VALUES (NEW.id, now());
+		    -- TODO: fare meglio di un hard-coded 6
+			INSERT INTO social_users (id, registration_time, access_level)
+			VALUES (NEW.id, now(), 6);
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;
@@ -153,15 +149,14 @@ BEGIN;
 		RETURN NEW;
 	END;
 	$$ LANGUAGE plpgsql;
-	DROP TRIGGER IF EXISTS contest_insert ON contestss;
+	DROP TRIGGER IF EXISTS contest_insert ON contests;
 	CREATE CONSTRAINT TRIGGER contest_insert AFTER INSERT ON contests DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_contest_insert();
 
 	CREATE OR REPLACE FUNCTION on_participation_insert() RETURNS TRIGGER AS $$
 	BEGIN
 		BEGIN
-		    -- TODO: fare meglio di un hard-coded 6
 			INSERT INTO social_participations (id, access_level, score, last_help_time, help_count)
-			VALUES (NEW.id, 6, 0, '1970-01-01 00:00:00', 0);
+			VALUES (NEW.id, NULL, 0, '1970-01-01 00:00:00', 0);
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;

@@ -22,11 +22,12 @@
 
 angular.module('cmsocial')
   .controller('TestsCtrl', function($scope, $http, notificationHub,
-        navbarManager, userManager, l10n, API_PREFIX) {
+        navbarManager, userManager, l10n, contestManager, API_PREFIX) {
     navbarManager.setActiveTab(0);
     $http.post(API_PREFIX + 'test', {
         "username": userManager.getUser().username,
         "token": userManager.getUser().token,
+        'contest': contestManager.getContest().name,
         "action": "list"
       })
       .success(function(data, status, headers, config) {
@@ -49,7 +50,8 @@ angular.module('cmsocial')
       });
   })
   .controller('TestpageCtrl', function($scope, $stateParams, $http,
-        $sce, notificationHub, navbarManager, userManager, l10n, API_PREFIX) {
+        $sce, notificationHub, navbarManager, userManager, l10n, contestManager,
+        API_PREFIX) {
     navbarManager.setActiveTab(0);
     $scope.score = function() {
       var data = [];
@@ -73,6 +75,7 @@ angular.module('cmsocial')
         "token": userManager.getUser().token,
         "answers": data,
         "action": "answer",
+        'contest': contestManager.getContest().name,
         "test_name": $stateParams.testName
       })
       .success(function(data, status, headers, config) {
@@ -103,6 +106,7 @@ angular.module('cmsocial')
       "username": userManager.getUser().username,
       "token": userManager.getUser().token,
       "action": "get",
+      'contest': contestManager.getContest().name,
       "test_name": $stateParams.testName
     })
     .success(function(data, status, headers, config) {

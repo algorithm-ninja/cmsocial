@@ -4,6 +4,7 @@
 # and to make database creation work.
 from cmsocial.db.socialtask import TaskTag, SocialTask
 from cmsocial.db.socialuser import SocialUser, SocialParticipation
+from cmsocial.db.socialcontest import SocialContest
 from cmsocial.db.lesson import Lesson, LessonTask
 from cmsocial.db.test import Test, TestQuestion, QuestionFile, TestScore
 from cmsocial.db.location import Region, Province, City, Institute

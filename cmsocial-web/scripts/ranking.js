@@ -26,7 +26,7 @@ angular.module('cmsocial')
     $scope.pagination = {perPage: 20};
   })
   .controller('RankingCtrl', function($scope, $stateParams, $state,
-      $http, userManager, notificationHub, l10n, API_PREFIX) {
+      $http, userManager, notificationHub, l10n, contestManager, API_PREFIX) {
     $scope.pagination.current = +$stateParams.pageNum;
     $scope.getUsers = function() {
       var data = {
@@ -34,6 +34,7 @@ angular.module('cmsocial')
         'last':     $scope.pagination.perPage * $scope.pagination.current,
         'username': userManager.getUser().username,
         'token':    userManager.getUser().token,
+        'contest':  contestManager.getContest().name,
         'action':   'list'
       };
       $http.post(API_PREFIX + 'user',

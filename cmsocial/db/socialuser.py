@@ -88,7 +88,7 @@ class SocialUser(Base):
     # tasktags = relationship("TaskTag")
 
 
-class SocialParticipation:
+class SocialParticipation(Base):
     """Class to store stats and custom fields of a participation.
 
     """

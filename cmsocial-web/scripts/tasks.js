@@ -4,7 +4,7 @@
 
 angular.module('cmsocial')
   .service('subsDatabase', function($http, $rootScope, $timeout,
-      notificationHub, userManager, l10n, API_PREFIX) {
+      notificationHub, userManager, contestManager, l10n, API_PREFIX) {
     $rootScope.submissions = {};
 
     var self = {};
@@ -20,6 +20,7 @@ angular.module('cmsocial')
         'username': userManager.getUser().username,
         'token': userManager.getUser().token,
         'action': 'list',
+        'contest': contestManager.getContest().name,
         'task_name': name
       })
       .success(function(data, status, headers, config) {
@@ -104,6 +105,7 @@ angular.module('cmsocial')
       $http.post(API_PREFIX + 'submission', {
         "username": userManager.getUser().username,
         "token": userManager.getUser().token,
+        'contest': contestManager.getContest().name,
         "action": "details",
         "id": id
       })
@@ -130,6 +132,7 @@ angular.module('cmsocial')
               'username': userManager.getUser().username,
               'token': userManager.getUser().token,
               'action': 'details',
+              'contest': contestManager.getContest().name,
               'id': i
             })
             .success(function(data, status, headers, config) {
@@ -168,7 +171,7 @@ angular.module('cmsocial')
     };
   })
   .controller('TasklistPage', function($scope, $stateParams, $state, $http,
-      notificationHub, userManager, l10n, API_PREFIX) {
+      notificationHub, userManager, l10n, contestManager, API_PREFIX) {
     $scope.pagination.current = +$stateParams.pageNum;
     $scope.search.q = $stateParams.q;
     $scope.search.tag_string = "";
@@ -183,6 +186,7 @@ angular.module('cmsocial')
         'last':     $scope.pagination.perPage * $scope.pagination.current,
         'username': userManager.getUser().username,
         'token':    userManager.getUser().token,
+        'contest':  contestManager.getContest().name,
         'action':   'list'
       })
       .success(function(data, status, headers, config) {

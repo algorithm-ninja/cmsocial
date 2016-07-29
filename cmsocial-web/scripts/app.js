@@ -20,7 +20,8 @@ angular
     'ui.ace',
     'angular-md5',
   ])
-  .constant('API_PREFIX', '[[api_prefix]]')
+  .constant('BASE_URL', '[[base_url]]')
+  .constant('API_PREFIX', '[[base_url]]api/')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
     $locationProvider.html5Mode(false)//.hashPrefix('!')
     // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
@@ -35,7 +36,7 @@ angular
     $stateProvider
       .state('overview', {
         url: '/overview',
-        templateUrl: 'views/homepage.html',
+        templateUrl: 'views/homepage.html', // TODO: use contest.homepage
         controller: 'HomepageCtrl'
       })
       .state('sso', {
@@ -131,9 +132,11 @@ angular
         controller: 'TestpageCtrl'
       })
   })
-  .controller('HomepageCtrl', function($scope, navbarManager, userManager) {
+  .controller('HomepageCtrl', function($scope, navbarManager, userManager, contestManager) {
     $scope.me = userManager;
+    $scope.cm = contestManager;
     navbarManager.setActiveTab(0);
+    console.log(contestManager.getContest());
   })
   .filter('repext', function() {
     return function(input) {
