@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import argparse
 import ConfigParser
+import argparse
 import hashlib
 import hmac
 import io
@@ -9,12 +9,17 @@ import json
 import logging
 import mimetypes
 import os
+import pkg_resources
 import re
+import requests
+import smtplib
 import tempfile
 import traceback
 import urllib
+
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
 from shutil import copyfileobj, rmtree
 
 import gevent
@@ -270,6 +275,36 @@ class APIHandler(object):
 
     def hashpw(self, pw):
         return self.hash(pw + config.get("core", "secret"))
+
+    def gencode(self):
+        from string import ascii_lowercase, ascii_uppercase, digits
+        from random import choice
+
+        return ''.join([choice(ascii_lowercase + ascii_uppercase + digits) for i in range(20)])
+
+    def send_mail(self, to, subject, body):
+        server = smtplib.SMTP(self.args.mail_server)
+        server.ehlo()
+        server.starttls()
+        server.login(self.args.mail_username, self.args.mail_password)
+
+        msg = MIMEText(body)
+        msg['Subject'] = subject
+        msg['From'] = '%s <%s>' % (self.args.site_name, self.args.mail_from)
+        msg['To'] = to
+
+        sent = False
+        nretries = 0
+        while sent is False:
+            try:
+                server.sendmail(self.args.mail_from, [email], msg.as_string())
+                sent = True
+            except TimeoutError:
+                nretries += 1
+                if nretries > 10:
+                    break
+
+        return sent
 
     def get_institute_info(self, institute_id):
         info = dict()
@@ -599,17 +634,17 @@ class APIHandler(object):
             if local.user is None:
                 return 'Unauthorized'
             if 'institute' in local.data and \
-               local.data['institute'] is not None:
+                local.data['institute'] is not None:
                 local.user.institute_id = int(local.data['institute'])
             if 'email' in local.data and \
-               local.data['email'] != '' and \
-               local.user.email != local.data['email']:
+                local.data['email'] != '' and \
+                local.user.email != local.data['email']:
                 err = self.check_email(local.data['email'])
                 if err is not None:
                     return err
                 local.user.email = local.data['email']
             if 'old_password' in local.data and \
-               local.data['old_password'] != '':
+                local.data['old_password'] != '':
                 old_token = self.hashpw(local.data['old_password'])
                 if local.user.password != old_token:
                     return 'Wrong password'
@@ -619,6 +654,44 @@ class APIHandler(object):
                 local.user.password = new_token
                 local.resp['token'] = new_token
             local.session.commit()
+        elif local.data['action'] == 'recover':
+            user = local.session.query(User)\
+                .filter(User.email == local.data['email'])\
+                .first()
+
+            if user is None:
+                return 'No such user'
+
+            if len(local.data['code']) > 0:
+                if local.data['code'] == user.social_user.recover_code:
+                    user.social_user.recover_code = None
+
+                    # Generate new password an mail it
+                    tmp_password = self.gencode()
+                    user.password = self.hashpw(tmp_password)
+                    local.session.commit()
+
+                    # XXX: it could return False
+                    self.send_mail(user.email, "Password reset", "New password: %s" % tmp_password)
+                    del tmp_password
+
+                    local.resp['message'] = 'Your new password was mailed to you'
+                else:
+                    return 'Wrong code'
+            else:
+                # Check if enough time has passed
+                if datetime.utcnow() - user.social_user.last_recover < timedelta(days=1):
+                    local.resp['message'] = 'You should already have received an email, if not, try tomorrow'
+                else:
+                    # Generate new code and mail it
+                    user.social_user.recover_code = self.gencode()
+                    user.social_user.last_recover = datetime.utcnow()
+                    local.session.commit()
+
+                    # XXX: it could return False
+                    self.send_mail(user.email, "Code for password reset", "Code: %s" % user.social_user.recover_code)
+
+                    local.resp['message'] = 'A code was sent, check your inbox'
         else:
             return 'Bad request'
 
@@ -1257,7 +1330,17 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument("-s", "--shard", action="store", type=int, default=0,
-                        help="Shard number (default: 0)")
+        help="Shard number (default: 0)")
+    parser.add_argument("--mail-server", action="store", type=str,
+        help="Mail server (for example: my-server.com:25)")
+    parser.add_argument("--mail-username", action="store", type=str,
+        help="Username used to login")
+    parser.add_argument("--mail-password", action="store", type=str,
+        help="Password used to login")
+    parser.add_argument("--mail-from", action="store", type=str,
+        help="Email address to use when sending emails")
+    parser.add_argument("--site-name", action="store", type=str,
+        help="Name of this website")
 
     args, unknown = parser.parse_known_args()
 

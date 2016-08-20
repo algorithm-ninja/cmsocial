@@ -111,6 +111,11 @@ angular
         templateUrl: 'views/signup.html',
         controller: 'SignupCtrl'
       })
+      .state('forgot-account', {
+        url: '/forgot-account',
+        templateUrl: 'views/forgot-account.html',
+        controller: 'ForgotAccountCtrl'
+      })
       .state('help', {
         url: '/help/{taskName}',
         templateUrl: 'views/help.html',

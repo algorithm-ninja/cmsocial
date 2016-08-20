@@ -60,6 +60,19 @@ class SocialUser(Base):
         default=6
     )
 
+    # Recover code (for password reset)
+    recover_code = Column(
+        String,
+        nullable=True
+    )
+
+    # The last time this user requested a new password
+    last_recover = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcfromtimestamp(0)
+    )
+
     # CUSTOM FIELDS:
 
     # Institute

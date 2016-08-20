@@ -67,6 +67,36 @@ angular.module('cmsocial')
       }
     };
   })
+  .controller('ForgotAccountCtrl', function($scope, $http, notificationHub,
+        l10n, navbarManager, API_PREFIX) {
+    navbarManager.setActiveTab(0);
+    $scope.user = {'recoverEmail': '', 'recoverCode': ''};
+
+    $scope.recover = function() {
+      $("#loading-indicator").show();
+
+      $http.post(API_PREFIX + 'user', {
+        'action': 'recover',
+        'email': $scope.user.recoverEmail,
+        'code': $scope.user.recoverCode,
+      }).then(function(ctx) {
+        if (ctx.data.success === 1) {
+          notificationHub.createAlert('success', l10n.get(ctx.data.message), 10);
+
+          $("#code-div").slideDown('slow');
+          $("#recover-button").text(l10n.get("Confirm code"));
+          $("#recover-code").focus();
+        } else {
+          notificationHub.createAlert('danger', l10n.get(ctx.data.error), 2);
+        }
+
+        $("#loading-indicator").hide();
+      }, function(ctx) {
+        notificationHub.serverError(ctx.status);
+        $("#loading-indicator").hide();
+      });
+    };
+  })
   .controller('SignCtrl', function($scope, $http, $state, userManager,
         notificationHub, l10n, contestManager, API_PREFIX) {
     $scope.user = {'username': '', 'password': ''};
