@@ -23,6 +23,12 @@ angular.module('cmsocial')
   .controller('SignupCtrl', function ($scope, $http, $state, md5,
       notificationHub, navbarManager, API_PREFIX) {
     navbarManager.setActiveTab(5);
+
+    if ([[ask_institute]]) {
+      // Only if specifying the institute is mandatory
+      $("#institute-form").show();
+    }
+
     $(".avatar")
       .load(function() {
         $(".avatar-loader").hide();
@@ -92,18 +98,21 @@ angular.module('cmsocial')
       } else if ($scope.isBad['email2']) {
         $scope.signupform.email2.$dirty = true;
         $("#email2").focus(); return;
-      } else if ($scope.isBad['region']) {
-        $scope.signupform.region.$dirty = true;
-        $("#region").focus(); return;
-      } else if ($scope.isBad['province']) {
-        $scope.signupform.province.$dirty = true;
-        $("#province").focus(); return;
-      } else if ($scope.isBad['city']) {
-        $scope.signupform.city.$dirty = true;
-        $("#city").focus(); return;
-      } else if ($scope.isBad['institute']) {
-        $scope.signupform.institute.$dirty = true;
-        $("#institute").focus(); return;
+      } else if ([[ask_institute]]) {
+        // Only if specifying the institute is mandatory
+        if ($scope.isBad['region']) {
+          $scope.signupform.region.$dirty = true;
+          $("#region").focus(); return;
+        } else if ($scope.isBad['province']) {
+          $scope.signupform.province.$dirty = true;
+          $("#province").focus(); return;
+        } else if ($scope.isBad['city']) {
+          $scope.signupform.city.$dirty = true;
+          $("#city").focus(); return;
+        } else if ($scope.isBad['institute']) {
+          $scope.signupform.institute.$dirty = true;
+          $("#institute").focus(); return;
+        }
       }
       var data = $scope.user;
       data['action'] = 'new';

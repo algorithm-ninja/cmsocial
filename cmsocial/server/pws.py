@@ -358,7 +358,6 @@ class APIHandler(object):
                 email = local.data['email']
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
-                institute = int(local.data['institute'])
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
@@ -390,8 +389,11 @@ class APIHandler(object):
                 user=user,
                 contest=contest
             )
+
             social_user.user = user
-            social_user.institute_id = institute
+
+            if 'institute' in local.data:
+                social_user.institute_id = int(local.data['institute'])
 
             try:
                 local.session.add(user)
