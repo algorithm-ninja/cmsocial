@@ -40,12 +40,10 @@ angular.module('cmsocial')
     };
   })
   .controller('NavbarCtrl', function($scope, $location, userManager,
-        navbarManager, contestManager) {
+        navbarManager) {
     $('.signin-form input').click(function(e) {
       e.stopPropagation();
     });
     $scope.me = userManager;
-    $scope.cm = contestManager;
-    $scope.participate = contestManager.participate;
     $scope.isActiveTab = navbarManager.isActiveTab;
   });

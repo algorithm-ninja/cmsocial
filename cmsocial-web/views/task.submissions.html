@@ -98,7 +98,7 @@
           </a>
           <ul class="dropdown-menu" role="menu">
             <li ng-repeat="file in sub.files">
-              <a href="[[base_url]]api/files/{{file['digest']}}/{{file['name']}}">{{file['name']}}</a>
+              <a href="[[api_prefix]]/files/{{file['digest']}}/{{file['name']}}">{{file['name']}}</a>
             </li>
           </ul>
         </div>

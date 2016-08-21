@@ -17,11 +17,12 @@ from sqlalchemy.types import Boolean, Integer, Float, String, Unicode, \
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.ext.orderinglist import ordering_list
 
-from cms.db import Task, Participation
+from cms.db import Task
 from cms.db.smartmappedcollection import smart_mapped_collection
 from cms import SCORE_MODE_MAX, SCORE_MODE_MAX_TOKENED_LAST
 
 from cmsocial.db.base import Base
+from cmsocial.db.socialuser import SocialUser
 
 
 class SocialTask(Base):
@@ -151,7 +152,7 @@ class TaskScore(Base):
     __tablename__ = 'taskscores'
 
     __table_args__ = (
-        UniqueConstraint('participation_id', 'task_id'),
+        UniqueConstraint('user_id', 'task_id'),
     )
 
     id = Column(
@@ -160,12 +161,10 @@ class TaskScore(Base):
         unique=True
     )
 
-    # I do not know what happens here, but if I refer to SocialParticipation.id
-    # then everything breaks down.
-    participation_id = Column(
+    user_id = Column(
         Integer,
         ForeignKey(
-            Participation.id,
+            SocialUser.id,
             onupdate="CASCADE",
             ondelete="CASCADE"
         ),
@@ -173,8 +172,8 @@ class TaskScore(Base):
         index=True
     )
 
-    participation = relationship(
-        Participation,
+    user = relationship(
+        SocialUser,
         backref=backref(
             'taskscores',
             cascade="all, delete-orphan",

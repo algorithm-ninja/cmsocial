@@ -4,13 +4,12 @@
 
 angular.module('cmsocial')
   .controller('LessonsCtrl', function($scope, $state, navbarManager,
-      $http, userManager, notificationHub, l10n, contestManager, API_PREFIX) {
+      $http, userManager, notificationHub, l10n, API_PREFIX) {
     navbarManager.setActiveTab(2);
     $scope.getLessons = function() {
       var data = {
         'username': userManager.getUser().username,
         'token':    userManager.getUser().token,
-        'contest': contestManager.getContest().name,
         'action':   'list'
       };
       $http.post(API_PREFIX + 'lessons',

@@ -39,11 +39,6 @@
         <li ng-class="{active: isActiveTab(5)}" ng-if="!me.isLogged()">
           <a ui-sref="signup"><i class="fa fa-pencil fa-lg"></i> {{'Sign up' | l10n}}</a>
         </li>
-        <li ng-if="me.isLogged() && !cm.hasParticipation()">
-          <p class="navbar-btn">
-            <a ng-click="participate()" class="btn btn-success"><i class="fa fa-sign-in"></i>{{'Enter the contest' | l10n}}</a>
-          </p>
-        </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li ng-if="!me.isLogged()" class="dropdown">

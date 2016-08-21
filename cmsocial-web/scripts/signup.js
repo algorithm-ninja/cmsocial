@@ -21,7 +21,7 @@
 
 angular.module('cmsocial')
   .controller('SignupCtrl', function ($scope, $http, $state, md5,
-      notificationHub, navbarManager, contestManager, API_PREFIX) {
+      notificationHub, navbarManager, API_PREFIX) {
     navbarManager.setActiveTab(5);
     $(".avatar")
       .load(function() {
@@ -44,10 +44,10 @@ angular.module('cmsocial')
       'password': true,
       'password2': true,
       'email2': true,
-      /*'region': true,
+      'region': true,
       'province': true,
       'city': true,
-      'institute': true*/
+      'institute': true
     };
     $scope.user = {
       'username': '',
@@ -60,10 +60,10 @@ angular.module('cmsocial')
       'password':  'Password\'s too short',
       'password2': 'Passwords don\'t match',
       'email2':    'E-mails don\'t match',
-      /*'region':    'You must specify a region',
+      'region':    'You must specify a region',
       'province':  'You must specify a province',
       'city':      'You must specify a city',
-      'institute': 'You must specify an institute'*/
+      'institute': 'You must specify an institute'
     };
     $http.post(API_PREFIX + 'location', {
       'action': 'listregions'
@@ -92,7 +92,7 @@ angular.module('cmsocial')
       } else if ($scope.isBad['email2']) {
         $scope.signupform.email2.$dirty = true;
         $("#email2").focus(); return;
-      } /*else if ($scope.isBad['region']) {
+      } else if ($scope.isBad['region']) {
         $scope.signupform.region.$dirty = true;
         $("#region").focus(); return;
       } else if ($scope.isBad['province']) {
@@ -104,10 +104,8 @@ angular.module('cmsocial')
       } else if ($scope.isBad['institute']) {
         $scope.signupform.institute.$dirty = true;
         $("#institute").focus(); return;
-      }*/
+      }
       var data = $scope.user;
-      if (contestManager.hasContest())
-        data['contest'] = contestManager.getContest().name;
       data['action'] = 'new';
       $http.post(API_PREFIX + 'user', data)
         .success(function(data, status, headers, config) {
@@ -148,7 +146,7 @@ angular.module('cmsocial')
     $scope.checkPassword = function() {
       $scope.isBad['password'] = ($scope.user.password.length < 5);
     };
-    /*$scope.checkRegion = function() {
+    $scope.checkRegion = function() {
       $scope.isBad['region'] = false;
       $http.post(API_PREFIX + 'location', {
         'action': 'listprovinces',
@@ -203,7 +201,7 @@ angular.module('cmsocial')
       $scope.isBad['institute'] = true;
       $scope.user.institute = undefined;
       $scope.signupform.institute.$dirty = false;
-    };*/
+    };
     $scope.matchPassword = function() {
       $scope.isBad['password2'] = ($scope.user.password !== $scope.user.password2);
     };
