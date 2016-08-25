@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import argparse
 import os
 import io
 import re
@@ -1040,8 +1041,8 @@ def main():
         description="PracticeWebServer",
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument("shard", action="store", type=int, nargs=1, default=0,
-        help="Shard number")
+    parser.add_argument("-s", "--shard", action="store", type=int, default=0,
+        help="Shard number (default: 0)")
 
     args = parser.parse_args()
 
