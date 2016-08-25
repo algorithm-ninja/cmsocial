@@ -125,6 +125,11 @@ angular
         templateUrl: 'views/tests.html',
         controller: 'TestsCtrl'
       })
+      .state('lessons', {
+        url: '/lessons',
+        templateUrl: 'views/lessons.html',
+        controller: 'LessonsCtrl'
+      })
       .state('test', {
         url: '/test/{testName}',
         templateUrl: 'views/testpage.html',

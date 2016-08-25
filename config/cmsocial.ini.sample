@@ -4,6 +4,7 @@ secret = 485e77da5c9eff017bab1ce8ce3fc0
 api_prefix = api/
 title = CMSocial
 top_left_name = CMSocial
+ask_institute = 0
 analytics = UA-XXXXX-X
 
 [forum]

@@ -115,5 +115,35 @@ BEGIN;
 	$$ LANGUAGE plpgsql;
 	DROP TRIGGER IF EXISTS submission_scored ON submission_results;
 	CREATE TRIGGER submission_scored AFTER UPDATE OR INSERT ON submission_results FOR EACH ROW WHEN (NEW.score IS NOT NULL) EXECUTE PROCEDURE on_submission_scored();
-ROLLBACK;
+
+	CREATE OR REPLACE FUNCTION on_user_insert() RETURNS TRIGGER AS $$
+	BEGIN
+		BEGIN
+		    -- TODO: fare meglio di un hard-coded 6
+			INSERT INTO social_users (id, access_level, score, registration_time, last_help_time, help_count)
+			VALUES (NEW.id, 6, 0, now(), '1970-01-01 00:00:00', 0);
+		EXCEPTION WHEN unique_violation THEN
+			RETURN NULL;
+		END;
+		RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	DROP TRIGGER IF EXISTS user_insert ON users;
+	CREATE CONSTRAINT TRIGGER user_insert AFTER INSERT ON users DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_user_insert();
+
+	CREATE OR REPLACE FUNCTION on_task_insert() RETURNS TRIGGER AS $$
+	BEGIN
+		BEGIN
+		    -- TODO: fare meglio di un hard-coded 7
+			INSERT INTO social_tasks (id, access_level, help_available, nsubs, nsubscorrect, nusers, nuserscorrect)
+			VALUES (NEW.id, 7, 'f', 0, 0, 0, 0);
+		EXCEPTION WHEN unique_violation THEN
+			RETURN NULL;
+		END;
+		RETURN NEW;
+	END;
+	$$ LANGUAGE plpgsql;
+	DROP TRIGGER IF EXISTS task_insert ON tasks;
+	CREATE CONSTRAINT TRIGGER task_insert AFTER INSERT ON tasks DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_task_insert();
+COMMIT;
 

@@ -30,6 +30,7 @@ from cms.db import SessionGen, User, Submission, File, Task, Participation, Test
 from cmsocial.db.test import Test, TestScore
 from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
 from cmsocial.db.socialuser import SocialUser
+from cmsocial.db.lesson import Lesson
 from cmsocial.db.location import Institute, Region, Province, City
 
 from cmscommon.datetime import make_timestamp, make_datetime
@@ -357,7 +358,6 @@ class APIHandler(object):
                 email = local.data['email']
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
-                institute = int(local.data['institute'])
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
@@ -389,8 +389,11 @@ class APIHandler(object):
                 user=user,
                 contest=contest
             )
+
             social_user.user = user
-            social_user.institute_id = institute
+
+            if 'institute' in local.data:
+                social_user.institute_id = int(local.data['institute'])
 
             try:
                 local.session.add(user)
@@ -398,7 +401,7 @@ class APIHandler(object):
                 local.session.add(participation)
                 local.session.commit()
             except IntegrityError:
-                return 'signup.user_exists'
+                return 'User already exists'
         elif local.data['action'] == 'login':
             try:
                 username = local.data['username']
@@ -470,6 +473,34 @@ class APIHandler(object):
     def heartbeat_handler(self):
         if local.user is None:
             return 'Unauthorized'
+
+    def lessons_handler(self):
+        if local.data['action'] == 'list':
+            query = local.session.query(Lesson)\
+                .filter(Lesson.contest_id == self.CONTEST_ID)\
+                .filter(Lesson.access_level >= local.access_level)\
+                .order_by(desc(Lesson.id))
+            local.resp['lessons'] = []
+            for l in query:
+                data = dict()
+                data['title'] = l.title
+                data['tasks'] = []
+                for t in l.tasks:
+                    task = dict()
+                    task['num'] = t.num
+                    task['name'] = t.task.name
+                    task['title'] = t.task.title
+                    if local.user is not None:
+                        taskscore = local.session.query(TaskScore)\
+                            .filter(TaskScore.task_id == t.task.id)\
+                            .filter(TaskScore.user_id == local.user.id).first()
+                        if taskscore is not None:
+                            task['score'] = taskscore.score
+                    data['tasks'].append(task)
+                data['tasks'].sort(key=lambda x: x['num'])
+                local.resp['lessons'].append(data)
+        else:
+            return 'Bad Request'
 
     def task_handler(self):
         if local.data['action'] == 'list':
@@ -583,14 +614,14 @@ class APIHandler(object):
                     local.session.add(tag)
                     local.session.commit()
             except IntegrityError:
-                return 'tags.tag_exists'
+                return 'Tag already exists'
         elif local.data['action'] == 'delete':
             if local.access_level >= 4:
                 return 'Unauthorized'
             tag = local.session.query(Tag)\
                 .filter(Tag.name == local.data['tag']).first()
             if tag is None:
-                return 'tags.tag_doesnt_exist'
+                return 'Tag does not exist'
             elif tag.hidden is True and local.access_level > 0:
                 return 'Unauthorized'
             else:
@@ -680,23 +711,9 @@ class APIHandler(object):
             local.user.social_user.help_count += 1
             local.session.commit()
 
-            # Start to prepare everything
-            input_file = self.file_cacher.get_file(testcase.input)
-            output_file = self.file_cacher.get_file(testcase.output)
-
-            # XXX: it would be better if there was a static method to create an "empty" Archive
-            dp = tempfile.mkdtemp()
-            fo, fp = tempfile.mkstemp(suffix=".zip")
-            copyfileobj(input_file, open(os.path.join(dp, "input.txt"), "w"))
-            copyfileobj(output_file, open(os.path.join(dp, "output.txt"), "w"))
-            os.remove(fp)  # because patool requires that fp doesn't exist
-            Archive.create_from_dir(dp, fp)
-            rmtree(dp)
-            archive = Archive(fp, delete_source=True)
-
-            local.resp['zip'] = b64encode(open(fp).read())
-
-            archive.cleanup()
+            # Return hashes
+            local.resp["input"] = testcase.input
+            local.resp["output"] = testcase.output
 
     def test_handler(self):
         if local.data['action'] == 'list':
