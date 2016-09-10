@@ -356,7 +356,7 @@ class APIHandler(object):
                 email = local.data['email']
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
-                recaptcha_response = local.data['g-recaptcha-response']
+                recaptcha_response = local.data['recaptcha_response']
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
