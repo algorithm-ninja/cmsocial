@@ -9,6 +9,8 @@ title = CMSocial
 top_left_name = CMSocial
 ask_institute = 0
 analytics = UA-XXXXX-X
+recaptcha_public_key = 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
+recaptcha_secret_key = 6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
 
 [forum]
 # The url of a functioning Discourse instance
