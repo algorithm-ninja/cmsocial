@@ -17,6 +17,7 @@
     "angular-animate": "^1.4.8",
     "angular-cookies": "^1.4.8",
     "angular-md5": "^0.1.10",
+    "angular-recaptcha": "^3.0.4",
     "angular-resource": "^1.4.8",
     "angular-route": "^1.4.8",
     "angular-sanitize": "^1.4.8",
