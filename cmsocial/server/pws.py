@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import argparse
 import os
 import io
 import re
@@ -12,6 +13,7 @@ import tempfile
 import mimetypes
 import traceback
 import pkg_resources
+import ConfigParser
 
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
@@ -21,7 +23,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
 from sqlalchemy.sql import or_, and_
 
-from cms import config, ServiceCoord, SOURCE_EXT_TO_LANGUAGE_MAP
+from cms import ServiceCoord, SOURCE_EXT_TO_LANGUAGE_MAP
 from cms.io import Service
 from cms.db.filecacher import FileCacher
 
@@ -49,6 +51,9 @@ import gevent.wsgi
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
 
+config = ConfigParser.SafeConfigParser()
+config.read('/usr/local/etc/cmsocial.ini')
+
 
 class WSGIHandler(gevent.wsgi.WSGIHandler):
     def format_request(self):
@@ -68,13 +73,6 @@ class WSGIHandler(gevent.wsgi.WSGIHandler):
 
     def get_environ(self):
         env = gevent.wsgi.WSGIHandler.get_environ(self)
-        # Proxy support
-        if config.is_proxy_used:
-            if 'HTTP_X_FORWARDED_FOR' in env:
-                env['REMOTE_ADDR'] = \
-                    env['HTTP_X_FORWARDED_FOR'].split(',')[0].strip()
-            elif 'HTTP_X_REAL_IP' in env:
-                env['REMOTE_ADDR'] = env['HTTP_X_REAL_IP']
         return env
 
 
@@ -214,7 +212,7 @@ class APIHandler(object):
         return sha.hexdigest()
 
     def hashpw(self, pw):
-        return self.hash(pw + config.secret_key)
+        return self.hash(pw + config.get("core", "secret_key"))
 
     def get_institute_info(self, institute_id):
         info = dict()
@@ -324,7 +322,7 @@ class APIHandler(object):
         payload = local.data['payload']
         sig = local.data['sig']
         computed_sig = hmac.new(
-            config.secret_key.encode(),
+            config.get("core", "secret_key").encode(),
             payload.encode(),
             hashlib.sha256).hexdigest()
         if computed_sig != sig:
@@ -342,7 +340,7 @@ class APIHandler(object):
         res_payload = urllib.urlencode(response_data)
         res_payload = b64encode(res_payload.encode())
         sig = hmac.new(
-            config.secret_key.encode(),
+            config.get("core", "secret_key").encode(),
             res_payload,
             hashlib.sha256).hexdigest()
         local.resp['parameters'] = urllib.urlencode({
@@ -968,7 +966,7 @@ class APIHandler(object):
                 f = files_sent.get(sfe.filename)
                 if f is None:
                     return 'Some files are missing!'
-                if len(f['body']) > config.max_submission_length:
+                if len(f['body']) > config.get("core", "max_submission_length"):
                     return 'The files you sent are too big!'
                 f['name'] = sfe.filename
                 files.append(f)
@@ -1032,11 +1030,11 @@ class PracticeWebServer(Service):
     '''Service that runs the web server for practice.
 
     '''
-    def __init__(self, shard):
-        Service.__init__(self, shard=shard)
+    def __init__(self, args):
+        Service.__init__(self, shard=args.shard)
 
-        self.address = config.contest_listen_address[shard]
-        self.port = config.contest_listen_port[shard]
+        self.address = config.get("core", "listen_address")
+        self.port = int(config.get("core", "listen_port")) + args.shard
         self.file_cacher = FileCacher(self)
         self.evaluation_service = self.connect_to(
             ServiceCoord('EvaluationService', 0))
@@ -1050,4 +1048,13 @@ class PracticeWebServer(Service):
 
 
 def main():
-    PracticeWebServer(0).run()
+    parser = argparse.ArgumentParser(
+        description="PracticeWebServer",
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument("-s", "--shard", action="store", type=int, default=0,
+        help="Shard number (default: 0)")
+
+    args = parser.parse_args()
+
+    PracticeWebServer(args).run()
