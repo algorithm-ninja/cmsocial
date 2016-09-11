@@ -60,7 +60,8 @@ angular.module('cmsocial')
       'email': '',
       'email2': '',
       'password': '',
-      'password2': ''
+      'password2': '',
+      'recaptcha_response': '',
     };
     $scope.errorMsg = {
       'password':  'Password\'s too short',
