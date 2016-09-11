@@ -356,20 +356,9 @@ class APIHandler(object):
                 email = local.data['email']
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
-                recaptcha_response = local.data['g-recaptcha-response']
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
-
-            # Check captcha
-            r = requests.post(
-                "https://www.google.com/recaptcha/api/siteverify",
-                data={'secret': config.get("core", "recaptcha_secret_key"),
-                      'response': recaptcha_response}) #, 'remoteip': ''})
-            try:
-                assert r.json().success == True
-            except:
-                return "Bad request"
 
             token = self.hashpw(password)
 
