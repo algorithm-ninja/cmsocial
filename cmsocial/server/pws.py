@@ -14,6 +14,7 @@ import mimetypes
 import traceback
 import pkg_resources
 import ConfigParser
+import requests
 
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
@@ -212,7 +213,7 @@ class APIHandler(object):
         return sha.hexdigest()
 
     def hashpw(self, pw):
-        return self.hash(pw + config.get("core", "secret_key"))
+        return self.hash(pw + config.get("core", "secret"))
 
     def get_institute_info(self, institute_id):
         info = dict()
@@ -322,7 +323,7 @@ class APIHandler(object):
         payload = local.data['payload']
         sig = local.data['sig']
         computed_sig = hmac.new(
-            config.get("core", "secret_key").encode(),
+            config.get("core", "secret").encode(),
             payload.encode(),
             hashlib.sha256).hexdigest()
         if computed_sig != sig:
@@ -340,7 +341,7 @@ class APIHandler(object):
         res_payload = urllib.urlencode(response_data)
         res_payload = b64encode(res_payload.encode())
         sig = hmac.new(
-            config.get("core", "secret_key").encode(),
+            config.get("core", "secret").encode(),
             res_payload,
             hashlib.sha256).hexdigest()
         local.resp['parameters'] = urllib.urlencode({
@@ -356,9 +357,20 @@ class APIHandler(object):
                 email = local.data['email']
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
+                recaptcha_response = local.data['recaptcha_response']
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
+
+            # Check captcha
+            r = requests.post(
+                "https://www.google.com/recaptcha/api/siteverify",
+                data={'secret': config.get("core", "recaptcha_secret_key"),
+                      'response': recaptcha_response}) #, 'remoteip': ''})
+            try:
+                assert r.json()["success"] == True
+            except:
+                return "Bad request"
 
             token = self.hashpw(password)
 

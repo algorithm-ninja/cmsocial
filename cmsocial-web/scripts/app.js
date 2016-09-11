@@ -19,6 +19,7 @@ angular
     'ui.router',
     'ui.ace',
     'angular-md5',
+    'vcRecaptcha',
   ])
   .constant('API_PREFIX', '[[api_prefix]]')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
