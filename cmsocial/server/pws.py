@@ -14,6 +14,7 @@ import mimetypes
 import traceback
 import pkg_resources
 import ConfigParser
+import requests
 
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
@@ -367,7 +368,7 @@ class APIHandler(object):
                 data={'secret': config.get("core", "recaptcha_secret_key"),
                       'response': recaptcha_response}) #, 'remoteip': ''})
             try:
-                assert r.json().success == True
+                assert r.json()["success"] == True
             except:
                 return "Bad request"
 
