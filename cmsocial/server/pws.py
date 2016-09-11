@@ -213,7 +213,7 @@ class APIHandler(object):
         return sha.hexdigest()
 
     def hashpw(self, pw):
-        return self.hash(pw + config.get("core", "secret_key"))
+        return self.hash(pw + config.get("core", "secret"))
 
     def get_institute_info(self, institute_id):
         info = dict()
@@ -323,7 +323,7 @@ class APIHandler(object):
         payload = local.data['payload']
         sig = local.data['sig']
         computed_sig = hmac.new(
-            config.get("core", "secret_key").encode(),
+            config.get("core", "secret").encode(),
             payload.encode(),
             hashlib.sha256).hexdigest()
         if computed_sig != sig:
@@ -341,7 +341,7 @@ class APIHandler(object):
         res_payload = urllib.urlencode(response_data)
         res_payload = b64encode(res_payload.encode())
         sig = hmac.new(
-            config.get("core", "secret_key").encode(),
+            config.get("core", "secret").encode(),
             res_payload,
             hashlib.sha256).hexdigest()
         local.resp['parameters'] = urllib.urlencode({
