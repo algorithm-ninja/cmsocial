@@ -366,7 +366,8 @@ class APIHandler(object):
             r = requests.post(
                 "https://www.google.com/recaptcha/api/siteverify",
                 data={'secret': config.get("core", "recaptcha_secret_key"),
-                      'response': recaptcha_response}) #, 'remoteip': ''})
+                      'response': recaptcha_response}, #, 'remoteip': ''},
+                verify=False)
             try:
                 assert r.json()["success"] == True
             except:
