@@ -354,7 +354,7 @@ class APIHandler(object):
             try:
                 username = local.data['username']
                 password = local.data['password']
-                email = local.data['email']
+                email = local.data['email'].lower()
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
                 recaptcha_response = local.data['recaptcha_response']
