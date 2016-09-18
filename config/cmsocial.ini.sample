@@ -1,7 +1,6 @@
 [core]
 # The secret must be an hexadecimal string
 secret = 485e77da5c9eff017bab1ce8ce3fc0
-api_prefix = api/
 max_submission_length = 1000000000
 listen_address = 127.0.0.1
 listen_port = 18888
