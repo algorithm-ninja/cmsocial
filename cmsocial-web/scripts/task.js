@@ -16,7 +16,7 @@ angular.module('cmsocial')
   })
   .controller('TaskbarCtrl', function($scope, $stateParams, $http, $state,
         $rootScope, $timeout, userManager, notificationHub, taskbarManager,
-        l10n, API_PREFIX) {
+        l10n, contestManager, API_PREFIX) {
 
     delete $rootScope.task;
 
@@ -26,7 +26,7 @@ angular.module('cmsocial')
 
     $scope.tag = {};
     $scope.isActiveTab = taskbarManager.isActiveTab;
-    $scope.isLogged = userManager.isLogged;
+    $scope.isLogged = contestManager.hasParticipation;
     $scope.taskName = $stateParams.taskName;
 
     $scope.tagClicked = function(tag) {
@@ -145,7 +145,7 @@ angular.module('cmsocial')
   })
   .controller('SubmissionsCtrl', function($scope, $stateParams, $location,
       $http, $timeout, $rootScope, userManager, notificationHub,
-      subsDatabase, taskbarManager, l10n, API_PREFIX) {
+      subsDatabase, taskbarManager, l10n, contestManager, API_PREFIX) {
     taskbarManager.setActiveTab(4);
     subsDatabase.load($stateParams.taskName);
     $scope.areThereSubs = function(name) {
@@ -154,11 +154,15 @@ angular.module('cmsocial')
     };
     var aceModeMap = {"C": "c_cpp", "C++": "c_cpp", "Pascal": "pascal"}
     var langExtMap = {"C": ".c", "C++": ".cpp", "Pascal": ".pas"}
-    $scope.languages = ["C", "C++", "Pascal"];
+    var cmsLanguageMap= {"c": "C", "cpp": "C++", "pas": "Pascal"};
+    $scope.languages = [];
+    for (var lang in contestManager.getContest().languages) {
+        $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
+    }
 
     if (!localStorage.getItem("preferred_language")) {
       localStorage.setItem("preferred_language", "C++")
-    }
+    } //TODO: fix this with multiple contests
 
     $scope.language = localStorage.getItem("preferred_language")
     $scope.aceOption = {

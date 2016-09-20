@@ -22,6 +22,7 @@ setup(
     download_url="https://github.com/algorithm-ninja/cmsocial/archive/master.tar.gz",
     description="A web application that builds a social coding platform upon CMS",
     packages=find_packages(),
+    include_package_data=True,
     entry_points={
         "console_scripts": [
 #            "cmsocialServer=cmsocial.server.pws:main",   # we must rename this because of CMS's ResourceService

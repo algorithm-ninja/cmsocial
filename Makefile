@@ -1,4 +1,4 @@
-DEST=cmsocial-web.build
+DEST=cmsocial-web-build
 MAKEROOT=$(shell pwd)
 SHELL := /bin/bash
 
@@ -51,11 +51,14 @@ node_modules: package.json
 	npm install
 	touch node_modules
 
-dirs: $(DEST) tmp
+dirs: $(DEST) tmp $(DEST)/__init__.py
 
 $(DEST): cmsocial-web
 	mkdir -p $(DESTDIRS)
 	touch $(DEST)
+
+$(DEST)/__init__.py: $(DEST)
+	cp cmsocial-web/__init__.py $@
 
 tmp: cmsocial-web
 	mkdir -p $(TMPDIRS)

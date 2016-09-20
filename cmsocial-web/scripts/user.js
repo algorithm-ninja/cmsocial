@@ -68,7 +68,7 @@ angular.module('cmsocial')
     };
   })
   .controller('SignCtrl', function($scope, $http, $state, userManager,
-        notificationHub, l10n, API_PREFIX) {
+        notificationHub, l10n, contestManager, API_PREFIX) {
     $scope.user = {'username': '', 'password': ''};
     $scope.isLogged = userManager.isLogged;
     $scope.signin = function() {
@@ -91,11 +91,13 @@ angular.module('cmsocial')
             });
             notificationHub.createAlert('success', l10n.get('Welcome back') +
                 ', ' + userManager.getUser().username, 2);
+            contestManager.refreshContest();
           } else if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Sign in error'), 3);
           }
         }).error(function(data, status, headers, config) {
           notificationHub.serverError(status);
+          contestManager.refreshContest();
         });
     };
     $scope.signout = function() {

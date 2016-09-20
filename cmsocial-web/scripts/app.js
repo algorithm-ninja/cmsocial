@@ -132,8 +132,9 @@ angular
         controller: 'TestpageCtrl'
       })
   })
-  .controller('HomepageCtrl', function($scope, navbarManager, userManager) {
+  .controller('HomepageCtrl', function($scope, navbarManager, userManager, contestManager) {
     $scope.me = userManager;
+    $scope.cm = contestManager;
     navbarManager.setActiveTab(0);
   })
   .filter('repext', function() {
