@@ -123,7 +123,7 @@ class APIHandler(object):
         except HTTPException as e:
             return e
 
-        # TODO: check the contest
+        # static_file_handler checks for a valid contest
         if endpoint == 'globalstaticfile':
             return self.static_file_handler(environ, args['path'])
         elif endpoint == 'staticfile':
@@ -319,19 +319,22 @@ class APIHandler(object):
         return response
 
 
-    def static_file_handler(self, environ, filename, contest=None):
+    def static_file_handler(self, environ, filename, contest_name=None):
         # TODO: implement files that do not depend on the contest
-        if contest is None:
+        if contest_name is None:
             return NotFound()
-        if filename == 'views/homepage.html':
-            with SessionGen() as session:
-                social_contest = session.query(SocialContest)\
-                    .join(Contest)\
-                    .filter(Contest.name == contest).first()
-                if  social_contest.homepage is not None:
-                        return self.dbfile_handler(environ, {
-                               'digest': social_contest.homepage,
-                               'name': 'homepage.html'})
+
+        with SessionGen() as session:
+            social_contest = session.query(SocialContest)\
+                .join(Contest)\
+                .filter(Contest.name == contest_name).first()
+            if social_contest is None:
+                return NotFound()
+            if filename == 'views/homepage.html':
+                    if social_contest.homepage is not None:
+                            return self.dbfile_handler(environ, {
+                                   'digest': social_contest.homepage,
+                                   'name': 'homepage.html'})
         path = os.path.join(
             pkg_resources.resource_filename('cmsocial-web-build', ''),
             filename)
