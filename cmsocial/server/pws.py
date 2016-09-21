@@ -150,14 +150,14 @@ class APIHandler(object):
                     return BadRequest()
 
         with SessionGen() as local.session:
+            if 'contest' in args:
+                local.contest = local.session.query(Contest)\
+                    .filter(Contest.name == args['contest']).first()
+            else:
+                local.contest = None
             try:
                 username = data['username']
                 token = data['token']
-                if 'contest' in args:
-                    local.contest = local.session.query(Contest)\
-                        .where(Contest.name == args['contest']).first()
-                else:
-                    local.contest = None
 
                 local.participation = self.get_participation(contest, username, token)
                 if local.participation is None:
@@ -569,8 +569,8 @@ class APIHandler(object):
             if 'institute' in local.data:
                 query = query\
                     .filter(SocialUser.institute_id == local.data['institute'])
-            participation, local.resp['num'] = self.sliced_query(query)
-            local.resp['users'] = map(self.get_participation_info, users)
+            participations, local.resp['num'] = self.sliced_query(query)
+            local.resp['users'] = map(self.get_participation_info, participations)
         elif local.data['action'] == 'update':
             if local.user is None:
                 return 'Unauthorized'
@@ -617,9 +617,9 @@ class APIHandler(object):
         elif local.data['action'] == 'get':
             if local.contest is None:
                 return 'Bad Request'
-            local.resp['name'] = contest.name
-            local.resp['description'] = contest.description
-            local.resp['languages'] = contest.languages
+            local.resp['name'] = local.contest.name
+            local.resp['description'] = local.contest.description
+            local.resp['languages'] = local.contest.languages
             local.resp['participates'] = local.participation is not None
         else:
             return 'Bad Request'

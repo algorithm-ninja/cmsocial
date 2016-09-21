@@ -3,7 +3,7 @@
 /* Contest management */
 
 angular.module('cmsocial')
-  .factory('contestManager', function($http, $window, notificationHub, userManager, BASE_URL, API_PREFIX) {
+  .factory('contestManager', function($http, $window, notificationHub, userManager, API_PREFIX) {
     var contest = null;
     var getContestData = function() {
       $http.post(API_PREFIX + "contest", {
