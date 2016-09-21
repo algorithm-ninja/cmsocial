@@ -159,7 +159,7 @@ class APIHandler(object):
                 username = data['username']
                 token = data['token']
 
-                local.participation = self.get_participation(contest, username, token)
+                local.participation = self.get_participation(local.contest, username, token)
                 if local.participation is None:
                     local.user = self.get_user(username, token)
                 else:
@@ -443,15 +443,15 @@ class APIHandler(object):
                 return 'Bad request'
 
             # Check captcha
-            r = requests.post(
-                "https://www.google.com/recaptcha/api/siteverify",
-                data={'secret': config.get("core", "recaptcha_secret_key"),
-                      'response': recaptcha_response}, #, 'remoteip': ''},
-                verify=False)
-            try:
-                assert r.json()["success"] == True
-            except:
-                return "Bad request"
+            #r = requests.post(
+            #    "https://www.google.com/recaptcha/api/siteverify",
+            #    data={'secret': config.get("core", "recaptcha_secret_key"),
+            #          'response': recaptcha_response}, #, 'remoteip': ''},
+            #    verify=False)
+            #try:
+            #    assert r.json()["success"] == True
+            #except:
+            #    return "Bad request"
 
             token = self.hashpw(password)
 
@@ -485,7 +485,6 @@ class APIHandler(object):
             try:
                 local.session.add(user)
                 local.session.add(social_user)
-                local.session.add(participation)
                 local.session.commit()
             except IntegrityError:
                 return 'User already exists'
@@ -513,7 +512,7 @@ class APIHandler(object):
                 return 'Unauthorized' 
                 
             participation = Participation(
-                user=user,
+                user=local.user,
                 contest=local.contest
             )
             social_participation = SocialParticipation()
@@ -539,7 +538,6 @@ class APIHandler(object):
             if user is None:
                 return 'login.error'
             else:
-                user = participation.user
                 local.resp['token'] = token
                 local.resp['user'] = self.get_user_info(user)
         elif local.data['action'] == 'get':
