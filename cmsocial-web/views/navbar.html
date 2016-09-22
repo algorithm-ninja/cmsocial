@@ -6,7 +6,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" ui-sref="overview"><i class="fa fa-home fa-lg"></i> [[top_left_name]]</a>
+      <a class="navbar-brand" ui-sref="overview"><i class="fa fa-home fa-lg"></i> {{cm.getContest().top_left_name}}</a>
     </div>
     <div class="navbar-collapse collapse" ng-controller="SignCtrl">
       <ul class="nav navbar-nav">
@@ -32,9 +32,9 @@
         <li ng-class="{active: isActiveTab(4)}">
           <a ui-sref="ranking.page({ pageNum: 1 })"><i class="fa fa-trophy fa-lg"></i> {{'Ranking' | l10n}}</a>
         </li>
-        <li>
-          <a ng-if="!me.isLogged()" href="[[forum_url]]"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
-          <a ng-if="me.isLogged()" href="[[forum_url]]/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
+        <li ng-if="cm.getContest().forum != null">
+          <a ng-if="!me.isLogged()" href="{{cm.getContest().forum}}"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
+          <a ng-if="me.isLogged()" href="{{cm.getContest().forum}}/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
         </li>
         <li ng-class="{active: isActiveTab(5)}" ng-if="!me.isLogged()">
           <a ui-sref="signup"><i class="fa fa-pencil fa-lg"></i> {{'Sign up' | l10n}}</a>

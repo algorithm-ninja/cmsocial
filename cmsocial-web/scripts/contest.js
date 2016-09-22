@@ -13,6 +13,7 @@ angular.module('cmsocial')
       })
       .success(function(data, status, headers, config) {
         contest = data;
+        $window.document.title = contest.title;
       }).error(function(data, status, headers, config) {
         notificationHub.serverError(status);
       });

@@ -40,6 +40,18 @@ class SocialContest(Base):
         default=7
     )
 
+    # Whether a contest should be examined by PWS
+    social_enabled = Column(Boolean, nullable=False, default=True)
+
+    # The URL of the forum
+    forum = Column(Unicode, nullable=True)
+
+    # What to show in the top-left part of the navbar
+    top_left_name = Column(Unicode, nullable=False)
+
+    # The page title
+    title = Column(Unicode, nullable=False)
+
     # Home page template URL - some file on the database, or None for the
     # default home page.
     homepage = Column(Unicode, nullable=True)

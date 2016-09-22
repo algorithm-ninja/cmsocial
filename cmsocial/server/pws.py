@@ -152,7 +152,9 @@ class APIHandler(object):
         with SessionGen() as local.session:
             if 'contest' in args:
                 local.contest = local.session.query(Contest)\
-                    .filter(Contest.name == args['contest']).first()
+                    .join(SocialContest)\
+                    .filter(Contest.name == args['contest'])\
+                    .filter(SocialContest.social_enabled == True).first()
             else:
                 local.contest = None
             try:
@@ -327,6 +329,7 @@ class APIHandler(object):
         with SessionGen() as session:
             social_contest = session.query(SocialContest)\
                 .join(Contest)\
+                .filter(SocialContest.social_enabled == True)\
                 .filter(Contest.name == contest_name).first()
             if social_contest is None:
                 return NotFound()
@@ -609,6 +612,7 @@ class APIHandler(object):
             query = local.session.query(Contest)\
                 .join(SocialContest)\
                 .filter(SocialContest.access_level >= local.global_access_level)\
+                .filter(SocialContest.social_enabled == True)\
                 .order_by(Contest.description)
             for c in query:
                 contest = dict()
@@ -622,6 +626,9 @@ class APIHandler(object):
             local.resp['description'] = local.contest.description
             local.resp['languages'] = local.contest.languages
             local.resp['participates'] = local.participation is not None
+            local.resp['top_left_name'] = local.contest.social_contest.top_left_name
+            local.resp['title'] = local.contest.social_contest.title
+            local.resp['forum'] = local.contest.social_contest.forum
         else:
             return 'Bad Request'
 
