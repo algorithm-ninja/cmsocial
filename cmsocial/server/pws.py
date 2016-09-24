@@ -669,7 +669,7 @@ class APIHandler(object):
                 .filter(TaskTag.tag == tag)\
                 .filter(TaskTag.task == task).first()
             if local.access_level > 0:
-                if tag.hidden or tasktag.approved or local.user is not tasktag.user:
+                if tag.hidden or tasktag.approved or local.user.social_user is not tasktag.user:
                     return 'Unauthorized'
             elif tasktag is None:
                 return 'Task does not have tag'
