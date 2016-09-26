@@ -198,9 +198,9 @@ angular.module('cmsocial')
     // User related
     'Sign up':
     {it: 'Registrati'},
-    'Sign in':
+    'Log in':
     {it: 'Entra'},
-    'Sign out':
+    'Log out':
     {it: 'Esci'},
     'My user profile':
     {it: 'Il mio profilo utente'},
@@ -304,7 +304,7 @@ angular.module('cmsocial')
     // Notifications
     'Welcome back':
     {it: 'Bentornato'},
-    'Sign in error':
+    'Login error':
     {it: 'Login errato'},
     'Make sure your internet connection is working and, if this error occurs again, contact an administrator.':
     {it: 'Assicurati che la tua connessione a internet sia funzionante e, se l\'errore dovesse ripetersi, contatta un amministratore.'},

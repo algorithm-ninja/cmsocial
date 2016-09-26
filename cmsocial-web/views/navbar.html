@@ -47,7 +47,7 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li ng-if="!me.isLogged()" class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-in fa-lg"></i> {{'Sign in' | l10n}} <b class="caret"></b></a>
+          <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-in fa-lg"></i> {{'Log in' | l10n}} <b class="caret"></b></a>
           <div class="dropdown-menu">
             <form class="signin-form" role="form" name="signinform" ng-submit="signin()">
               <div class="form-group">
@@ -58,7 +58,7 @@
                 <label class="sr-only" for="password">{{'Password' | l10n}}</label>
                 <input class="form-control" type="password" id="password" name="password" ng-model="user.password" placeholder="Password" />
               </div>
-              <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> {{'Sign in' | l10n}}</button>
+              <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> {{'Log in' | l10n}}</button>
             </form>
           </div>
         </li>
@@ -79,7 +79,7 @@
             <li>
               <a ng-click="signout()">
                 <i class="fa fa-sign-out fa-fw"></i>
-                {{'Sign out' | l10n}}
+                {{'Log out' | l10n}}
               </a>
             </li>
           </ul>

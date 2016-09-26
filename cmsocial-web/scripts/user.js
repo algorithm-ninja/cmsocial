@@ -40,7 +40,7 @@ angular.module('cmsocial')
           .success(function(data, status, headers, config) {
             if (data.success === 0) {
               localStorage.removeItem('user');
-              notificationHub.createAlert('danger', l10n.get('Sign in error'), 3);
+              notificationHub.createAlert('danger', l10n.get('Login error'), 3);
             } else {
               var user = getIt();
               localStorage.setItem('user', JSON.stringify(user));
@@ -93,7 +93,7 @@ angular.module('cmsocial')
                 ', ' + userManager.getUser().username, 2);
             contestManager.refreshContest();
           } else if (data.success === 0) {
-            notificationHub.createAlert('danger', l10n.get('Sign in error'), 3);
+            notificationHub.createAlert('danger', l10n.get('Login error'), 3);
           }
         }).error(function(data, status, headers, config) {
           notificationHub.serverError(status);
