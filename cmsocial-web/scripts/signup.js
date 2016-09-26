@@ -125,7 +125,7 @@ angular.module('cmsocial')
               'del tuo nuovo account usando il modulo in alto a destra. Una volta entrato ' +
               'nel sistema avrai la possibilità di sottoporre le soluzioni ai task presenti ' +
               'in questa pagina. Buon allenamento.', 10);
-            $state.go('tasklist.page', {'pageNum': 1});
+            $state.go('overview');
           } else {
             notificationHub.createAlert('danger', data.error, 3);
           }

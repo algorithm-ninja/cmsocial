@@ -446,15 +446,15 @@ class APIHandler(object):
                 return 'Bad request'
 
             # Check captcha
-            #r = requests.post(
-            #    "https://www.google.com/recaptcha/api/siteverify",
-            #    data={'secret': config.get("core", "recaptcha_secret_key"),
-            #          'response': recaptcha_response}, #, 'remoteip': ''},
-            #    verify=False)
-            #try:
-            #    assert r.json()["success"] == True
-            #except:
-            #    return "Bad request"
+            r = requests.post(
+                "https://www.google.com/recaptcha/api/siteverify",
+                data={'secret': config.get("core", "recaptcha_secret_key"),
+                      'response': recaptcha_response}, #, 'remoteip': ''},
+                verify=False)
+            try:
+                assert r.json()["success"] == True
+            except:
+                return "Bad request"
 
             token = self.hashpw(password)
 
@@ -552,10 +552,8 @@ class APIHandler(object):
             # Append scores of tried tasks
             local.resp['scores'] = []
             participation = self.get_participation(
-                local.contest, local.user.username, local.user.password)
+                local.contest, user.username, user.password)
             for ts in participation.taskscores:
-                if ts.contest_id != local.contest.id:
-                    continue
                 taskinfo = dict()
                 taskinfo['name'] = ts.task.name
                 taskinfo['score'] = ts.score
@@ -706,7 +704,7 @@ class APIHandler(object):
         elif local.data['action'] == 'get':
             t = local.session.query(Task)\
                 .join(SocialTask)\
-                .filter(Task.contest_id == local.contest_id)\
+                .filter(Task.contest_id == local.contest.id)\
                 .filter(Task.name == local.data['name'])\
                 .filter(SocialTask.access_level >= local.access_level).first()
             if t is None:
@@ -735,7 +733,6 @@ class APIHandler(object):
                         tag['can_delete'] = (local.user.social_user is tasktag.user and not tasktag.approved) or \
                                 local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
-
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
                 .join(SocialTask)\

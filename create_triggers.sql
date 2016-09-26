@@ -141,8 +141,8 @@ BEGIN;
 	BEGIN
 		BEGIN
 		    -- TODO: fare meglio di un hard-coded 7
-			INSERT INTO social_contests (id, access_level, homepage)
-			VALUES (NEW.id, 7, 'views/homepage.html');
+			INSERT INTO social_contests (id, access_level, social_enabled, top_left_name, title)
+			VALUES (NEW.id, 7, true, NEW.name, NEW.description);
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;

@@ -12,3 +12,8 @@ Creating the database is somewhat difficult. Here are the needed steps (after in
     cmsInitDB
     python2 -c "import cmsocial.db; from cms.db import metadata; metadata.create_all()"
     psql -U cms < create_triggers.sql
+
+## Update for multicontest
+Run the following:
+    python2 -c "import cmsocial.db; from cms.db import metadata; metadata.create_all()"
+    psql -U cms < multicontest_update.sql
