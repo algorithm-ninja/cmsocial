@@ -57,7 +57,7 @@ $(DEST): cmsocial-web
 	mkdir -p $(DESTDIRS)
 	touch $(DEST)
 
-$(DEST)/__init__.py: $(DEST)
+$(DEST)/__init__.py: cmsocial-web/__init__.py
 	cp cmsocial-web/__init__.py $@
 
 tmp: cmsocial-web

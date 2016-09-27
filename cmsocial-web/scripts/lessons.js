@@ -6,6 +6,7 @@ angular.module('cmsocial')
   .controller('LessonsCtrl', function($scope, $state, navbarManager,
       $http, userManager, notificationHub, l10n, API_PREFIX) {
     navbarManager.setActiveTab(2);
+    $scope.userManager = userManager;
     $scope.getLessons = function() {
       var data = {
         'username': userManager.getUser().username,
@@ -35,4 +36,21 @@ angular.module('cmsocial')
       });
     };
     $scope.getLessons();
+    $scope.togglePublic = function(lesson) {
+      var data = {
+        'username':     userManager.getUser().username,
+        'token':        userManager.getUser().token,
+        'action':       'alter',
+        'id':           lesson.id,
+        'access_level': lesson.access_level
+      };
+      $http.post(API_PREFIX + 'lessons', data)
+      .success(function(data, status, headers, config) {
+        notificationHub.createAlert('success', "Change successful", 2);
+        $scope.getLessons();
+      })
+      .error(function(data, status, headers, config) {
+        notificationHub.serverError(status);
+      });
+    };
   });

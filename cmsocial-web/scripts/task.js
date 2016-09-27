@@ -160,9 +160,11 @@ angular.module('cmsocial')
         $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
     }
 
-    if (!localStorage.getItem("preferred_language")) {
-      localStorage.setItem("preferred_language", "C++")
-    } //TODO: fix this with multiple contests
+    if (
+        !localStorage.getItem("preferred_language") ||
+        $scope.languages.indexOf(localStorage.getItem("preferred_language")) == -1) {
+      localStorage.setItem("preferred_language", $scope.languages[0])
+    } //TODO: fix this with multiple contests on the same domain
 
     $scope.language = localStorage.getItem("preferred_language")
     $scope.aceOption = {
@@ -267,6 +269,7 @@ angular.module('cmsocial')
           $("#submitform").each(function() {
             this.reset();
           });
+          subsDatabase.submitCompleted = true;  // stop loading
         }
         else {
           notificationHub.createAlert('danger', l10n.get(data['error']), 2);

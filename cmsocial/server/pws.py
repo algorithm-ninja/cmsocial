@@ -440,21 +440,23 @@ class APIHandler(object):
                 email = local.data['email'].lower()
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
-                recaptcha_response = local.data['recaptcha_response']
+                recaptcha_response = local.data['recaptcha_response'] if \
+                    'recaptcha_response' in local.data else None
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
 
-            # Check captcha
-            r = requests.post(
-                "https://www.google.com/recaptcha/api/siteverify",
-                data={'secret': config.get("core", "recaptcha_secret_key"),
-                      'response': recaptcha_response}, #, 'remoteip': ''},
-                verify=False)
-            try:
-                assert r.json()["success"] == True
-            except:
-                return "Bad request"
+            # Check captcha if we changed the secret key
+            if config.get("core", "recaptcha_secret_key") != "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe":
+                r = requests.post(
+                    "https://www.google.com/recaptcha/api/siteverify",
+                    data={'secret': config.get("core", "recaptcha_secret_key"),
+                          'response': recaptcha_response}, #, 'remoteip': ''},
+                    verify=False)
+                try:
+                    assert r.json()["success"] == True
+                except:
+                    return "Bad request"
 
             token = self.hashpw(password)
 
@@ -639,7 +641,9 @@ class APIHandler(object):
             local.resp['lessons'] = []
             for l in query:
                 data = dict()
+                data['id'] = l.id
                 data['title'] = l.title
+                data['access_level'] = l.access_level
                 data['tasks'] = []
                 for t in l.tasks:
                     task = dict()
@@ -655,6 +659,17 @@ class APIHandler(object):
                     data['tasks'].append(task)
                 data['tasks'].sort(key=lambda x: x['num'])
                 local.resp['lessons'].append(data)
+        elif local.data['action'] == 'alter':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                lesson = local.session.query(Lesson)\
+                    .filter(Lesson.contest_id == local.contest.id)\
+                    .filter(Lesson.id == local.data['id']).first()
+                lesson.access_level = local.data['access_level']
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
         else:
             return 'Bad Request'
 

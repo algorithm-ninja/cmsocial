@@ -94,7 +94,7 @@
             </div>
           </div>
         </fieldset>
-        <div class="form-group">
+        <div class="form-group" ng-if="'[[recaptcha_public_key]]' != '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'" >
           <div class="col-sm-offset-4 col-sm-6"
             vc-recaptcha
             ng-model="user.recaptcha_response"
