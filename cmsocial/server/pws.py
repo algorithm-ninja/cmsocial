@@ -1213,6 +1213,6 @@ def main():
     parser.add_argument("-s", "--shard", action="store", type=int, default=0,
         help="Shard number (default: 0)")
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
 
     PracticeWebServer(args).run()
