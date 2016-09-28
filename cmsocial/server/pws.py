@@ -1,54 +1,49 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import os
-import io
-import re
-import hmac
-import json
-import urllib
-import logging
-import hashlib
-import tempfile
-import mimetypes
-import traceback
-import pkg_resources
 import ConfigParser
-import requests
-
+import hashlib
+import hmac
+import io
+import json
+import logging
+import mimetypes
+import os
+import re
+import tempfile
+import traceback
+import urllib
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
 from shutil import copyfileobj, rmtree
 
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc
-from sqlalchemy.sql import or_, and_
-
-from cms import ServiceCoord, SOURCE_EXT_TO_LANGUAGE_MAP
-from cms.io import Service
-from cms.db.filecacher import FileCacher
-
-from cms.db import SessionGen, User, Submission, File, Task, Participation, Testcase, Contest
-
-from cmsocial.db.test import Test, TestScore
-from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
-from cmsocial.db.socialuser import SocialUser, SocialParticipation
-from cmsocial.db.socialcontest import SocialContest
-from cmsocial.db.lesson import Lesson
-from cmsocial.db.location import Institute, Region, Province, City
-
-from cmscommon.datetime import make_timestamp, make_datetime
-from cmscommon.archive import Archive
-
-from werkzeug.wrappers import Response, Request
-from werkzeug.wsgi import SharedDataMiddleware, wrap_file, responder
-from werkzeug.routing import Map, Rule
-from werkzeug.exceptions import HTTPException, NotFound, BadRequest, \
-    InternalServerError
-
 import gevent
 import gevent.local
 import gevent.wsgi
+import pkg_resources
+import requests
+from sqlalchemy import desc
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import and_, or_
+from werkzeug.exceptions import (BadRequest, HTTPException,
+                                 InternalServerError, NotFound)
+from werkzeug.routing import Map, Rule
+from werkzeug.wrappers import Request, Response
+from werkzeug.wsgi import SharedDataMiddleware, responder, wrap_file
+
+from cms import SOURCE_EXT_TO_LANGUAGE_MAP, ServiceCoord
+from cms.db import (Contest, File, Participation, SessionGen, Submission, Task,
+                    Testcase, User)
+from cms.db.filecacher import FileCacher
+from cms.io import Service
+from cmscommon.archive import Archive
+from cmscommon.datetime import make_datetime, make_timestamp
+from cmsocial.db.lesson import Lesson
+from cmsocial.db.location import City, Institute, Province, Region
+from cmsocial.db.socialcontest import SocialContest
+from cmsocial.db.socialtask import SocialTask, Tag, TaskScore, TaskTag
+from cmsocial.db.socialuser import SocialParticipation, SocialUser
+from cmsocial.db.test import Test, TestScore
 
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
@@ -58,6 +53,7 @@ config.read('/usr/local/etc/cmsocial.ini')
 
 
 class WSGIHandler(gevent.wsgi.WSGIHandler):
+
     def format_request(self):
         if self.time_finish:
             delta = '%.6f' % (self.time_finish - self.time_start)
@@ -83,16 +79,20 @@ class Server(gevent.wsgi.WSGIServer):
 
 
 class APIHandler(object):
+
     def __init__(self, parent):
         self.router = Map([
             Rule('/api/<target>', methods=['POST'], endpoint='globaljsondata'),
-            Rule('/static/<path:path>', methods=['GET'], endpoint='globalstaticfile'),
+            Rule('/static/<path:path>',
+                 methods=['GET'], endpoint='globalstaticfile'),
             Rule('/<contest>/api/files/<digest>', methods=['GET', 'POST'],
                  endpoint='dbfile'),
             Rule('/<contest>/api/files/<digest>/<name>', methods=['GET', 'POST'],
                  endpoint='dbfile'),
-            Rule('/<contest>/api/<target>', methods=['POST'], endpoint='jsondata'),
-            Rule('/<contest>/<path:path>', methods=['GET'], endpoint='staticfile'),
+            Rule('/<contest>/api/<target>',
+                 methods=['POST'], endpoint='jsondata'),
+            Rule('/<contest>/<path:path>',
+                 methods=['GET'], endpoint='staticfile'),
             Rule('/<contest>/', methods=['GET'], endpoint='index'),
             Rule('/', methods=['GET'], endpoint='globalindex')
         ], encoding_errors='strict')
@@ -161,7 +161,8 @@ class APIHandler(object):
                 username = data['username']
                 token = data['token']
 
-                local.participation = self.get_participation(local.contest, username, token)
+                local.participation = self.get_participation(
+                    local.contest, username)
                 if local.participation is None:
                     local.user = self.get_user(username, token)
                 else:
@@ -212,21 +213,27 @@ class APIHandler(object):
         num = query.count()
         return (res, num)
 
-    def get_participation(self, contest, username, token):
+    def get_participation(self, contest, username, token=None):
         try:
-            return local.session.query(Participation)\
+            participation = local.session.query(Participation)\
                 .join(User)\
                 .filter(Participation.contest_id == contest.id)\
-                .filter(User.username == username)\
-                .filter(User.password == token).first()
+                .filter(User.username == username).first()
+            if participation is None:
+                return None
+            if token is None or participation.user.password == token:
+                return participation
         except UnicodeDecodeError:
             return None
 
-    def get_user(self, username, token):
+    def get_user(self, username, token=None):
         try:
-            return local.session.query(User)\
-                .filter(User.username == username)\
-                .filter(User.password == token).first()
+            user = local.session.query(User)\
+                .filter(User.username == username).first()
+            if user is None:
+                return None
+            if token is None or user.password == token:
+                return user
         except UnicodeDecodeError:
             return None
 
@@ -275,18 +282,23 @@ class APIHandler(object):
     def get_user_info(self, user):
         info = dict()
         info['username'] = user.username
-        info['access_level'] = user.social_user.access_level
+        info['global_access_level'] = user.social_user.access_level
+        info['access_level'] = info['global_access_level']
         info['join_date'] = make_timestamp(user.social_user.registration_time)
         info['mail_hash'] = self.hash(user.email, 'md5')
-        info['institute'] = self.get_institute_info(user.social_user.institute_id)
+        info['institute'] = self.get_institute_info(
+            user.social_user.institute_id)
         info['first_name'] = user.first_name
         info['last_name'] = user.last_name
+        info['preferred_languages'] = user.preferred_languages
         info['tasks_solved'] = -1
         return info
 
     def get_participation_info(self, participation):
         info = self.get_user_info(participation.user)
         info['score'] = participation.social_participation.score
+        if participation.social_participation.access_level is not None:
+            info['access_level'] = participation.social_participation.access_level
         return info
 
     # Handlers that do not require JSON data
@@ -304,9 +316,10 @@ class APIHandler(object):
             if args["name"].endswith(".pdf"):
                 # Add header to allow the official pdf.js to work
                 response.headers.add_header(b'Access-Control-Allow-Origin',
-                        b'https://mozilla.github.io')
+                                            b'https://mozilla.github.io')
             else:
-                # Don't do this on pdf files because it breaks the native pdf reader
+                # Don't do this on pdf files because it breaks the native pdf
+                # reader
                 response.headers.add_header(
                     b'Content-Disposition', b'attachment',
                     filename=args['name'])
@@ -319,7 +332,6 @@ class APIHandler(object):
         response.cache_control.max_age = 31536000
         response.cache_control.public = True
         return response
-
 
     def static_file_handler(self, environ, filename, contest_name=None):
         # TODO: implement files that do not depend on the contest
@@ -334,10 +346,10 @@ class APIHandler(object):
             if social_contest is None:
                 return NotFound()
             if filename == 'views/homepage.html':
-                    if social_contest.homepage is not None:
-                            return self.dbfile_handler(environ, {
-                                   'digest': social_contest.homepage,
-                                   'name': 'homepage.html'})
+                if social_contest.homepage is not None:
+                    return self.dbfile_handler(environ, {
+                        'digest': social_contest.homepage,
+                        'name': 'homepage.html'})
         path = os.path.join(
             pkg_resources.resource_filename('cmsocial-web-build', ''),
             filename)
@@ -451,7 +463,7 @@ class APIHandler(object):
                 r = requests.post(
                     "https://www.google.com/recaptcha/api/siteverify",
                     data={'secret': config.get("core", "recaptcha_secret_key"),
-                          'response': recaptcha_response}, #, 'remoteip': ''},
+                          'response': recaptcha_response},  # , 'remoteip': ''},
                     verify=False)
                 try:
                     assert r.json()["success"] == True
@@ -468,8 +480,8 @@ class APIHandler(object):
                 return err
 
             if local.contest is not None and    \
-                local.contest.social_contest.access_level < local.global_access_level:
-                return 'Unauthorized' 
+                    local.contest.social_contest.access_level < local.global_access_level:
+                return 'Unauthorized'
 
             user = User(
                 first_name=firstname,
@@ -501,7 +513,7 @@ class APIHandler(object):
                 )
                 social_participation = SocialParticipation()
                 social_participation.participation = participation
-                
+
                 try:
                     local.session.add(participation)
                     local.session.add(social_participation)
@@ -514,15 +526,15 @@ class APIHandler(object):
             if local.contest is None:
                 return 'Bad request'
             if local.contest.social_contest.access_level < local.global_access_level:
-                return 'Unauthorized' 
-                
+                return 'Unauthorized'
+
             participation = Participation(
                 user=local.user,
                 contest=local.contest
             )
             social_participation = SocialParticipation()
             social_participation.participation = participation
-            
+
             try:
                 local.session.add(participation)
                 local.session.add(social_participation)
@@ -539,22 +551,26 @@ class APIHandler(object):
 
             token = self.hashpw(password)
 
-            user = self.get_user(username, token)
-            if user is None:
-                return 'login.error'
+            participation = self.get_participation(
+                local.contest, username, token)
+            if participation is None:
+                user = self.get_user(username, token)
+                if user is None:
+                    return 'login.error'
+                else:
+                    local.resp['token'] = token
+                    local.resp['user'] = self.get_user_info(user)
             else:
                 local.resp['token'] = token
-                local.resp['user'] = self.get_user_info(user)
+                local.resp['user'] = self.get_participation_info(participation)
         elif local.data['action'] == 'get':
-            user = local.session.query(User)\
-                .filter(User.username == local.data['username']).first()
-            if user is None:
+            participation = self.get_participation(
+                local.contest, local.data['username'])
+            if participation is None:
                 return 'Not found'
-            local.resp = self.get_user_info(user)
+            local.resp = self.get_participation_info(participation)
             # Append scores of tried tasks
             local.resp['scores'] = []
-            participation = self.get_participation(
-                local.contest, user.username, user.password)
             for ts in participation.taskscores:
                 taskinfo = dict()
                 taskinfo['name'] = ts.task.name
@@ -574,7 +590,8 @@ class APIHandler(object):
                 query = query\
                     .filter(SocialUser.institute_id == local.data['institute'])
             participations, local.resp['num'] = self.sliced_query(query)
-            local.resp['users'] = map(self.get_participation_info, participations)
+            local.resp['users'] = map(
+                self.get_participation_info, participations)
         elif local.data['action'] == 'update':
             if local.user is None:
                 return 'Unauthorized'
@@ -626,7 +643,8 @@ class APIHandler(object):
             local.resp['description'] = local.contest.description
             local.resp['languages'] = local.contest.languages
             local.resp['participates'] = local.participation is not None
-            local.resp['top_left_name'] = local.contest.social_contest.top_left_name
+            local.resp[
+                'top_left_name'] = local.contest.social_contest.top_left_name
             local.resp['title'] = local.contest.social_contest.title
             local.resp['forum'] = local.contest.social_contest.forum
         else:
@@ -684,9 +702,11 @@ class APIHandler(object):
                 .order_by(desc(SocialTask.id))
 
             if 'tag' in local.data and local.data['tag'] is not None:
-                tags = local.data['tag'].split(',')[:5]  # Ignore requests with more that 5 tags
+                # Ignore requests with more that 5 tags
+                tags = local.data['tag'].split(',')[:5]
                 conditions = [Tag.name == tname for tname in tags]
-                targets = local.session.query(Tag).filter(or_(*conditions)).all()
+                targets = local.session.query(
+                    Tag).filter(or_(*conditions)).all()
                 local.resp['tags'] = []
                 for tag in targets:
                     local.resp['tags'].append(tag.name)
@@ -746,7 +766,7 @@ class APIHandler(object):
                         tag['can_delete'] = False
                     else:
                         tag['can_delete'] = (local.user.social_user is tasktag.user and not tasktag.approved) or \
-                                local.user.social_user.access_level == 0
+                            local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
@@ -816,7 +836,8 @@ class APIHandler(object):
                 return 'Task does not exist'
             else:
                 try:
-                    local.session.add(TaskTag(task=task.social_task, tag=tag, user=local.user.social_user))
+                    local.session.add(
+                        TaskTag(task=task.social_task, tag=tag, user=local.user.social_user))
                     local.session.commit()
                 except IntegrityError:
                     return 'The task already has this tag'
@@ -859,7 +880,8 @@ class APIHandler(object):
                 .filter(Testcase.dataset == task.active_dataset)\
                 .all()
 
-            local.resp['testcases'] = [{'codename': t.codename} for t in testcases]
+            local.resp['testcases'] = [
+                {'codename': t.codename} for t in testcases]
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
@@ -969,7 +991,8 @@ class APIHandler(object):
                                     an = float(ans[a])
                                     cor = float(correct[a])
                                 except:
-                                    # Hack to make the answer wrong if the user triggers a TypeError
+                                    # Hack to make the answer wrong if the user
+                                    # triggers a TypeError
                                     an = 1
                                     cor = 2
                             else:
@@ -1116,7 +1139,8 @@ class APIHandler(object):
                 unpacked_dir = archive.unpack()
                 for name in archive.namelist():
                     filename = os.path.basename(name)
-                    body = open(os.path.join(unpacked_dir, filename), "r").read()
+                    body = open(os.path.join(
+                        unpacked_dir, filename), "r").read()
                     local.data['files'][filename] = {
                         'filename': filename,
                         'body': body
@@ -1203,6 +1227,7 @@ class PracticeWebServer(Service):
     '''Service that runs the web server for practice.
 
     '''
+
     def __init__(self, args):
         Service.__init__(self, shard=args.shard)
 
@@ -1226,7 +1251,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument("-s", "--shard", action="store", type=int, default=0,
-        help="Shard number (default: 0)")
+                        help="Shard number (default: 0)")
 
     args, unknown = parser.parse_known_args()
 
