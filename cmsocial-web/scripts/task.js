@@ -158,17 +158,20 @@ angular.module('cmsocial')
     var aceModeMap = {
       "C": "c_cpp",
       "C++": "c_cpp",
-      "Pascal": "pascal"
+      "Pascal": "pascal",
+      "Python": "python"
     };
     var langExtMap = {
       "C": ".c",
       "C++": ".cpp",
-      "Pascal": ".pas"
+      "Pascal": ".pas",
+      "Python": ".py"
     };
     var cmsLanguageMap = {
       "c": "C",
       "cpp": "C++",
-      "pas": "Pascal"
+      "pas": "Pascal",
+      "py": "Python"
     };
     $scope.languages = [];
     for (var lang in contestManager.getContest().languages) {
