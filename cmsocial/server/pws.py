@@ -22,6 +22,7 @@ import gevent.local
 import gevent.wsgi
 import pkg_resources
 import requests
+from gevent import monkey
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import and_, or_
@@ -44,6 +45,9 @@ from cmsocial.db.socialcontest import SocialContest
 from cmsocial.db.socialtask import SocialTask, Tag, TaskScore, TaskTag
 from cmsocial.db.socialuser import SocialParticipation, SocialUser
 from cmsocial.db.test import Test, TestScore
+
+monkey.patch_all()
+
 
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
@@ -290,7 +294,6 @@ class APIHandler(object):
             user.social_user.institute_id)
         info['first_name'] = user.first_name
         info['last_name'] = user.last_name
-        info['preferred_languages'] = user.preferred_languages
         info['tasks_solved'] = -1
         return info
 
@@ -685,6 +688,9 @@ class APIHandler(object):
                     .filter(Lesson.contest_id == local.contest.id)\
                     .filter(Lesson.id == local.data['id']).first()
                 lesson.access_level = local.data['access_level']
+                for lt in lesson.tasks:
+                    lt.task.social_task.access_level = lesson.access_level
+                    local.session.add(lt.task)
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'

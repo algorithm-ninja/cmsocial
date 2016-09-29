@@ -40,7 +40,7 @@ angular.module('cmsocial')
     };
   })
   .controller('NavbarCtrl', function($scope, $location, userManager,
-        navbarManager, contestManager) {
+    navbarManager, contestManager, l10n) {
     $('.signin-form input').click(function(e) {
       e.stopPropagation();
     });
@@ -48,4 +48,17 @@ angular.module('cmsocial')
     $scope.cm = contestManager;
     $scope.participate = contestManager.participate;
     $scope.isActiveTab = navbarManager.isActiveTab;
+    $scope.vars = {};
+    $scope.vars.language = l10n.getLanguage();
+    $scope.setLanguage = function() {
+      l10n.setLanguage($scope.vars.language);
+      console.log(l10n.getLanguage());
+    };
+    $scope.languages = [{
+      'code': 'en',
+      'name': 'English'
+    }, {
+      'code': 'it',
+      'name': 'Italiano'
+    }];
   });
