@@ -23,7 +23,7 @@ angular
   ])
   .constant('API_PREFIX', 'api/')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
-    $locationProvider.html5Mode(false)//.hashPrefix('!')
+    $locationProvider.html5Mode(false); //.hashPrefix('!')
     // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
 
     $urlRouterProvider
@@ -31,7 +31,7 @@ angular
       .when('/task/{taskName}', '/task/{taskName}/statement')
       .when('/user/{userId}', '/user/{userId}/profile')
       .when('/ranking/', '/ranking/1')
-      .otherwise('/overview')
+      .otherwise('/overview');
 
     $stateProvider
       .state('overview', {
@@ -130,7 +130,7 @@ angular
         url: '/test/{testName}',
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
-      })
+    });
   })
   .controller('HomepageCtrl', function($scope, navbarManager, userManager, contestManager) {
     $scope.me = userManager;
@@ -139,7 +139,7 @@ angular
   })
   .filter('repext', function() {
     return function(input) {
-      return input.replace(/.%l$/, ".(cpp|c|pas)")
+      return input.replace(/.%l$/, ".(cpp|c|pas)");
     };
   })
   .filter('outcomeToClass', function() {

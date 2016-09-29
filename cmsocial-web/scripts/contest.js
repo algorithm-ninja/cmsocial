@@ -30,7 +30,7 @@ angular.module('cmsocial')
           return contest != null && contest.participates === true;
       },
       refreshContest: function() {
-          getContestData()
+          getContestData();
       },
       participate: function() {
         $http.post(API_PREFIX + 'user', {
@@ -45,4 +45,4 @@ angular.module('cmsocial')
         });
       }
     };
-  })
+});
