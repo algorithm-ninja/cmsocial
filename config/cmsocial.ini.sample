@@ -4,7 +4,3 @@ secret = 485e77da5c9eff017bab1ce8ce3fc0
 max_submission_length = 1000000000
 listen_address = 127.0.0.1
 listen_port = 18888
-ask_institute = 0
-analytics = UA-XXXXX-X
-recaptcha_public_key = 6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
-recaptcha_secret_key = 6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe

@@ -141,8 +141,8 @@ BEGIN;
 	BEGIN
 		BEGIN
 		    -- TODO: fare meglio di un hard-coded 7
-			INSERT INTO social_contests (id, access_level, social_enabled, top_left_name, title)
-			VALUES (NEW.id, 7, true, NEW.name, NEW.description);
+			INSERT INTO social_contests (id, access_level, social_enabled, top_left_name, title, recaptcha_public_key, recaptcha_secret_key)
+			VALUES (NEW.id, 7, true, NEW.name, NEW.description, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe');
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;
@@ -166,4 +166,3 @@ BEGIN;
 	DROP TRIGGER IF EXISTS participation_insert ON participations;
 	CREATE CONSTRAINT TRIGGER participation_insert AFTER INSERT ON participations DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_participation_insert();
 COMMIT;
-

@@ -15,12 +15,12 @@ angular.module('cmsocial')
     };
   })
   .controller('UserbarCtrl', function($scope, $stateParams, $http,
-        $rootScope, userManager, notificationHub, userbarManager) {
+    $rootScope, userManager, notificationHub, userbarManager) {
     $scope.isActiveTab = userbarManager.isActiveTab;
     $scope.isLogged = userManager.isLogged;
-    $scope.myName = function(){
+    $scope.myName = function() {
       return userManager.getUser().username;
-    }
+    };
     $scope.isMe = function() {
       return $stateParams.userId === userManager.getUser().username;
     };
@@ -32,10 +32,10 @@ angular.module('cmsocial')
     var heartbeat_timeout = undefined;
     var heartbeat = function() {
       heartbeat_timeout = $timeout(heartbeat, 60000);
-      if(getIt().hasOwnProperty("token")) {
+      if (getIt().hasOwnProperty("token")) {
         $http.post(API_PREFIX + 'heartbeat', {
             'username': getIt().username,
-            'token':    getIt().token
+            'token': getIt().token
           })
           .success(function(data, status, headers, config) {
             if (data.success === 0) {
@@ -53,7 +53,7 @@ angular.module('cmsocial')
     return {
       getUser: getIt,
       isLogged: function() {
-        if(heartbeat_timeout === undefined) heartbeat();
+        if (heartbeat_timeout === undefined) heartbeat();
         return getIt().hasOwnProperty("token");
       },
       getGravatar: function(user, size) {
@@ -68,9 +68,12 @@ angular.module('cmsocial')
     };
   })
   .controller('ForgotAccountCtrl', function($scope, $http, notificationHub,
-        l10n, navbarManager, API_PREFIX) {
+    l10n, navbarManager, API_PREFIX) {
     navbarManager.setActiveTab(0);
-    $scope.user = {'recoverEmail': '', 'recoverCode': ''};
+    $scope.user = {
+      'recoverEmail': '',
+      'recoverCode': ''
+    };
 
     $scope.recover = function() {
       $("#loading-indicator").show();
@@ -98,15 +101,18 @@ angular.module('cmsocial')
     };
   })
   .controller('SignCtrl', function($scope, $http, $state, userManager,
-        notificationHub, l10n, contestManager, API_PREFIX) {
-    $scope.user = {'username': '', 'password': ''};
+    notificationHub, l10n, contestManager, API_PREFIX) {
+    $scope.user = {
+      'username': '',
+      'password': ''
+    };
     $scope.isLogged = userManager.isLogged;
     $scope.signin = function() {
       // temporary fix to get username & password
       $scope.user.username = $("#username").val();
       $scope.user.password = $("#password").val();
       $http.post(API_PREFIX + 'user', {
-          'action':   'login',
+          'action': 'login',
           'username': $scope.user.username,
           'password': $scope.user.password,
         })
@@ -120,7 +126,7 @@ angular.module('cmsocial')
               'mail_hash': data.user.mail_hash
             });
             notificationHub.createAlert('success', l10n.get('Welcome back') +
-                ', ' + userManager.getUser().username, 2);
+              ', ' + userManager.getUser().username, 2);
             contestManager.refreshContest();
           } else if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
@@ -136,58 +142,58 @@ angular.module('cmsocial')
     };
   })
   .controller('SSOCtrl', function($scope, $http, notificationHub, $location,
-      userManager, l10n, $state, API_PREFIX) {
+    userManager, l10n, $state, contestManager, API_PREFIX) {
     $http.post(API_PREFIX + 'sso', {
-      'username': userManager.getUser().username,
-      'token': userManager.getUser().token,
-      'payload': $location.$$search.sso,
-      'sig': $location.$$search.sig
-    })
-    .success(function(data, status, headers, config) {
-      if (data.success === 1) {
-        window.location.replace('[[forum_url]]/session/sso_login?' + data.parameters);
-      } else {
-        notificationHub.createAlert('danger', l10n.get('Sign on failed - please make sure to be logged in on the main website!'), 3);
-        $state.go('overview');
-      }
-    })
-    .error(function(data, status, headers, config) {
-      notificationHub.serverError(status);
-    });
+        'username': userManager.getUser().username,
+        'token': userManager.getUser().token,
+        'payload': $location.$$search.sso,
+        'sig': $location.$$search.sig
+      })
+      .success(function(data, status, headers, config) {
+        if (data.success === 1) {
+          window.location.replace(contestManager.getContest().forum_url + '/session/sso_login?' + data.parameters);
+        } else {
+          notificationHub.createAlert('danger', l10n.get('Sign on failed - please make sure to be logged in on the main website!'), 3);
+          $state.go('overview');
+        }
+      })
+      .error(function(data, status, headers, config) {
+        notificationHub.serverError(status);
+      });
   })
   .controller('UserpageCtrl', function($scope, $http, notificationHub,
-      $stateParams, $state, $timeout, userbarManager, l10n, API_PREFIX) {
+    $stateParams, $state, $timeout, userbarManager, l10n, API_PREFIX) {
     userbarManager.setActiveTab(1);
     $timeout(function() {
       $('.my-tooltip').tooltip(); // enable tooltips
     });
     $http.post(API_PREFIX + 'user', {
-      'action':   'get',
-      'username': $stateParams.userId
-    })
-    .success(function(data, status, headers, config) {
-      if (data.success === 1) {
-        $scope.user = data;
-      } else {
-        notificationHub.createAlert('danger', l10n.get('User doesn\'t exist'), 3);
-        $state.go('overview');
-      }
-    })
-    .error(function(data, status, headers, config) {
-      notificationHub.serverError(status);
-    });
+        'action': 'get',
+        'username': $stateParams.userId
+      })
+      .success(function(data, status, headers, config) {
+        if (data.success === 1) {
+          $scope.user = data;
+        } else {
+          notificationHub.createAlert('danger', l10n.get('User doesn\'t exist'), 3);
+          $state.go('overview');
+        }
+      })
+      .error(function(data, status, headers, config) {
+        notificationHub.serverError(status);
+      });
   })
   .controller('EdituserCtrl', function($scope, $state, $stateParams,
-      $http, userbarManager, userManager, notificationHub, l10n, API_PREFIX) {
+    $http, userbarManager, userManager, notificationHub, l10n, API_PREFIX) {
     if (userManager.getUser().username !== $stateParams.userId) {
       $state.go('overview');
     }
     userbarManager.setActiveTab(3);
     $scope.user = {
-      password:  '',
+      password: '',
       password2: '',
       password3: '',
-      email:     '',
+      email: '',
     };
     $scope.submit = function() {
       var data = {};
@@ -209,9 +215,9 @@ angular.module('cmsocial')
         .success(function(data, status, headers, config) {
           if (data.success == 1) {
             if (data.hasOwnProperty('token')) {
-              var user_object = JSON.parse(localStorage.getItem('user'))
-              user_object['token'] = data['token']  // overwrite old password with new one
-              localStorage.setItem('user', JSON.stringify(user_object))
+              var user_object = JSON.parse(localStorage.getItem('user'));
+              user_object['token'] = data['token']; // overwrite old password with new one
+              localStorage.setItem('user', JSON.stringify(user_object));
             }
 
             notificationHub.createAlert('success', l10n.get('Changes recorded'), 2);
@@ -231,24 +237,24 @@ angular.module('cmsocial')
   .filter('levelClass', function() {
     return function(input) {
       switch (input) {
-      case 0:
-        return 'admin';
-      case 1:
-        return 'monica';
-      case 2:
-        return 'tutor';
-      case 3:
-        return 'teacher';
-      case 4:
-        return 'superuser';
-      case 5:
-        return 'user';
-      case 6:
-        return 'newbie';
-      case 7:
-        return 'guest';
-      default:
-        return 'unknown';
+        case 0:
+          return 'admin';
+        case 1:
+          return 'monica';
+        case 2:
+          return 'tutor';
+        case 3:
+          return 'teacher';
+        case 4:
+          return 'superuser';
+        case 5:
+          return 'user';
+        case 6:
+          return 'newbie';
+        case 7:
+          return 'guest';
+        default:
+          return 'unknown';
       }
     };
   });

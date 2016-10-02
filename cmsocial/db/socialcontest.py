@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-from cmsocial.db.base import Base
-from cms.db import Contest
-from sqlalchemy.schema import Column, ForeignKey, CheckConstraint, \
-    UniqueConstraint, ForeignKeyConstraint, Table
-from sqlalchemy.types import Boolean, Integer, Float, String, Unicode, \
-    Interval, Enum
+from __future__ import unicode_literals
+
 from sqlalchemy.orm import backref, relationship
+from sqlalchemy.schema import (CheckConstraint, Column, ForeignKey,
+                               ForeignKeyConstraint, Table, UniqueConstraint)
+from sqlalchemy.types import (Boolean, Enum, Float, Integer, Interval, String,
+                              Unicode)
+
+from cms.db import Contest
+from cmsocial.db.base import Base
+
+RECAPTCHA_DEFAULT_PUBLIC = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+RECAPTCHA_DEFAULT_SECRET = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+
 
 class SocialContest(Base):
     """Class to store custom fields of a contest.
@@ -17,9 +24,9 @@ class SocialContest(Base):
     id = Column(
         Integer,
         ForeignKey("contests.id",
-            onupdate="CASCADE",
-            ondelete="CASCADE"
-        ),
+                   onupdate="CASCADE",
+                   ondelete="CASCADE"
+                   ),
         primary_key=True,
         unique=True
     )
@@ -52,12 +59,31 @@ class SocialContest(Base):
     # The page title
     title = Column(Unicode, nullable=False)
 
+    # Mail configuration
     mail_server = Column(Unicode, nullable=True)
     mail_username = Column(Unicode, nullable=True)
     mail_password = Column(Unicode, nullable=True)
     mail_from = Column(Unicode, nullable=True)
-    site_name = Column(Unicode, nullable=True)
+
+    # Captcha configuration
+    recaptcha_public_key = Column(
+        Unicode, default=RECAPTCHA_DEFAULT_PUBLIC)
+    recaptcha_secret_key = Column(
+        Unicode, default=RECAPTCHA_DEFAULT_SECRET)
+
+    # Analytics configuration
+    analytics = Column(Unicode, nullable=True)
 
     # Home page template URL - some file on the database, or None for the
     # default home page.
     homepage = Column(Unicode, nullable=True)
+
+    def is_mail_enabled(self):
+        return self.mail_server is not None and \
+            self.mail_username is not None and \
+            self.mail_password is not None and \
+            self.mail_from is not None
+
+    def is_captcha_enabled(self):
+        return self.recaptcha_secret_key != RECAPTCHA_DEFAULT_SECRET and \
+            self.recaptcha_public_key != RECAPTCHA_DEFAULT_PUBLIC

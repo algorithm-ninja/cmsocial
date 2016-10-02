@@ -70,17 +70,17 @@ $(DEST)/custom_images: config/custom_images | $(DEST)
 $(DEST)/favicon.ico: config/favicon.ico | $(DEST)
 	cp $^ $@
 
-$(DEST)/views/footer.html: config/footer.html config/cmsocial.ini | $(DEST)
-	./instantiate.sh $< > $@
+$(DEST)/views/footer.html: config/footer.html | $(DEST)
+	cp $< $@
 
-$(DEST)/views/homepage.html: config/homepage.html config/cmsocial.ini | $(DEST)
-	./instantiate.sh $< > $@
+$(DEST)/views/homepage.html: config/homepage.html | $(DEST)
+	cp $< $@
 
-$(DEST)/index.html: cmsocial-web/index.html node_modules config/cmsocial.ini | $(DEST)
-	./instantiate.sh <(node_modules/.bin/cdnify $(CDNFLAGS) $<) | $(STRIPDEBUG) > $@
+$(DEST)/index.html: cmsocial-web/index.html node_modules | $(DEST)
+	node_modules/.bin/cdnify $(CDNFLAGS) $< | $(STRIPDEBUG) > $@
 
-$(DEST)/%.html: cmsocial-web/%.html config/cmsocial.ini | $(DEST)
-	./instantiate.sh $< | $(STRIPDEBUG) > $@
+$(DEST)/%.html: cmsocial-web/%.html | $(DEST)
+	cat $< | $(STRIPDEBUG) > $@
 
 $(DEST)/styles/main.css: $(CSS)
 	cat $^ > $@
@@ -91,8 +91,8 @@ tmp/%.css: cmsocial-web/%.less node_modules | tmp
 $(DEST)/scripts/app.processed.js: $(TMPJS) | node_modules
 	${UGLIFY} $^ > $@
 
-tmp/%.js: cmsocial-web/%.js config/cmsocial.ini | tmp
-	./instantiate.sh $< | $(STRIPDEBUG) > $@
+tmp/%.js: cmsocial-web/%.js | tmp
+	cat $< | $(STRIPDEBUG) > $@
 
 $(DEST)/node_modules: node_modules
 	ln -s ../node_modules $(DEST)/node_modules
@@ -109,6 +109,3 @@ distclean: clean
 
 jshint:
 	./node_modules/.bin/jshint --reporter=node_modules/jshint-stylish $(JS)
-
-bsync:
-	./node_modules/.bin/browser-sync start --config bs-config.js

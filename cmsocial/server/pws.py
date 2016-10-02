@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import ConfigParser
 import argparse
+import ConfigParser
 import hashlib
 import hmac
 import io
@@ -9,14 +9,12 @@ import json
 import logging
 import mimetypes
 import os
-import pkg_resources
 import re
-import requests
 import smtplib
+import socket
 import tempfile
 import traceback
 import urllib
-
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
@@ -291,7 +289,7 @@ class APIHandler(object):
 
         msg = MIMEText(body)
         msg['Subject'] = subject
-        msg['From'] = '%s <%s>' % (local.contest.social_contest.site_name,
+        msg['From'] = '%s <%s>' % (local.contest.name,
                                    local.contest.social_contest.mail_from)
         msg['To'] = to
 
@@ -300,13 +298,15 @@ class APIHandler(object):
         while sent is False:
             try:
                 server.sendmail(local.contest.social_contest.mail_from,
-                                [email], msg.as_string())
+                                [to], msg.as_string())
                 sent = True
-            except TimeoutError:
+            except socket.timeout:
+                traceback.print_exc()
                 nretries += 1
                 if nretries > 10:
                     break
 
+        server.quit()
         return sent
 
     def get_institute_info(self, institute_id):
@@ -500,10 +500,10 @@ class APIHandler(object):
                 return 'Bad request'
 
             # Check captcha if we changed the secret key
-            if config.get("core", "recaptcha_secret_key") != "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe":
+            if local.contest.is_captcha_enabled():
                 r = requests.post(
                     "https://www.google.com/recaptcha/api/siteverify",
-                    data={'secret': config.get("core", "recaptcha_secret_key"),
+                    data={'secret': local.contest.recaptcha_secret_key,
                           'response': recaptcha_response},  # , 'remoteip': ''},
                     verify=False)
                 try:
@@ -637,17 +637,17 @@ class APIHandler(object):
             if local.user is None:
                 return 'Unauthorized'
             if 'institute' in local.data and \
-                local.data['institute'] is not None:
+                    local.data['institute'] is not None:
                 local.user.institute_id = int(local.data['institute'])
             if 'email' in local.data and \
-                local.data['email'] != '' and \
-                local.user.email != local.data['email']:
+                    local.data['email'] != '' and \
+                    local.user.email != local.data['email']:
                 err = self.check_email(local.data['email'])
                 if err is not None:
                     return err
                 local.user.email = local.data['email']
             if 'old_password' in local.data and \
-                local.data['old_password'] != '':
+                    local.data['old_password'] != '':
                 old_token = self.hashpw(local.data['old_password'])
                 if local.user.password != old_token:
                     return 'Wrong password'
@@ -674,27 +674,33 @@ class APIHandler(object):
                     user.password = self.hashpw(tmp_password)
                     local.session.commit()
 
-                    # XXX: it could return False
-                    self.send_mail(user.email, "Password reset", "New password: %s" % tmp_password)
-                    del tmp_password
+                    if self.send_mail(user.email, "Password reset",
+                                      "New password: %s" % tmp_password):
+                        del tmp_password
 
-                    local.resp['message'] = 'Your new password was mailed to you'
+                        local.resp['message'] = \
+                            'Your new password was mailed to you'
+                    else:
+                        return 'Internal Server Error'
                 else:
                     return 'Wrong code'
             else:
                 # Check if enough time has passed
                 if datetime.utcnow() - user.social_user.last_recover < timedelta(days=1):
-                    local.resp['message'] = 'You should already have received an email, if not, try tomorrow'
+                    local.resp[
+                        'message'] = 'You should already have received an email, if not, try tomorrow'
                 else:
                     # Generate new code and mail it
                     user.social_user.recover_code = self.gencode()
                     user.social_user.last_recover = datetime.utcnow()
                     local.session.commit()
 
-                    # XXX: it could return False
-                    self.send_mail(user.email, "Code for password reset", "Code: %s" % user.social_user.recover_code)
-
-                    local.resp['message'] = 'A code was sent, check your inbox'
+                    if self.send_mail(user.email, "Code for password reset",
+                                      "Code: %s" % user.social_user.recover_code):
+                        local.resp[
+                            'message'] = 'A code was sent, check your inbox'
+                    else:
+                        return 'Internal Server Error'
         else:
             return 'Bad request'
 
@@ -726,6 +732,14 @@ class APIHandler(object):
                 'top_left_name'] = local.contest.social_contest.top_left_name
             local.resp['title'] = local.contest.social_contest.title
             local.resp['forum'] = local.contest.social_contest.forum
+            local.resp['mail_enabled'] = local.contest.social_contest\
+                .is_mail_enabled()
+            local.resp['captcha_enabled'] = local.contest.social_contest\
+                .is_captcha_enabled()
+            if local.contest.social_contest.is_captcha_enabled():
+                local.resp['recaptcha_public_key'] = local.contest\
+                    .social_contest.recaptcha_public_key
+            local.resp['analytics'] = local.contest.social_contest.analytics
         else:
             return 'Bad Request'
 
@@ -951,7 +965,7 @@ class APIHandler(object):
 
         task = local.session.query(Task)\
             .filter(Task.name == local.data['task'])\
-            .filter(Task.contest_id == local.contest_id)\
+            .filter(Task.contest_id == local.contest.id)\
             .first()
 
         if task is None:
@@ -1333,7 +1347,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument("-s", "--shard", action="store", type=int, default=0,
-        help="Shard number (default: 0)")
+                        help="Shard number (default: 0)")
 
     args, unknown = parser.parse_known_args()
 
