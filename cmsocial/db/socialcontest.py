@@ -52,6 +52,12 @@ class SocialContest(Base):
     # The page title
     title = Column(Unicode, nullable=False)
 
+    mail_server = Column(Unicode, nullable=True)
+    mail_username = Column(Unicode, nullable=True)
+    mail_password = Column(Unicode, nullable=True)
+    mail_from = Column(Unicode, nullable=True)
+    site_name = Column(Unicode, nullable=True)
+
     # Home page template URL - some file on the database, or None for the
     # default home page.
     homepage = Column(Unicode, nullable=True)

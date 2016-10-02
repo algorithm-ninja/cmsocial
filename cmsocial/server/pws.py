@@ -283,21 +283,24 @@ class APIHandler(object):
         return ''.join([choice(ascii_lowercase + ascii_uppercase + digits) for i in range(20)])
 
     def send_mail(self, to, subject, body):
-        server = smtplib.SMTP(self.args.mail_server)
+        server = smtplib.SMTP(local.contest.social_contest.mail_server)
         server.ehlo()
         server.starttls()
-        server.login(self.args.mail_username, self.args.mail_password)
+        server.login(local.contest.social_contest.mail_username,
+                     local.contest.social_contest.mail_password)
 
         msg = MIMEText(body)
         msg['Subject'] = subject
-        msg['From'] = '%s <%s>' % (self.args.site_name, self.args.mail_from)
+        msg['From'] = '%s <%s>' % (local.contest.social_contest.site_name,
+                                   local.contest.social_contest.mail_from)
         msg['To'] = to
 
         sent = False
         nretries = 0
         while sent is False:
             try:
-                server.sendmail(self.args.mail_from, [email], msg.as_string())
+                server.sendmail(local.contest.social_contest.mail_from,
+                                [email], msg.as_string())
                 sent = True
             except TimeoutError:
                 nretries += 1
@@ -1331,16 +1334,6 @@ def main():
 
     parser.add_argument("-s", "--shard", action="store", type=int, default=0,
         help="Shard number (default: 0)")
-    parser.add_argument("--mail-server", action="store", type=str,
-        help="Mail server (for example: my-server.com:25)")
-    parser.add_argument("--mail-username", action="store", type=str,
-        help="Username used to login")
-    parser.add_argument("--mail-password", action="store", type=str,
-        help="Password used to login")
-    parser.add_argument("--mail-from", action="store", type=str,
-        help="Email address to use when sending emails")
-    parser.add_argument("--site-name", action="store", type=str,
-        help="Name of this website")
 
     args, unknown = parser.parse_known_args()
 
