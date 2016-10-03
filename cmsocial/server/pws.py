@@ -613,6 +613,7 @@ class APIHandler(object):
                     local.session.commit()
                 except IntegrityError:
                     return "Participation already exists"
+            local.user = user
             local.response = Response()
             local.response.set_cookie(
                 'token', value=self.build_token(), domain=local.contest.social_contest.cookie_domain)
