@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from shutil import copyfileobj, rmtree
 
+import bcrypt
 import gevent
 import gevent.local
 import gevent.wsgi
@@ -169,7 +170,7 @@ class APIHandler(object):
                 token = data['token']
 
                 local.participation = self.get_participation(
-                    local.contest, username)
+                    local.contest, username, token)
                 if local.participation is None:
                     local.user = self.get_user(username, token)
                 else:
@@ -220,7 +221,22 @@ class APIHandler(object):
         num = query.count()
         return (res, num)
 
-    def get_participation(self, contest, username, token=None):
+    def validate_user(self, user, password):
+        if self.validate(password, user.password):
+            return True
+        elif self.old_validate(password, user.password):
+            try:
+                with SessionGen() as session:
+                    user2 = session.query(User).filter(
+                        User.id == user.id).first()
+                    user2.password = self.hashpw(password)
+                    session.commit()
+            except:
+                traceback.print_exc()
+        else:
+            return False
+
+    def get_participation(self, contest, username, password=None):
         try:
             participation = local.session.query(Participation)\
                 .join(User)\
@@ -228,18 +244,18 @@ class APIHandler(object):
                 .filter(User.username == username).first()
             if participation is None:
                 return None
-            if token is None or participation.user.password == token:
+            if password is None or self.validate_user(participation.user, password):
                 return participation
         except UnicodeDecodeError:
             return None
 
-    def get_user(self, username, token=None):
+    def get_user(self, username, password=None):
         try:
             user = local.session.query(User)\
                 .filter(User.username == username).first()
             if user is None:
                 return None
-            if token is None or user.password == token:
+            if password is None or self.validate_user(user, password):
                 return user
         except UnicodeDecodeError:
             return None
@@ -271,8 +287,23 @@ class APIHandler(object):
         sha.update(string)
         return sha.hexdigest()
 
-    def hashpw(self, pw):
+    def old_hashpw(self, pw):
         return self.hash(pw + config.get("core", "secret"))
+
+    def old_validate(self, pw, storedpw):
+        return self.old_hashpw(pw) == storedpw
+
+    def hashpw(self, pw):
+        pw = pw.encode('utf-8')
+        payload = bcrypt.hashpw(pw, bcrypt.gensalt())
+        return "bcrypt:%s" % payload
+
+    def validate(self, pw, storedpw):
+        if not storedpw.startswith("bcrypt:"):
+            return False
+        payload = storedpw.split(":", 1)[1].encode("utf-8")
+        pw = pw.encode("utf-8")
+        return bcrypt.hashpw(pw, payload) == payload
 
     def gencode(self):
         from string import ascii_lowercase, ascii_uppercase, digits
@@ -590,19 +621,17 @@ class APIHandler(object):
                 logger.warning('Missing parameter')
                 return 'Bad request'
 
-            token = self.hashpw(password)
-
             participation = self.get_participation(
-                local.contest, username, token)
+                local.contest, username, password)
             if participation is None:
-                user = self.get_user(username, token)
+                user = self.get_user(username, password)
                 if user is None:
                     return 'login.error'
                 else:
-                    local.resp['token'] = token
+                    local.resp['token'] = password
                     local.resp['user'] = self.get_user_info(user)
             else:
-                local.resp['token'] = token
+                local.resp['token'] = password
                 local.resp['user'] = self.get_participation_info(participation)
         elif local.data['action'] == 'get':
             participation = self.get_participation(
