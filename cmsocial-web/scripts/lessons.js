@@ -49,4 +49,17 @@ angular.module('cmsocial')
           notificationHub.serverError(status);
         });
     };
+    $scope.deleteLesson = function(lesson) {
+      $http.post(API_PREFIX + 'lessons', {
+        'action': 'delete',
+        'id': lesson.id
+      })
+      .success(function(data, status, headers, config) {
+        notificationHub.createAlert('success', 'Deletion successful', 2);
+        $scope.getLessons();
+      })
+      .error(function(data, status, headers, config) {
+        notificationHub.serverError(status);
+      });
+    };
   });

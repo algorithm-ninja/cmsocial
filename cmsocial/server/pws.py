@@ -854,6 +854,21 @@ class APIHandler(object):
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
+        elif local.data['action'] == 'delete':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                lesson = local.session.query(Lesson)\
+                    .filter(Lesson.contest_id == local.contest.id)\
+                    .filter(Lesson.id == local.data['id']).first()
+                for lt in lesson.tasks:
+                    local.session.delete(lt.task.social_task)
+                    local.session.delete(lt.task)
+                    local.session.delete(lt)
+                local.session.delete(lesson)
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
         else:
             return 'Bad Request'
 

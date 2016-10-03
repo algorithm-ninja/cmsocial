@@ -2,7 +2,8 @@
   <div class="row container">
     <div>
       <div ng-repeat="lesson in lessons">
-        <span ng-if="userManager.getUser().access_level < 3" class="public-toggle">Public <input type="checkbox" ng-model="lesson.access_level" ng-true-value="7" ng-false-value="0" ng-change="togglePublic(lesson)"/></span>
+        <span ng-if="userManager.getUser().access_level == 0" class="public-toggle">Public <input type="checkbox" ng-model="lesson.access_level" ng-true-value="7" ng-false-value="0" ng-change="togglePublic(lesson)"/></span>
+        <span ng-if="userManager.getUser().access_level == 0" class="delete-lesson"><input class="btn btn-danger" type="button" ng-click="deleteLesson(lesson)" value="Delete"/></span>
         <h3 ng-click="lesson.visible = !lesson.visible">
           <i class="fa fa-angle-right" ng-if="!lesson.visible"></i>
           <i class="fa fa-angle-down" ng-if="lesson.visible"></i>
