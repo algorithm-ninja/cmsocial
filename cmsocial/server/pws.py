@@ -36,6 +36,7 @@ from werkzeug.routing import Map, Rule
 from werkzeug.wrappers import Request, Response
 from werkzeug.wsgi import SharedDataMiddleware, responder, wrap_file
 
+import jwt
 from cms import SOURCE_EXT_TO_LANGUAGE_MAP, ServiceCoord
 from cms.db import (Contest, File, Participation, SessionGen, Submission, Task,
                     Testcase, User)
@@ -166,16 +167,21 @@ class APIHandler(object):
             else:
                 local.contest = None
             try:
-                username = data['username']
-                token = data['token']
+                local.jwt_payload = request.cookies.get("token")
+                if local.jwt_payload is None:
+                    auth_data = dict()
+                else:
+                    auth_data = jwt.decode(
+                        local.jwt_payload, config.get('core', 'secret'))
+                username = auth_data['username']
 
                 local.participation = self.get_participation(
-                    local.contest, username, token)
+                    local.contest, username)
                 if local.participation is None:
-                    local.user = self.get_user(username, token)
+                    local.user = self.get_user(username)
                 else:
                     local.user = local.participation.user
-            except (BadRequest, KeyError):
+            except (BadRequest, KeyError, jwt.exceptions.InvalidTokenError):
                 local.user = None
                 local.participation = None
             if local.user is None:
@@ -206,7 +212,10 @@ class APIHandler(object):
                 logger.error(traceback.format_exc())
                 return BadRequest()
 
-        response = Response()
+        if getattr(local, 'response', None) is None:
+            response = Response()
+        else:
+            response = local.response
         response.mimetype = 'application/json'
         response.status_code = 200
         if ans is None:
@@ -233,6 +242,7 @@ class APIHandler(object):
                     session.commit()
             except:
                 traceback.print_exc()
+            return True
         else:
             return False
 
@@ -259,6 +269,17 @@ class APIHandler(object):
                 return user
         except UnicodeDecodeError:
             return None
+
+    def build_token(self):
+        data = {
+            'id': local.user.id,
+            'username': local.user.username,
+            'email': local.user.email,
+            'firstName': local.user.first_name,
+            'lastName': local.user.last_name,
+            'picture': '//gravatar.com/avatar/%s?d=identicon' % (self.hash(local.user.email, 'md5'))
+        }
+        return jwt.encode(data, config.get('core', 'secret'), algorithm='HS256')
 
     def check_user(self, username):
         if len(username) < 4:
@@ -531,7 +552,7 @@ class APIHandler(object):
                 return 'Bad request'
 
             # Check captcha if we changed the secret key
-            if local.contest.is_captcha_enabled():
+            if local.contest.social_contest.is_captcha_enabled():
                 r = requests.post(
                     "https://www.google.com/recaptcha/api/siteverify",
                     data={'secret': local.contest.recaptcha_secret_key,
@@ -592,6 +613,9 @@ class APIHandler(object):
                     local.session.commit()
                 except IntegrityError:
                     return "Participation already exists"
+            local.response = Response()
+            local.response.set_cookie(
+                'token', value=self.build_token(), domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'newparticipation':
             if local.user is None:
                 return 'Unauthorized'
@@ -624,15 +648,22 @@ class APIHandler(object):
             participation = self.get_participation(
                 local.contest, username, password)
             if participation is None:
-                user = self.get_user(username, password)
-                if user is None:
+                local.user = self.get_user(username, password)
+                if local.user is None:
                     return 'login.error'
-                else:
-                    local.resp['token'] = password
-                    local.resp['user'] = self.get_user_info(user)
             else:
-                local.resp['token'] = password
-                local.resp['user'] = self.get_participation_info(participation)
+                local.user = participation.user
+            local.response = Response()
+            local.response.set_cookie(
+                'token', value=self.build_token(), domain=local.contest.social_contest.cookie_domain)
+        elif local.data['action'] == 'me':
+            if local.user is None:
+                return 'Unauthorized'
+            if local.participation is None:
+                local.resp['user'] = self.get_user_info(local.user)
+            else:
+                local.resp['user'] = self.get_participation_info(
+                    local.participation)
         elif local.data['action'] == 'get':
             participation = self.get_participation(
                 local.contest, local.data['username'])
@@ -734,8 +765,16 @@ class APIHandler(object):
             return 'Bad request'
 
     def heartbeat_handler(self):
+        local.response = Response()
         if local.user is None:
+            local.response.set_cookie(
+                'token', expires=datetime.utcnow(), domain=local.contest.social_contest.cookie_domain)
             return 'Unauthorized'
+        else:
+            new_token = self.build_token()
+            if new_token != local.jwt_payload:
+                local.response.set_cookie(
+                    'token', value=new_token, domain=local.contest.social_contest.cookie_domain)
 
     def contest_handler(self):
         if local.data['action'] == 'list':
@@ -769,6 +808,8 @@ class APIHandler(object):
                 local.resp['recaptcha_public_key'] = local.contest\
                     .social_contest.recaptcha_public_key
             local.resp['analytics'] = local.contest.social_contest.analytics
+            local.resp[
+                'cookie_domain'] = local.contest.social_contest.cookie_domain
         else:
             return 'Bad Request'
 

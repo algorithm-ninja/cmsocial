@@ -21,7 +21,7 @@
 
 angular.module('cmsocial')
   .controller('SignupCtrl', function($scope, $http, $state, md5,
-    notificationHub, navbarManager, contestManager, API_PREFIX) {
+    notificationHub, navbarManager, userManager, contestManager, API_PREFIX) {
     navbarManager.setActiveTab(5);
     $scope.cm = contestManager;
 
@@ -110,6 +110,7 @@ angular.module('cmsocial')
               'nel sistema avrai la possibilità di sottoporre le soluzioni ai task presenti ' +
               'in questa pagina. Buon allenamento.', 10);
             $state.go('overview');
+            userManager.refresh();
           } else {
             notificationHub.createAlert('danger', data.error, 3);
           }

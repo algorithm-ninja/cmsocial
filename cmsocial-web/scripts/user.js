@@ -25,45 +25,60 @@ angular.module('cmsocial')
       return $stateParams.userId === userManager.getUser().username;
     };
   })
-  .factory('userManager', function($http, $timeout, $sce, notificationHub, l10n, API_PREFIX) {
+  .factory('userManager', function($http, $timeout, $sce, $cookies, notificationHub, contestManager, l10n, API_PREFIX) {
+    var user = {};
     var getIt = function() {
-      return JSON.parse(localStorage.getItem('user')) || {};
+      return user;
+    };
+    var refreshUser = function() {
+      $http.post(API_PREFIX + "user", {
+          'action': 'me'
+        })
+        .success(function(data, status, headers, config) {
+          if (data.success === 0)
+            notificationHub.createAlert('danger', l10n.get('Login error'), 3);
+          else {
+            user = data["user"];
+            contestManager.refreshContest();
+          }
+        }).error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+        });
+    };
+    var isUserLogged = function() {
+      return $cookies.get('token') != null;
     };
     var heartbeat_timeout = undefined;
     var heartbeat = function() {
       heartbeat_timeout = $timeout(heartbeat, 60000);
-      if (getIt().hasOwnProperty("token")) {
-        $http.post(API_PREFIX + 'heartbeat', {
-            'username': getIt().username,
-            'token': getIt().token
-          })
+      if (isUserLogged()) {
+        $http.post(API_PREFIX + 'heartbeat', {})
           .success(function(data, status, headers, config) {
             if (data.success === 0) {
-              localStorage.removeItem('user');
               notificationHub.createAlert('danger', l10n.get('Login error'), 3);
-            } else {
-              var user = getIt();
-              localStorage.setItem('user', JSON.stringify(user));
             }
           }).error(function(data, status, headers, config) {
             notificationHub.serverError(status);
           });
       }
     };
+    if (isUserLogged()) refreshUser();
     return {
       getUser: getIt,
       isLogged: function() {
         if (heartbeat_timeout === undefined) heartbeat();
-        return getIt().hasOwnProperty("token");
+        return isUserLogged();
       },
       getGravatar: function(user, size) {
-        return $sce.trustAsUrl('http://gravatar.com/avatar/' + user.mail_hash + '?d=identicon&s=' + size);
+        return $sce.trustAsUrl('//gravatar.com/avatar/' + user.mail_hash + '?d=identicon&s=' + size);
       },
-      signin: function(user) {
-        localStorage.setItem('user', JSON.stringify(user));
-      },
+      refresh: refreshUser,
       signout: function() {
-        localStorage.removeItem('user');
+        $cookies.remove('token', {
+          domain: contestManager.getContest().cookie_domain,
+          path: '/'
+        });
+        user = {};
       }
     };
   })
@@ -118,15 +133,9 @@ angular.module('cmsocial')
         })
         .success(function(data, status, headers, config) {
           if (data.success == 1) {
-            console.log(JSON.stringify(data));
-            userManager.signin({
-              'username': data.user.username,
-              'token': data.token,
-              'access_level': data.user.access_level,
-              'mail_hash': data.user.mail_hash
-            });
+            userManager.refresh();
             notificationHub.createAlert('success', l10n.get('Welcome back') +
-              ', ' + userManager.getUser().username, 2);
+              ', ' + $scope.user.username, 2);
             contestManager.refreshContest();
           } else if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
@@ -141,11 +150,8 @@ angular.module('cmsocial')
       notificationHub.createAlert('success', l10n.get('Goodbye'), 1);
     };
   })
-  .controller('SSOCtrl', function($scope, $http, notificationHub, $location,
-    userManager, l10n, $state, contestManager, API_PREFIX) {
+  .controller('SSOCtrl', function($scope, $http, notificationHub, $location, l10n, $state, contestManager, API_PREFIX) {
     $http.post(API_PREFIX + 'sso', {
-        'username': userManager.getUser().username,
-        'token': userManager.getUser().token,
         'payload': $location.$$search.sso,
         'sig': $location.$$search.sig
       })
@@ -198,8 +204,6 @@ angular.module('cmsocial')
     $scope.submit = function() {
       var data = {};
       data['action'] = 'update';
-      data['username'] = userManager.getUser().username;
-      data['token'] = userManager.getUser().token;
       data['email'] = $scope.user.email;
 
       if ($scope.user.password2.length > 0) {
@@ -214,12 +218,7 @@ angular.module('cmsocial')
       $http.post(API_PREFIX + 'user', data)
         .success(function(data, status, headers, config) {
           if (data.success == 1) {
-            if (data.hasOwnProperty('token')) {
-              var user_object = JSON.parse(localStorage.getItem('user'));
-              user_object['token'] = data['token']; // overwrite old password with new one
-              localStorage.setItem('user', JSON.stringify(user_object));
-            }
-
+            userManager.refresh();
             notificationHub.createAlert('success', l10n.get('Changes recorded'), 2);
             $state.go('^.profile');
           } else if (data.success == 0) {

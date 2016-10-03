@@ -3,7 +3,7 @@
 /* Contest management */
 
 angular.module('cmsocial')
-  .factory('contestManager', function($http, $window, notificationHub, userManager, API_PREFIX) {
+  .factory('contestManager', function($http, $window, notificationHub, API_PREFIX) {
     var contest = null;
     var createAnalytics = function() {
       ! function(A, n, g, u, l, a, r) {
@@ -19,8 +19,6 @@ angular.module('cmsocial')
     var analyticsCreated = false;
     var getContestData = function() {
       $http.post(API_PREFIX + "contest", {
-          "username": userManager.getUser().username,
-          "token": userManager.getUser().token,
           "action": "get"
         })
         .success(function(data, status, headers, config) {
@@ -51,8 +49,6 @@ angular.module('cmsocial')
       participate: function() {
         $http.post(API_PREFIX + 'user', {
             'action': 'newparticipation',
-            'username': userManager.getUser().username,
-            'token': userManager.getUser().token
           })
           .success(function(data, status, headers, config) {
             getContestData();

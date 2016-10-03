@@ -40,8 +40,8 @@ angular
         controller: 'HomepageCtrl'
       })
       .state('sso', {
-         url: '/sso',
-         controller: 'SSOCtrl'
+        url: '/sso',
+        controller: 'SSOCtrl'
       })
       .state('tags', {
         url: '/tags',
@@ -135,7 +135,7 @@ angular
         url: '/test/{testName}',
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
-    });
+      });
   })
   .controller('HomepageCtrl', function($scope, navbarManager, userManager, contestManager) {
     $scope.me = userManager;
@@ -167,10 +167,10 @@ angular
     return function(input) {
       if (input == undefined)
         return "N/A";
-      if (input>1024*1024)
-        return (input/(1024*1024)).toFixed(1) + " MiB";
-      else if (input>1024)
-        return (input/1024).toFixed(0) + " KiB";
+      if (input > 1024 * 1024)
+        return (input / (1024 * 1024)).toFixed(1) + " MiB";
+      else if (input > 1024)
+        return (input / 1024).toFixed(0) + " KiB";
       return input + " B";
     };
   })
@@ -183,8 +183,8 @@ angular
       if (d.toDateString() == new Date(Date.now()).toDateString())
         return "ieri, " + ('0' + d.getHours()).substr(-2) + ":" + ('0' + d.getMinutes()).substr(-2);
       d.setDate(d.getDate() - 1);
-      return ('0' + d.getDate()).substr(-2) + "/" + ('0' + (d.getMonth()+1)).substr(-2)
-             + "/" + d.getFullYear() + ", " + ('0' + d.getHours()).substr(-2) + ":"
-             + ('0' + d.getMinutes()).substr(-2);
+      return ('0' + d.getDate()).substr(-2) + "/" + ('0' + (d.getMonth() + 1)).substr(-2) +
+        "/" + d.getFullYear() + ", " + ('0' + d.getHours()).substr(-2) + ":" +
+        ('0' + d.getMinutes()).substr(-2);
     };
   });

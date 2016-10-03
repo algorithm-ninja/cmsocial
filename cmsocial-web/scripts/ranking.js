@@ -23,29 +23,29 @@
 angular.module('cmsocial')
   .controller('RankingSkel', function($scope, navbarManager) {
     navbarManager.setActiveTab(4);
-    $scope.pagination = {perPage: 20};
+    $scope.pagination = {
+      perPage: 20
+    };
   })
   .controller('RankingCtrl', function($scope, $stateParams, $state,
-      $http, userManager, notificationHub, l10n, API_PREFIX) {
+    $http, notificationHub, l10n, API_PREFIX) {
     $scope.pagination.current = +$stateParams.pageNum;
     $scope.getUsers = function() {
       var data = {
-        'first':    $scope.pagination.perPage * ($scope.pagination.current-1),
-        'last':     $scope.pagination.perPage * $scope.pagination.current,
-        'username': userManager.getUser().username,
-        'token':    userManager.getUser().token,
-        'action':   'list'
+        'first': $scope.pagination.perPage * ($scope.pagination.current - 1),
+        'last': $scope.pagination.perPage * $scope.pagination.current,
+        'action': 'list'
       };
       $http.post(API_PREFIX + 'user',
-        data
-      )
-      .success(function(data, status, headers, config) {
-        $scope.users = data['users'];
-        $scope.pagination.total = Math.ceil(data['num'] / $scope.pagination.perPage);
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
+          data
+        )
+        .success(function(data, status, headers, config) {
+          $scope.users = data['users'];
+          $scope.pagination.total = Math.ceil(data['num'] / $scope.pagination.perPage);
+        })
+        .error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+        });
     };
     $scope.getUsers();
   });

@@ -52,7 +52,6 @@ angular.module('cmsocial')
     $scope.vars.language = l10n.getLanguage();
     $scope.setLanguage = function() {
       l10n.setLanguage($scope.vars.language);
-      console.log(l10n.getLanguage());
     };
     $scope.languages = [{
       'code': 'en',

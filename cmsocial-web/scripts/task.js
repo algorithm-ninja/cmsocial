@@ -15,7 +15,7 @@ angular.module('cmsocial')
     };
   })
   .controller('TaskbarCtrl', function($scope, $stateParams, $http, $state,
-    $rootScope, $timeout, userManager, notificationHub, taskbarManager,
+    $rootScope, $timeout, notificationHub, taskbarManager,
     l10n, contestManager, API_PREFIX) {
 
     delete $rootScope.task;
@@ -44,8 +44,6 @@ angular.module('cmsocial')
           'action': 'add',
           'tag': $scope.tag.newtag,
           'task': $rootScope.task.name,
-          'username': userManager.getUser().username,
-          'token': userManager.getUser().token
         })
         .success(function(data, status, headers, config) {
           if (data.success === 0) {
@@ -66,8 +64,6 @@ angular.module('cmsocial')
             'action': 'remove',
             'tag': tag,
             'task': $rootScope.task.name,
-            'username': userManager.getUser().username,
-            'token': userManager.getUser().token
           })
           .success(function(data, status, headers, config) {
             if (data.success === 0) {
@@ -102,8 +98,6 @@ angular.module('cmsocial')
     $scope.loadTask = function() {
       return $http.post(API_PREFIX + 'task', {
           'name': $stateParams.taskName,
-          'username': userManager.getUser().username,
-          'token': userManager.getUser().token,
           'action': 'get'
         })
         .then(
@@ -125,13 +119,11 @@ angular.module('cmsocial')
     taskbarManager.setActiveTab(2);
   })
   .controller('StatsCtrl', function($scope, $stateParams, $http,
-    notificationHub, userManager, taskbarManager, l10n, API_PREFIX) {
+    notificationHub, taskbarManager, l10n, API_PREFIX) {
     taskbarManager.setActiveTab(3);
     $scope.getStats = function() {
       $http.post(API_PREFIX + 'task', {
           'name': $stateParams.taskName,
-          'username': userManager.getUser().username,
-          'token': userManager.getUser().token,
           'action': 'stats'
         }).success(function(data, status, headers, config) {
           $scope.nsubs = data.nsubs;
@@ -147,7 +139,7 @@ angular.module('cmsocial')
     $scope.getStats();
   })
   .controller('SubmissionsCtrl', function($scope, $stateParams, $location,
-    $http, $timeout, $rootScope, userManager, notificationHub,
+    $http, $timeout, $rootScope, notificationHub,
     subsDatabase, taskbarManager, l10n, contestManager, API_PREFIX) {
     taskbarManager.setActiveTab(4);
     subsDatabase.load($stateParams.taskName);
@@ -271,8 +263,6 @@ angular.module('cmsocial')
 
     $scope.submitFiles = function() {
       var data = {};
-      data['username'] = userManager.getUser().username;
-      data['token'] = userManager.getUser().token;
       data['files'] = $scope.files;
       data['action'] = 'new';
       data['task_name'] = $scope.taskName;

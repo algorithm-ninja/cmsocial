@@ -74,6 +74,9 @@ class SocialContest(Base):
     # Analytics configuration
     analytics = Column(Unicode, nullable=True)
 
+    # Domain for authentication cookies - may be null (meaning default domain)
+    cookie_domain = Column(Unicode, nullable=True)
+
     # Home page template URL - some file on the database, or None for the
     # default home page.
     homepage = Column(Unicode, nullable=True)
