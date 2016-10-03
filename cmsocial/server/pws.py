@@ -27,6 +27,7 @@ import gevent.wsgi
 import pkg_resources
 import requests
 from gevent import monkey
+from gevent.subprocess import check_output, CalledProcessError, STDOUT
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import and_, or_
@@ -225,6 +226,12 @@ class APIHandler(object):
         return response
 
     # Useful methods
+    def decode_file(self, f):
+        f['data'] = f['data'].split(',')[-1]
+        f['body'] = b64decode(f['data'])
+        del f['data']
+        return f
+
     def sliced_query(self, query):
         res = query.slice(local.data['first'], local.data['last']).all()
         num = query.count()
@@ -870,6 +877,27 @@ class APIHandler(object):
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
+        elif local.data['action'] == 'new':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            archive_data = self.decode_file(local.data['files']['submission'])
+            with tempfile.NamedTemporaryFile() as temp:
+                temp.write(archive_data['body'])
+                temp.flush()
+                status = 0
+                script_file = os.path.join(
+                    pkg_resources.resource_filename('cmsocial', 'scripts'),
+                    'import_lessons_from_zip.sh')
+                try:
+                    local.resp['log'] = check_output([
+                        script_file,
+                        str(local.contest.id),
+                        temp.name], stderr=STDOUT)
+                except CalledProcessError as e:
+                    status = e.returncode
+                    local.resp['log'] = e.output
+            if status != 0:
+                return 'Error %s in script' % status
         else:
             return 'Bad Request'
 
@@ -1300,15 +1328,9 @@ class APIHandler(object):
             except KeyError:
                 return 'Not found'
 
-            def decode_file(f):
-                f['data'] = f['data'].split(',')[-1]
-                f['body'] = b64decode(f['data'])
-                del f['data']
-                return f
-
             if len(local.data['files']) == 1 and \
                'submission' in local.data['files']:
-                archive_data = decode_file(local.data['files']['submission'])
+                archive_data = self.decode_file(local.data['files']['submission'])
                 del local.data['files']['submission']
 
                 # Create the archive.
@@ -1333,7 +1355,7 @@ class APIHandler(object):
                 archive.cleanup()
             else:
                 files_sent = \
-                    dict([(k, decode_file(v))
+                    dict([(k, self.decode_file(v))
                           for k, v in local.data['files'].iteritems()])
 
             # TODO: implement partial submissions (?)

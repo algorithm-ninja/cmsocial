@@ -1,6 +1,30 @@
 <div class="container">
   <div class="row container">
     <div>
+        <div class="row" ng-if="userManager.getUser().access_level == 0">
+        {{"Here you can upload new lessons. You should send a single .zip file, containing one or more folders with a name that starts with 'Lezione '. Each folder should contain only folders that contain an exercise. Each exercise folder must contain a certain number of files named 'input%d.txt', the same amount of files named 'output%d.txt', a file named 'testo.pdf' and a file named 'testo.tex'. This last file should contain a '\\maketitle{task_title}' line." | l10n}}
+        </div>
+        <div class="row container" ng-if="userManager.getUser().access_level == 0">
+            <div class="col-sm-3" />
+            <form class="well col-sm-6 form-horizontal" ng-submit="loadFiles()" id="zipform" class="pull-right">
+              <div class="form-group">
+                <label class="control-label col-lg-3" for="zipfile"><i class="fa fa-floppy-o"></i> {{'Lesson file' | l10n}}</label>
+                <div class="col-lg-9">
+                  <input type="file" id="zipfile" name="submission"/>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-offset-3 col-lg-9">
+                  <button type="submit" class="btn btn-success"><i class="fa" ng-class="{'fa-spin': !submitCompleted, 'fa-paper-plane': submitCompleted, 'fa-circle-o-notch': !submitCompleted}"></i> {{'Submit' | l10n}}</button>
+                </div>
+              </div>
+            </form>
+            <div class="col-sm-3" />
+        </div>
+        <pre class="row well log-view" ng-if="userManager.getUser().access_level == 0 && lessonLog != ''">
+          {{lessonLog}}
+        </pre>
+
       <div ng-repeat="lesson in lessons">
         <span ng-if="userManager.getUser().access_level == 0" class="public-toggle">Public <input type="checkbox" ng-model="lesson.access_level" ng-true-value="7" ng-false-value="0" ng-change="togglePublic(lesson)"/></span>
         <span ng-if="userManager.getUser().access_level == 0" class="delete-lesson"><input class="btn btn-danger" type="button" ng-click="deleteLesson(lesson)" value="Delete"/></span>
