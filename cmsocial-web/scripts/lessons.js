@@ -4,7 +4,7 @@
 
 angular.module('cmsocial')
   .controller('LessonsCtrl', function($scope, $state, navbarManager,
-    $http, notificationHub, l10n, API_PREFIX) {
+    $http, notificationHub, userManager, l10n, API_PREFIX) {
     navbarManager.setActiveTab(2);
     $scope.userManager = userManager;
     $scope.getLessons = function() {
