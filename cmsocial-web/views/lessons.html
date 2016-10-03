@@ -2,7 +2,7 @@
   <div class="row container">
     <div>
         <div class="row" ng-if="userManager.getUser().access_level == 0">
-        {{"Here you can upload new lessons. You should send a single .zip file, containing one or more folders with a name that starts with 'Lezione '. Each folder should contain only folders that contain an exercise. Each exercise folder must contain a certain number of files named 'input%d.txt', the same amount of files named 'output%d.txt', a file named 'testo.pdf' and a file named 'testo.tex'. This last file should contain a '\\maketitle{task_title}' line." | l10n}}
+        {{"Here you can upload new lessons. You should send a single .zip file, containing one or more folders with a name that starts with 'Lezione '. Each folder should contain only folders that contain an exercise. Each exercise folder must contain a certain number of files named 'input%d.txt', the same amount of files named 'output%d.txt', a file named 'testo.pdf' and a file named 'testo.tex'. This last file should contain a '\\title{task_title}' line." | l10n}}
         </div>
         <div class="row container" ng-if="userManager.getUser().access_level == 0">
             <div class="col-sm-3" />
