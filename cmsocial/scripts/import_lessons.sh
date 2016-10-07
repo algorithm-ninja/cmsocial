@@ -30,6 +30,12 @@ do
         WHERE NOT EXISTS (
             SELECT 1 FROM lessons WHERE title = '${lez}' AND contest_id = ${CONTEST}
         );
+    DELETE FROM lesson_tasks WHERE
+        lesson_id IN (
+            SELECT id
+            FROM lessons
+            WHERE lessons.title = '${lez}' AND lessons.contest_id = ${CONTEST}
+        );
 EOF
     for es in *
     do
@@ -64,17 +70,6 @@ EOF
         popd
         rm -rf $tname
         cat >> $TMP << EOF
-DELETE FROM lesson_tasks WHERE 
-    lesson_id IN (
-        SELECT id
-        FROM lessons
-        WHERE lessons.title = '${lez}' AND lessons.contest_id = ${CONTEST}
-    ) AND task_id IN (
-        SELECT id
-        FROM tasks
-        WHERE tasks.name = '${tname}'
-    );
-
 WITH lesson AS (
     SELECT *
     FROM lessons
