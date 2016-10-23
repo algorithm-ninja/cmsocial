@@ -111,8 +111,8 @@ BEGIN;
 	BEGIN
 		BEGIN
 		    -- TODO: fare meglio di un hard-coded 6
-			INSERT INTO social_users (id, registration_time, access_level)
-			VALUES (NEW.id, now(), 6);
+			INSERT INTO social_users (id, registration_time, access_level, last_recover)
+			VALUES (NEW.id, now(), 6, '1970-01-01 00:00:00');
 		EXCEPTION WHEN unique_violation THEN
 			RETURN NULL;
 		END;
