@@ -5,7 +5,9 @@ A web application that builds a social coding platform upon [CMS](https://github
 
 ## Installing cmsocial
 Run `make` to build the web application (`make ONLINE=1` if you don't need local copies of the used libraries). Then run `python2 ./setup.py install` as root.
-Run `cp config/cmsocial.ini.sample /usr/local/etc/cmsocial.ini` as root.
+
+Create a configuration file `config/cmsocial.ini` (you can find an example in `config/cmsocial.ini.sample`) and install it by running  `cp config/cmsocial.ini /usr/local/etc/cmsocial.ini` as root.
+
 Add service `PracticeWebServer` to `/usr/local/etc/cms.conf` in `core_services` section.
 
 ## Database creation instructions
