@@ -286,6 +286,7 @@ angular.module('cmsocial')
         })
         .error(function(data, status, headers, config) {
           notificationHub.serverError(status);
+          subsDatabase.submitCompleted = true; // stop loading
         });
     };
     $scope.showDetails = function(id) {
