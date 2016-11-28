@@ -222,7 +222,10 @@ class APIHandler(object):
         if ans is None:
             response.data = json.dumps(local.resp)
         else:
-            response.data = json.dumps({'success': 0, 'error': ans})
+            if 'log' in local.resp:
+                response.data = json.dumps({'success': 0, 'error': ans, 'log': local.resp['log']})
+            else:
+                response.data = json.dumps({'success': 0, 'error': ans})
         return response
 
     # Useful methods
