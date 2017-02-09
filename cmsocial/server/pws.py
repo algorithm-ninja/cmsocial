@@ -565,7 +565,7 @@ class APIHandler(object):
             if local.contest.social_contest.is_captcha_enabled():
                 r = requests.post(
                     "https://www.google.com/recaptcha/api/siteverify",
-                    data={'secret': local.contest.recaptcha_secret_key,
+                    data={'secret': local.contest.social_contest.recaptcha_secret_key,
                           'response': recaptcha_response},  # , 'remoteip': ''},
                     verify=False)
                 try:

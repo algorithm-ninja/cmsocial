@@ -1,4 +1,5 @@
 BEGIN;
+
 -- Fill up social_contests with sane defaults
 INSERT INTO social_contests (id, access_level, social_enabled, top_left_name, title)
     SELECT id, 7, true, name, name FROM contests;

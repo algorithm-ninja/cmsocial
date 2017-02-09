@@ -88,5 +88,5 @@ class SocialContest(Base):
             self.mail_from is not None
 
     def is_captcha_enabled(self):
-        return self.recaptcha_secret_key != RECAPTCHA_DEFAULT_SECRET and \
-            self.recaptcha_public_key != RECAPTCHA_DEFAULT_PUBLIC
+        return self.recaptcha_secret_key is not None and \
+            self.recaptcha_public_key is not None
