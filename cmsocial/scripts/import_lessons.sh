@@ -22,6 +22,7 @@ echo BEGIN\; > $TMP
 
 for lez in "$@"
 do
+    echo Importing $lez...
     pushd "$lez"
     cat >> $TMP << EOF
 
@@ -37,9 +38,12 @@ do
             WHERE lessons.title = '${lez}' AND lessons.contest_id = ${CONTEST}
         );
 EOF
+    ls
     for es in *
     do
-        tname="Lez${lez#Lezione }${es}c${CONTEST}"
+        echo Processing task $es
+        [ -d "$es" ] || continue
+        tname="$(echo Lez${lez#Lezione }${es}c${CONTEST} | sed s/\ /_/g)"
         ttitle=$(grep title\{ $es/testo.tex | sed 's/.*{\(.*\)}/\1/' | sed s/\\$//g)
         mkdir $tname
         mkdir $tname/{input,output,testo,att}
