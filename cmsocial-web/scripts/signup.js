@@ -56,7 +56,6 @@ angular.module('cmsocial')
       'email2': '',
       'password': '',
       'password2': '',
-      'recaptcha_response': '',
     };
     $scope.errorMsg = {
       'password': 'Password\'s too short',
@@ -99,7 +98,10 @@ angular.module('cmsocial')
         $("#email2").focus();
         return;
       }
+
       var data = $scope.user;
+      data['recaptcha_response'] = document.getElementById("g-recaptcha-response").value
+
       data['action'] = 'new';
       $http.post(API_PREFIX + 'user', data)
         .success(function(data, status, headers, config) {

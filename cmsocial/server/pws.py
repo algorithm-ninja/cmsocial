@@ -457,17 +457,23 @@ class APIHandler(object):
             pkg_resources.resource_filename('cmsocial-web-build', ''),
             filename)
 
-        response = Response()
-        response.status_code = 200
-        response.mimetype = 'application/octet-stream'
-        mimetype = mimetypes.guess_type(filename)[0]
-        if mimetype is not None:
-            response.mimetype = mimetype
-        response.last_modified = \
-            datetime.utcfromtimestamp(os.path.getmtime(path))\
-                    .replace(microsecond=0)
-        response.response = wrap_file(environ, io.open(path, 'rb'))
-        response.direct_passthrough = True
+        try:
+            response = Response()
+            response.status_code = 200
+            response.mimetype = 'application/octet-stream'
+            mimetype = mimetypes.guess_type(filename)[0]
+            if mimetype is not None:
+                response.mimetype = mimetype
+            response.last_modified = \
+                datetime.utcfromtimestamp(os.path.getmtime(path))\
+                        .replace(microsecond=0)
+            response.response = wrap_file(environ, io.open(path, 'rb'))
+            response.direct_passthrough = True
+        except OSError:
+            response = Response()
+            response.status_code = 404
+            response.data = "404 Not Found"
+
         return response
 
     # Handlers that require JSON data

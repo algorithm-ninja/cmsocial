@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap-theme.css" cdn="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"/>
     <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.css" cdn="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="styles/main.css">
-    <script src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   </head>
 
   <body ng-app="cmsocial">
@@ -18,21 +18,23 @@
     <div ui-view></div>
     <foot></foot>
 
-    <script src="node_modules/jquery/dist/jquery.js" cdn="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="node_modules/angular/angular.js" cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-    <script src="node_modules/bootstrap/dist/js/bootstrap.js" cdn="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="node_modules/angular-recaptcha/release/angular-recaptcha.js" cdn="//cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.0.4/angular-recaptcha.min.js"></script>
-    <script src="node_modules/angular-animate/angular-animate.js" cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
-    <script src="node_modules/angular-cookies/angular-cookies.js" cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-cookies.min.js"></script>
-    <script src="node_modules/angular-resource/angular-resource.js" cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-resource.min.js"></script>
-    <script src="node_modules/angular-route/angular-route.js" cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.min.js"></script>
-    <script src="node_modules/angular-sanitize/angular-sanitize.js" cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-sanitize.min.js"></script>
-    <script src="node_modules/angular-touch/angular-touch.js" cdn="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-touch.min.js"></script>
-    <script src="node_modules/angular-ui-router/release/angular-ui-router.js" cdn="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
-    <script src="node_modules/angular-md5/angular-md5.js" cdn="//cdnjs.cloudflare.com/ajax/libs/angular-md5/0.1.10/angular-md5.min.js"></script>
-    <script src="node_modules/ace-builds/src-min-noconflict/ace.js" cdn="//cdnjs.cloudflare.com/ajax/libs/ace/1.2.2/ace.js"></script>
-    <script src="node_modules/angular-ui-ace/src/ui-ace.js" cdn="//cdn.rawgit.com/angular-ui/ui-ace/v0.2.3/ui-ace.min.js"></script>
-    <script src="node_modules/mathjax/MathJax.js?config=TeX-AMS_HTML" cdn="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <script src="node_modules/react/dist/react.js" cdn="https://unpkg.com/react@15.4.2/dist/react.min.js"></script>
+    <script src="node_modules/react-dom/dist/react-dom.js" cdn="https://unpkg.com/react-dom@15.4.2/dist/react-dom.min.js"></script>
+    <script src="node_modules/jquery/dist/jquery.js" cdn="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="node_modules/angular/angular.js" cdn="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.js" cdn="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="node_modules/react-recaptcha/dist/react-recaptcha.js" cdn="https://unpkg.com/react-dom@2.2.6/dist/react-recaptcha.min.js"></script>
+    <script src="node_modules/angular-animate/angular-animate.js" cdn="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+    <script src="node_modules/angular-cookies/angular-cookies.js" cdn="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-cookies.min.js"></script>
+    <script src="node_modules/angular-resource/angular-resource.js" cdn="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-resource.min.js"></script>
+    <script src="node_modules/angular-route/angular-route.js" cdn="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.min.js"></script>
+    <script src="node_modules/angular-sanitize/angular-sanitize.js" cdn="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-sanitize.min.js"></script>
+    <script src="node_modules/angular-touch/angular-touch.js" cdn="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-touch.min.js"></script>
+    <script src="node_modules/angular-ui-router/release/angular-ui-router.js" cdn="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+    <script src="node_modules/angular-md5/angular-md5.js" cdn="https://cdnjs.cloudflare.com/ajax/libs/angular-md5/0.1.10/angular-md5.min.js"></script>
+    <script src="node_modules/ace-builds/src-min-noconflict/ace.js" cdn="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.2/ace.js"></script>
+    <script src="node_modules/angular-ui-ace/src/ui-ace.js" cdn="https://cdn.rawgit.com/angular-ui/ui-ace/v0.2.3/ui-ace.min.js"></script>
+    <script src="node_modules/mathjax/MathJax.js?config=TeX-AMS_HTML" cdn="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
     <script src="scripts/app.processed.js"></script>
   </body>
 </html>

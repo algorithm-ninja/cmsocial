@@ -13,10 +13,12 @@ endif
 
 ifeq ($(PROD), 1)
 STRIPDEBUG=sed '/<!-- *start  *debug *-->/,/<!-- *end  *debug *-->/d'
-UGLIFY=node_modules/.bin/uglifyjs -c --
+UGLIFY=node_modules/.bin/uglifyjs
+BABEL=node_modules/.bin/babel --
 else
 STRIPDEBUG=cat
 UGLIFY=cat
+BABEL=node_modules/.bin/babel --
 endif
 
 WEBDIRS=$(shell find cmsocial-web -type d)
@@ -62,6 +64,7 @@ $(DEST)/__init__.py: cmsocial-web/__init__.py
 
 tmp: cmsocial-web
 	mkdir -p $(TMPDIRS)
+	cp cmsocial-web/.babelrc tmp
 	touch tmp
 
 $(DEST)/custom_images: config/custom_images | $(DEST)
@@ -89,7 +92,7 @@ tmp/%.css: cmsocial-web/%.less node_modules | tmp
 	node_modules/.bin/lessc $< $@
 
 $(DEST)/scripts/app.processed.js: $(TMPJS) | node_modules
-	${UGLIFY} $^ > $@
+	${BABEL} $^ | ${UGLIFY} > $@
 
 tmp/%.js: cmsocial-web/%.js | tmp
 	cat $< | $(STRIPDEBUG) > $@

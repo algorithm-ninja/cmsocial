@@ -55,13 +55,14 @@
             </div>
           </div>
         </fieldset>
-        <div class="form-group" ng-if="cm.getContest().is_captcha_enabled" >
-          <div class="col-sm-offset-4 col-sm-6"
-            vc-recaptcha
-            ng-model="user.recaptcha_response"
-            key="{{contestManager.getContest().recaptcha_public_key}}"
-          ></div>
+
+        <div class="form-group">
+            <label class="col-sm-4 control-label" for="email2">{{'Anti-spam check' | l10n}}</label>
+            <div class="col-sm-6">
+                <div id="recaptcha-div"></div>
+            </div>
         </div>
+
         <div class="form-group">
           <div class="col-sm-offset-4 col-sm-8">
             <button type="submit" class="btn btn-default">{{'Sign up' | l10n}}</button>

@@ -18,21 +18,35 @@ angular.module('cmsocial')
     };
     var analyticsCreated = false;
     var getContestData = function() {
-      $http.post(API_PREFIX + "contest", {
-          "action": "get"
-        })
-        .success(function(data, status, headers, config) {
-          contest = data;
-          $window.document.title = contest.title;
-          if (!analyticsCreated) {
-            createAnalytics();
-            analyticsCreated = true;
-          }
-        }).error(function(data, status, headers, config) {
-          notificationHub.serverError(status);
-        });
+      contest = $http({
+        url: API_PREFIX + "contest",
+        method: "POST",
+        data: {action: "get"}
+      }).then(function(response) {
+        contest = response.data;
+        $window.document.title = contest.title;
+
+        if (!analyticsCreated) {
+          createAnalytics();
+          analyticsCreated = true;
+        }
+
+        var Recaptcha = ReactRecaptcha;
+
+        var recaptchaDiv = document.getElementById('recaptcha-div');
+        ReactDOM.render(
+          <Recaptcha
+            sitekey={contest.recaptcha_public_key}
+          />,
+          recaptchaDiv
+        );
+
+      }, function(response) {
+        notificationHub.serverError(response.status);
+      });
     };
     getContestData();
+
     return {
       getContest: function() {
         return contest;
