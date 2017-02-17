@@ -878,11 +878,19 @@ class APIHandler(object):
                 lesson = local.session.query(Lesson)\
                     .filter(Lesson.contest_id == local.contest.id)\
                     .filter(Lesson.id == local.data['id']).first()
+                deleted_tasks = []
                 for lt in lesson.tasks:
+                    deleted_tasks.append(lt.task.num)
                     local.session.delete(lt.task.social_task)
                     local.session.delete(lt.task)
                     local.session.delete(lt)
                 local.session.delete(lesson)
+                local.session.flush()
+                for tn in sorted(deleted_tasks, reverse=True):
+                    for t in local.session.query(Task)\
+                        .filter(Task.contest_id == local.contest.id)\
+                        .filter(Task.num > tn).all():
+                        t.num -= 1
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
