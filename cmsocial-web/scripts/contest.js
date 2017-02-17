@@ -18,7 +18,7 @@ angular.module('cmsocial')
     };
     var analyticsCreated = false;
     var getContestData = function() {
-      contest = $http({
+      $http({
         url: API_PREFIX + "contest",
         method: "POST",
         data: {action: "get"}
@@ -58,7 +58,8 @@ angular.module('cmsocial')
         return contest != null;
       },
       hasParticipation: function() {
-        return contest != null && contest.participates === true;
+        if (contest == null) return true;
+        return contest.participates === true;
       },
       refreshContest: function() {
         getContestData();
