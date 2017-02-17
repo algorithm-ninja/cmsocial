@@ -33,7 +33,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import and_, or_
 from werkzeug.exceptions import (BadRequest, HTTPException,
                                  InternalServerError, NotFound)
-from werkzeug.routing import Map, Rule
+from werkzeug.routing import Map, Rule, RequestRedirect
 from werkzeug.wrappers import Request, Response
 from werkzeug.wsgi import SharedDataMiddleware, responder, wrap_file
 
@@ -104,6 +104,7 @@ class APIHandler(object):
             Rule('/<contest>/<path:path>',
                  methods=['GET'], endpoint='staticfile'),
             Rule('/<contest>/', methods=['GET'], endpoint='index'),
+            Rule('/<contest>', redirect_to='/<contest>/'),
             Rule('/', methods=['GET'], endpoint='globalindex')
         ], encoding_errors='strict')
         self.file_cacher = parent.file_cacher
@@ -124,6 +125,8 @@ class APIHandler(object):
 
         try:
             endpoint, args = route.match()
+        except RequestRedirect as e:
+            return e
         except HTTPException:
             return NotFound()
 
