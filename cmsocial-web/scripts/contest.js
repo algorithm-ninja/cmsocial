@@ -34,12 +34,15 @@ angular.module('cmsocial')
         var Recaptcha = ReactRecaptcha;
 
         var recaptchaDiv = document.getElementById('recaptcha-div');
-        ReactDOM.render(
-          <Recaptcha
-            sitekey={contest.recaptcha_public_key}
-          />,
-          recaptchaDiv
-        );
+
+        if (recaptchaDiv) {
+            ReactDOM.render(
+              <Recaptcha
+                sitekey={contest.recaptcha_public_key}
+              />,
+              recaptchaDiv
+            );
+        }
 
       }, function(response) {
         notificationHub.serverError(response.status);

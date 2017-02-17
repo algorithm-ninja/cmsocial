@@ -45,13 +45,7 @@
           </p>
         </li>
       </ul>
-      <ul class="navbar navbar-right navbar-nav">
-        <form class="navbar-form form-inline">
-          <select class="input-small" ng-model="vars.language" ng-change="setLanguage()">
-            <option ng-repeat='lang in languages' value='{{lang.code}}'>{{lang.name}}</option>
-          </select>
-        </form>
-      </ul>
+
       <ul class="nav navbar-nav navbar-right">
         <li ng-if="!me.isLogged()" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-in fa-lg"></i> {{'Log in' | l10n}} <b class="caret"></b></a>
@@ -72,6 +66,7 @@
             </form>
           </div>
         </li>
+
         <li ng-if="me.isLogged()" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-user fa-lg"></i>
@@ -93,6 +88,14 @@
               </a>
             </li>
           </ul>
+        </li>
+
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-language fa-lg"></i>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu" id="langsel"></ul>
         </li>
       </ul>
     </div><!--/.navbar-collapse -->

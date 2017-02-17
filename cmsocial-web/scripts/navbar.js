@@ -17,6 +17,15 @@
  */
 'use strict';
 
+var _l10n;
+var langlist = [{
+  'code': 'en',
+  'name': 'English'
+}, {
+  'code': 'it',
+  'name': 'Italiano'
+}];
+
 angular.module('cmsocial')
   .directive('navbar', function() {
     return {
@@ -40,7 +49,7 @@ angular.module('cmsocial')
     };
   })
   .controller('NavbarCtrl', function($scope, $location, userManager,
-    navbarManager, contestManager, l10n) {
+        navbarManager, contestManager, l10n) {
     $('.signin-form input').click(function(e) {
       e.stopPropagation();
     });
@@ -48,16 +57,50 @@ angular.module('cmsocial')
     $scope.cm = contestManager;
     $scope.participate = contestManager.participate;
     $scope.isActiveTab = navbarManager.isActiveTab;
-    $scope.vars = {};
-    $scope.vars.language = l10n.getLanguage();
-    $scope.setLanguage = function() {
-      l10n.setLanguage($scope.vars.language);
-    };
-    $scope.languages = [{
-      'code': 'en',
-      'name': 'English'
-    }, {
-      'code': 'it',
-      'name': 'Italiano'
-    }];
+
+    _l10n = l10n;
+
+    ReactDOM.render(
+      <LanguageSelector/>,
+      document.getElementById("langsel")
+    );
+
+    // ugly hack because of react limitation
+    let x = document.getElementsByTagName("something");
+    for (let y of x) {
+        while (y.childNodes.length > 0) {
+            y.parentNode.appendChild(y.childNodes[0]);
+        }
+    }
   });
+
+
+class LanguageSelector extends React.Component {
+    setLang(lang) {
+        _l10n.setLanguage(lang);
+        window.location.reload();
+    }
+
+    render() {
+        let x = [], kk = 0;
+        for (let lang of langlist) {
+            // FIXME: put flag icon besides {lang.name}
+
+            x.push(
+              <li key={kk} className={lang.code == _l10n.getLanguage() ? 'active' : ''}>
+                <a onClick={this.setLang.bind(this, lang.code)}>
+                  {lang.name}
+                </a>
+              </li>
+            );
+
+            kk += 1;
+        }
+
+        return (
+            <something>
+                {x}
+            </something>
+        );
+    }
+}
