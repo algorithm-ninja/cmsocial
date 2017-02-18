@@ -5,6 +5,8 @@
 angular.module('cmsocial')
   .factory('contestManager', function($http, $window, notificationHub, API_PREFIX) {
     var contest = null;
+    var contestPromise;
+
     var createAnalytics = function() {
       ! function(A, n, g, u, l, a, r) {
         A.GoogleAnalyticsObject = l, A[l] = A[l] || function() {
@@ -18,7 +20,7 @@ angular.module('cmsocial')
     };
     var analyticsCreated = false;
     var getContestData = function() {
-      $http({
+      contestPromise = $http({
         url: API_PREFIX + "contest",
         method: "POST",
         data: {action: "get"}
@@ -30,20 +32,6 @@ angular.module('cmsocial')
           createAnalytics();
           analyticsCreated = true;
         }
-
-        var Recaptcha = ReactRecaptcha;
-
-        var recaptchaDiv = document.getElementById('recaptcha-div');
-
-        if (recaptchaDiv) {
-            ReactDOM.render(
-              <Recaptcha
-                sitekey={contest.recaptcha_public_key}
-              />,
-              recaptchaDiv
-            );
-        }
-
       }, function(response) {
         notificationHub.serverError(response.status);
       });
@@ -53,6 +41,9 @@ angular.module('cmsocial')
     return {
       getContest: function() {
         return contest;
+      },
+      getContestPromise: function() {
+        return contestPromise;
       },
       hasContest: function() {
         return contest != null;

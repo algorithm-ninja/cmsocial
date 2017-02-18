@@ -25,6 +25,20 @@ angular.module('cmsocial')
     navbarManager.setActiveTab(5);
     $scope.cm = contestManager;
 
+    contestManager.getContestPromise().then(function(response) {
+        var Recaptcha = ReactRecaptcha;
+        // FIXME: why is this onloadCallback needed??
+        //        see https://github.com/appleboy/react-recaptcha/issues/181
+        ReactDOM.render(
+            <Recaptcha
+                sitekey={contestManager.getContest().recaptcha_public_key}
+                render="explicit"
+                onloadCallback={console.log.bind(this, "recaptcha loaded")}
+            />,
+            document.getElementById('recaptcha-div')
+        );
+    });
+
     $(".avatar")
       .load(function() {
         $(".avatar-loader").hide();
@@ -100,7 +114,12 @@ angular.module('cmsocial')
       }
 
       var data = $scope.user;
-      data['recaptcha_response'] = document.getElementById("g-recaptcha-response").value
+      // FIXME: the following doesn't work because if you switch multiple times
+      //        between, e.g., "Signup" and "Ranking", many recaptchas will be
+      //        rendered, and in the end the correct ID will be something like
+      //        "g-recaptcha-response-4" or similar, so we just look by classname
+      //data['recaptcha_response'] = document.getElementById("g-recaptcha-response").value
+      data['recaptcha_response'] = document.querySelectorAll("textarea.g-recaptcha-response")[0].value;
 
       data['action'] = 'new';
       $http.post(API_PREFIX + 'user', data)

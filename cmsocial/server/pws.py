@@ -578,9 +578,9 @@ class APIHandler(object):
                           'response': recaptcha_response},  # , 'remoteip': ''},
                     verify=False)
                 try:
-                    assert r.json()["success"] == True
+                    assert r.json()["success"] is True
                 except:
-                    return "Bad request"
+                    return "Anti-spam check failed"
 
             token = self.hashpw(password)
 
