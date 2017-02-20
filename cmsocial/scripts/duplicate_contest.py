@@ -2,7 +2,8 @@
 
 import argparse
 import sys
-from cms.db import SessionGen, Task, Contest, Participation, User, engine, Dataset, Testcase
+from cms.db import SessionGen, Task, Contest, Participation, User, engine, Dataset, Testcase, \
+        Statement
 from cmsocial.db import SocialTask, SocialContest, SocialParticipation, SocialUser, Lesson, \
         LessonTask
 from sqlalchemy.orm.session import make_transient
@@ -123,7 +124,7 @@ def main():
             (Task, "contest_id"),
             (Lesson, "contest_id")],
         Participation: [(SocialParticipation, "id")],
-        Task: [(Dataset, "task_id"), (LessonTask, "task_id")],
+        Task: [(Dataset, "task_id"), (LessonTask, "task_id"), (Statement, "task_id")],
         Dataset: [(Testcase, "dataset_id")],
         Lesson: [(LessonTask, "lesson_id")]
     }
@@ -139,7 +140,7 @@ def main():
         Task: [("name", lambda x: x.name + "_dup")],
         SocialTask: [("access_level", lambda x: 0)],
         Lesson: [("access_level", lambda x: 0)],
-        SocialUser: [("score", lambda x: 0)]
+        SocialParticipation: [("score", lambda x: 0)]
     }
     clone_backedit = {Dataset: [(Task, "active_dataset_id")]}
     with SessionGen() as session:
