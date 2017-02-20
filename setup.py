@@ -28,7 +28,8 @@ setup(
 #            "cmsocialServer=cmsocial.server.pws:main",   # we must rename this because of CMS's ResourceService
             "cmsPracticeWebServer=cmsocial.server.pws:main",
             "cmsocialSyncTasks=cmsocial.scripts.synctasks:main",
-            "cmsocialSyncUsers=cmsocial.scripts.syncusers:main"
+            "cmsocialSyncUsers=cmsocial.scripts.syncusers:main",
+            "cmsocialDuplicateContest=cmsocial.scripts.duplicate_contest:main"
         ]
     },
     keywords="ioi programming contest grader management system",
