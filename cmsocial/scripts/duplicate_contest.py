@@ -138,7 +138,8 @@ def main():
         Contest: [("name", lambda x: new_contest)],
         Task: [("name", lambda x: x.name + "_dup")],
         SocialTask: [("access_level", lambda x: 0)],
-        Lesson: [("access_level", lambda x: 0)]
+        Lesson: [("access_level", lambda x: 0)],
+        SocialUser: [("score", lambda x: 0)]
     }
     clone_backedit = {Dataset: [(Task, "active_dataset_id")]}
     with SessionGen() as session:
