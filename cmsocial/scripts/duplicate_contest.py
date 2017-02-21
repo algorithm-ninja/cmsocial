@@ -3,7 +3,7 @@
 import argparse
 import sys
 from cms.db import SessionGen, Task, Contest, Participation, User, engine, Dataset, Testcase, \
-        Statement
+        Statement, Attachment, Manager, SubmissionFormatElement
 from cmsocial.db import SocialTask, SocialContest, SocialParticipation, SocialUser, Lesson, \
         LessonTask
 from sqlalchemy.orm.session import make_transient
@@ -124,8 +124,15 @@ def main():
             (Task, "contest_id"),
             (Lesson, "contest_id")],
         Participation: [(SocialParticipation, "id")],
-        Task: [(Dataset, "task_id"), (LessonTask, "task_id"), (Statement, "task_id")],
-        Dataset: [(Testcase, "dataset_id")],
+        Task: [
+            (Dataset, "task_id"),
+            (LessonTask, "task_id"),
+            (Statement, "task_id"),
+            (Attachment, "task_id"),
+            (SocialTask, "id"),
+            (SubmissionFormatElement, "task_id")
+        ],
+        Dataset: [(Testcase, "dataset_id"), (Manager, "dataset_id")],
         Lesson: [(LessonTask, "lesson_id")]
     }
     clone_filter = {
