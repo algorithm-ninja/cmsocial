@@ -1204,6 +1204,30 @@ class APIHandler(object):
                 .slice(0, 10).all()
             local.resp['best'] = [{'username': b.participation.user.username,
                                    'time': b.time} for b in best]
+        elif local.data['action'] == 'bulk_download':
+            tmp_path = tempfile.mkdtemp()
+
+            for f in local.data['attachments']:
+                # Retrieve each attachment by its digest and store it with
+                # its name.
+                self.file_cacher.get_file_to_path(
+                    f[1],
+                    os.path.join(tmp_path, f[0]))
+
+            # Create a zip archive named after task name.
+            archive_name = next(tempfile._get_candidate_names()) + '.zip'
+            archive_path = os.path.join(tmp_path, archive_name)
+            Archive.create_from_dir(tmp_path, archive_path)
+
+            # Store the archive in FileCacher and return its digest.
+            digest = self.file_cacher.put_file_from_path(archive_path)
+            local.resp['digest'] = digest
+
+            # Cleanup
+            try:
+                rmtree(tmp_path)
+            except:
+                pass
         else:
             return 'Bad request'
 

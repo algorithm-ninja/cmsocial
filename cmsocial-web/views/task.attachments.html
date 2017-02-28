@@ -1,6 +1,11 @@
 <div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">{{'Attachments' | l10n}}</h3>
+  <div class="panel-heading clearfix">
+    <!-- Default .panel-title font-size is 16px, but here .panel-title cannot be
+         used as it wrongly sets margin-top: 0px -->
+    <h5 style="font-size: 16px" class="pull-left">{{'Attachments' | l10n}} </h5>
+    <button class="btn btn-warning pull-right" ng-click="bulkDownload()">
+      <i class="fa fa-download"></i> {{'Download all' | l10n}}
+    </button>
   </div>
   <div class="panel-body">
     <div class="list-group">

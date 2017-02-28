@@ -100,6 +100,9 @@ angular.module('cmsocial')
     'Attachments': {
       it: 'Allegati'
     },
+    'Download all': {
+      it: 'Scarica tutto'
+    },
     'Stats': {
       it: 'Statistiche'
     },
