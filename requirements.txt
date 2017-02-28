@@ -2,4 +2,4 @@ sqlalchemy==0.9.10
 alembic==0.8.4
 bcrypt==3.1.1
 pyjwt==1.4.0
--e git://github.com/algorithm-ninja/cms.git@1681ee4841004190a293b290d93525a09acba9f3#egg=cms
+-e git://github.com/algorithm-ninja/cms.git@future#egg=cms

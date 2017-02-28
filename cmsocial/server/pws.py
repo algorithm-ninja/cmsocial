@@ -38,7 +38,8 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.wsgi import SharedDataMiddleware, responder, wrap_file
 
 import jwt
-from cms import SOURCE_EXT_TO_LANGUAGE_MAP, ServiceCoord
+from cms import ServiceCoord
+from cms.grading.languagemanager import SOURCE_EXTS, filename_to_language
 from cms.db import (Contest, File, Participation, SessionGen, Submission, Task,
                     Testcase, User)
 from cms.db.filecacher import FileCacher
@@ -1393,7 +1394,8 @@ class APIHandler(object):
                 files.append(f)
                 if sfe.filename.endswith('.%l'):
                     language = None
-                    for ext, l in SOURCE_EXT_TO_LANGUAGE_MAP.iteritems():
+                    for ext in SOURCE_EXTS:
+                        l = filename_to_language(ext)
                         if f['filename'].endswith(ext):
                             language = l
                     if language is None:
@@ -1407,7 +1409,7 @@ class APIHandler(object):
             # Add the submission
             timestamp = make_datetime()
             submission = Submission(timestamp,
-                                    sub_lang,
+                                    sub_lang.name,
                                     participation=local.participation,
                                     task=task)
             for f in files:

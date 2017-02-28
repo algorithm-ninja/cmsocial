@@ -160,40 +160,43 @@ angular.module('cmsocial')
       "Python": ".py"
     };
     var cmsLanguageMap = {
-      "c": "C",
-      "cpp": "C++",
-      "pas": "Pascal",
-      "py": "Python"
+      "C11 / gcc": "C",
+      "C++11 / g++": "C++",
+      "Pascal / fpc": "Pascal",
+      "Python 2 / CPython": "Python"
     };
     $scope.languages = [];
-    for (var lang in contestManager.getContest().languages) {
-      $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
-    }
+    contestManager.getContestPromise().then(function(response) {
+        for (var lang in contestManager.getContest().languages) {
+          $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
+        }
 
-    var preferred_language_key = "preferred_language_" + contestManager.getContest().name;
+        var preferred_language_key = "preferred_language_" + contestManager.getContest().name;
 
-    if (!localStorage.getItem(preferred_language_key) ||
-      $scope.languages.indexOf(localStorage.getItem(preferred_language_key)) == -1) {
-      localStorage.setItem(preferred_language_key, $scope.languages[0]);
-    }
+        if (!localStorage.getItem(preferred_language_key) ||
+          $scope.languages.indexOf(localStorage.getItem(preferred_language_key)) == -1) {
+          localStorage.setItem(preferred_language_key, $scope.languages[0]);
+        }
 
-    $scope.language = localStorage.getItem(preferred_language_key);
-    $scope.aceOption = {
-      mode: aceModeMap[$scope.language],
-      showPrintMargin: false,
-      onLoad: function(_ace) {
-        $scope.aceSession = _ace.getSession();
-        $scope.languageChanged = function(newL) {
-          $scope.language = newL;
-          localStorage.setItem(preferred_language_key, newL);
-          $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
+        $scope.language = localStorage.getItem(preferred_language_key);
+
+        $scope.aceOption = {
+          mode: aceModeMap[$scope.language],
+          showPrintMargin: false,
+          onLoad: function(_ace) {
+            $scope.aceSession = _ace.getSession();
+            $scope.languageChanged = function(newL) {
+              $scope.language = newL;
+              localStorage.setItem(preferred_language_key, newL);
+              $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
+            };
+          },
+          onChange: function(_ace) {
+            $scope.aceModel = $scope.aceSession.getDocument().getValue();
+            localStorage.setItem("source_code", $scope.aceModel);
+          }
         };
-      },
-      onChange: function(_ace) {
-        $scope.aceModel = $scope.aceSession.getDocument().getValue();
-        localStorage.setItem("source_code", $scope.aceModel);
-      }
-    };
+    });
 
     if (localStorage.getItem("source_code") === null) {
       localStorage.setItem("source_code", l10n.get("Write your code here"));
