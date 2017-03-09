@@ -952,20 +952,20 @@ class APIHandler(object):
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
-        elif local.data['action'] == 'swap':
-            if local.access_level != 0:
-                return 'Unauthorized'
-            try:
-                material1 = local.session.query(Material)\
-                    .filter(Material.contest_id == local.contest.id)\
-                    .filter(Material.id == local.data['id1']).first()
-                material2 = local.session.query(Material)\
-                    .filter(Material.contest_id == local.contest.id)\
-                    .filter(Material.id == local.data['id2']).first()
-                material1.position, material2.position = material2.position, material1.position
-                local.session.commit()
-            except KeyError, ValueError:
-                return 'Bad Request'
+        # elif local.data['action'] == 'swap':
+        #     if local.access_level != 0:
+        #         return 'Unauthorized'
+        #     try:
+        #         material1 = local.session.query(Material)\
+        #             .filter(Material.contest_id == local.contest.id)\
+        #             .filter(Material.id == local.data['id1']).first()
+        #         material2 = local.session.query(Material)\
+        #             .filter(Material.contest_id == local.contest.id)\
+        #             .filter(Material.id == local.data['id2']).first()
+        #         material1.position, material2.position = material2.position, material1.position
+        #         local.session.commit()
+        #     except KeyError, ValueError:
+        #         return 'Bad Request'
         elif local.data['action'] == 'delete':
             if local.access_level != 0:
                 return 'Unauthorized'

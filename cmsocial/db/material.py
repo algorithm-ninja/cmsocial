@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 from sqlalchemy.schema import Column, ForeignKey, CheckConstraint, \
     UniqueConstraint, ForeignKeyConstraint, Table
 from sqlalchemy.types import Boolean, Integer, Float, String, Unicode, \
-    Interval, Enum, Text, Serial
+    Interval, Enum, Text
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.ext.orderinglist import ordering_list
 
@@ -60,6 +60,3 @@ class Material(Base):
 
     # Text (in Markdown) of that material
     text = Column(Text, nullable=False, default='')
-
-    # Position of the material in the list
-    position = Column(Integer, Sequence('material_position_seq'))
