@@ -924,12 +924,12 @@ class APIHandler(object):
         else:
             return 'Bad Request'
 
-    def materials_handler(self):
+    def material_handler(self):
         if local.data['action'] == 'list':
             query = local.session.query(Material)\
                 .filter(Material.contest_id == Material.contest.id)\
                 .filter(Material.access_level >= Material.access_level)\
-                .order_by(desc(Material.id))
+                .order_by(asc(Material.position))
             local.resp['materials'] = [{
                     'id': m.id,
                     'title': m.title,
@@ -949,6 +949,20 @@ class APIHandler(object):
                     material.text = local.data['text']
                 if 'title' in local.data:
                     material.title = local.data['title']
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
+        elif local.data['action'] == 'swap':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                material1 = local.session.query(Material)\
+                    .filter(Material.contest_id == local.contest.id)\
+                    .filter(Material.id == local.data['id1']).first()
+                material2 = local.session.query(Material)\
+                    .filter(Material.contest_id == local.contest.id)\
+                    .filter(Material.id == local.data['id2']).first()
+                material1.position, material2.position = material2.position, material1.position
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
