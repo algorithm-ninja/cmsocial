@@ -127,7 +127,7 @@ angular
         controller: 'LessonsCtrl'
       })
       .state('test', {
-        url: '/test/{testName}',
+        url: '/tags/test/{testName}',
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
       })
