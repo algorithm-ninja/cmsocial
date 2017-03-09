@@ -132,12 +132,12 @@ angular
         controller: 'LessonsCtrl'
       })
       .state('test', {
-        url: '/test/{testName}',
+        url: '/tags/test/{testName}',
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
       })
       .state('techniques', {
-        url: '/techniques',
+        url: '/tags/techniques',
         controller: 'TechniquesPage',
         template: `<div class="container">
   <legend>Tasks by technique</legend>
