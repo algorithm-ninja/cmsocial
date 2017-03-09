@@ -356,8 +356,7 @@ class APIHandler(object):
 
         msg = MIMEText(body)
         msg['Subject'] = subject
-        msg['From'] = '%s <%s>' % (local.contest.name,
-                                   local.contest.social_contest.mail_from)
+        msg['From'] = local.contest.social_contest.mail_from
         msg['To'] = to
 
         sent = False
@@ -748,6 +747,8 @@ class APIHandler(object):
                 return 'No such user'
 
             if len(local.data['code']) > 0:
+                local.resp['type'] = 1
+
                 if local.data['code'] == user.social_user.recover_code:
                     user.social_user.recover_code = None
 
@@ -767,10 +768,11 @@ class APIHandler(object):
                 else:
                     return 'Wrong code'
             else:
+                local.resp['type'] = 2
+
                 # Check if enough time has passed
                 if datetime.utcnow() - user.social_user.last_recover < timedelta(days=1):
-                    local.resp[
-                        'message'] = 'You should already have received an email, if not, try tomorrow'
+                    local.resp['message'] = 'You should already have received an email, if not, try tomorrow'
                 else:
                     # Generate new code and mail it
                     user.social_user.recover_code = self.gencode()
@@ -779,8 +781,7 @@ class APIHandler(object):
 
                     if self.send_mail(user.email, "Code for password reset",
                                       "Code: %s" % user.social_user.recover_code):
-                        local.resp[
-                            'message'] = 'A code was sent, check your inbox'
+                        local.resp['message'] = 'A code was sent, check your inbox'
                     else:
                         return 'Internal Server Error'
         else:
@@ -1080,8 +1081,15 @@ class APIHandler(object):
         if local.data['action'] == 'list':
             tags = local.session.query(Tag)\
                 .order_by(Tag.id)\
-                .filter(Tag.hidden == False).all()
-            local.resp['tags'] = [t.name for t in tags]
+                .filter(Tag.hidden == False)
+
+            if local.data.get('filter') == 'techniques':
+                tags = tags.filter(Tag.is_technique == True)
+
+            if local.data.get('filter') == 'events':
+                tags = tags.filter(Tag.is_event == True)
+
+            local.resp['tags'] = [t.name for t in tags.all()]
         elif local.data['action'] == 'create':
             if local.access_level >= 4:
                 return 'Unauthorized'

@@ -82,7 +82,7 @@ angular.module('cmsocial')
       }
     };
   })
-  .controller('ForgotAccountCtrl', function($scope, $http, notificationHub,
+  .controller('ForgotAccountCtrl', function($scope, $http, $state, notificationHub,
     l10n, navbarManager, API_PREFIX) {
     navbarManager.setActiveTab(0);
     $scope.user = {
@@ -106,6 +106,11 @@ angular.module('cmsocial')
           $("#recover-code").focus();
         } else {
           notificationHub.createAlert('danger', l10n.get(ctx.data.error), 2);
+        }
+
+        // type = 1 (password resetting) or 2 (code sending)
+        if (ctx.data.type === 1 && ctx.data.success === 1) {
+            $state.go('overview');
         }
 
         $("#loading-indicator").hide();

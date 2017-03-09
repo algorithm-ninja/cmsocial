@@ -249,4 +249,26 @@ angular.module('cmsocial')
           notificationHub.serverError(status);
         });
     };
-  });
+  })
+  .controller('TechniquesPage', function($scope, $http, notificationHub, API_PREFIX) {
+    $scope.tags = [];
+    $http.post(API_PREFIX + 'tag', {
+      'action': 'list',
+      'filter': 'techniques'
+    })
+    .success(function(data, status, headers, config) {
+      var tags = data['tags'];
+      for (var idx in tags) {
+        $scope.tags.push(tags[idx]);
+      }
+    })
+    .error(function(data, status, headers, config) {
+      notificationHub.serverError(status);
+    });
+  })
+  .controller('EventsPage', function($scope, $http, notificationHub) {
+    $scope.ioi = [];
+    for (var i=2017; i>=2004; i--) {
+      $scope.ioi.push(i);
+    }
+  })

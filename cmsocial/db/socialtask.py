@@ -138,6 +138,9 @@ class Tag(Base):
 
     hidden = Column(Boolean)
 
+    is_technique = Column(Boolean, nullable=False)
+    is_event = Column(Boolean, nullable=False)
+
     description = Column(
         String,
         nullable=False
