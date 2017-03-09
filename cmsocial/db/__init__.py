@@ -8,5 +8,6 @@ from cmsocial.db.socialcontest import SocialContest
 from cmsocial.db.lesson import Lesson, LessonTask
 from cmsocial.db.test import Test, TestQuestion, QuestionFile, TestScore
 from cmsocial.db.location import Region, Province, City, Institute
+from cmsocial.db.material import Material
 from sqlalchemy.orm import relationship
 SocialUser.tasktags = relationship("TaskTag")

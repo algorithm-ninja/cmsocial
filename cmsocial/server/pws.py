@@ -47,6 +47,7 @@ from cms.io import Service
 from cmscommon.archive import Archive
 from cmscommon.datetime import make_datetime, make_timestamp
 from cmsocial.db.lesson import Lesson
+from cmsocial.db.material import Material
 from cmsocial.db.location import City, Institute, Province, Region
 from cmsocial.db.socialcontest import SocialContest
 from cmsocial.db.socialtask import SocialTask, Tag, TaskScore, TaskTag
@@ -773,7 +774,7 @@ class APIHandler(object):
                 else:
                     # Generate new code and mail it
                     user.social_user.recover_code = self.gencode()
-                    user.social_user.last_recover = datetime.utcnow()
+                    user.social_user.lastLesson_recover = datetime.utcnow()
                     local.session.commit()
 
                     if self.send_mail(user.email, "Code for password reset",
@@ -919,6 +920,61 @@ class APIHandler(object):
                     local.resp['log'] = e.output
             if status != 0:
                 return 'Error %s in script' % status
+        else:
+            return 'Bad Request'
+
+    def materials_handler(self):
+        if local.data['action'] == 'list':
+            query = local.session.query(Material)\
+                .filter(Material.contest_id == Material.contest.id)\
+                .filter(Material.access_level >= Material.access_level)\
+                .order_by(desc(Material.id))
+            local.resp['materials'] = [{
+                    'id': m.id,
+                    'title': m.title,
+                    'access_level': m.access_level,
+                    'text': m.text
+                } for m in query]
+        elif local.data['action'] == 'alter':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                material = local.session.query(Material)\
+                    .filter(Material.contest_id == local.contest.id)\
+                    .filter(Material.id == local.data['id']).first()
+                if 'access_level' in local.data:
+                    material.access_level = local.data['access_level']
+                if 'text' in local.data:
+                    material.text = local.data['text']
+                if 'title' in local.data:
+                    material.title = local.data['title']
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
+        elif local.data['action'] == 'delete':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                material = local.session.query(Material)\
+                    .filter(Material.contest_id == local.contest.id)\
+                    .filter(Material.id == local.data['id']).first()
+                local.session.delete(material)
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
+        elif local.data['action'] == 'new':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                material = Material(
+                    contest_id = local.contest.id,
+                    access_level = 0,
+                    text = local.data['text'],
+                    title = local.data['title'])
+                local.session.add(material)
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
         else:
             return 'Bad Request'
 
