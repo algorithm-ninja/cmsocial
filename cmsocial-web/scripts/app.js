@@ -43,11 +43,6 @@ angular
         url: '/sso',
         controller: 'SSOCtrl'
       })
-      .state('tags', {
-        url: '/tags',
-        templateUrl: 'views/tags.html',
-        controller: 'TagsPage'
-      })
       .state('tasklist', {
         templateUrl: 'views/tasklist.html',
         controller: 'TasklistSkel'
@@ -132,7 +127,7 @@ angular
         controller: 'LessonsCtrl'
       })
       .state('test', {
-        url: '/tags/test/{testName}',
+        url: '/test/{testName}',
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
       })
@@ -152,7 +147,7 @@ angular
 </div>`
       })
       .state('events', {
-        url: '/events',
+        url: '/tags/events',
         controller: 'EventsPage',
         template: `<div class="container">
   <div class="col-sm-5">
