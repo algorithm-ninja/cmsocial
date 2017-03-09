@@ -1,4 +1,4 @@
-DEST=cmsocial-web.build
+DEST=cmsocial-web-build
 MAKEROOT=$(shell pwd)
 SHELL := /bin/bash
 
@@ -13,10 +13,12 @@ endif
 
 ifeq ($(PROD), 1)
 STRIPDEBUG=sed '/<!-- *start  *debug *-->/,/<!-- *end  *debug *-->/d'
-UGLIFY=node_modules/.bin/uglifyjs -c --
+UGLIFY=node_modules/.bin/uglifyjs
+BABEL=node_modules/.bin/babel --
 else
 STRIPDEBUG=cat
 UGLIFY=cat
+BABEL=node_modules/.bin/babel --
 endif
 
 WEBDIRS=$(shell find cmsocial-web -type d)
@@ -51,14 +53,18 @@ node_modules: package.json
 	npm install
 	touch node_modules
 
-dirs: $(DEST) tmp
+dirs: $(DEST) tmp $(DEST)/__init__.py
 
 $(DEST): cmsocial-web
 	mkdir -p $(DESTDIRS)
 	touch $(DEST)
 
+$(DEST)/__init__.py: cmsocial-web/__init__.py
+	cp cmsocial-web/__init__.py $@
+
 tmp: cmsocial-web
 	mkdir -p $(TMPDIRS)
+	cp cmsocial-web/.babelrc tmp
 	touch tmp
 
 $(DEST)/custom_images: config/custom_images | $(DEST)
@@ -67,17 +73,17 @@ $(DEST)/custom_images: config/custom_images | $(DEST)
 $(DEST)/favicon.ico: config/favicon.ico | $(DEST)
 	cp $^ $@
 
-$(DEST)/views/footer.html: config/footer.html config/cmsocial.ini | $(DEST)
-	./instantiate.sh $< > $@
+$(DEST)/views/footer.html: config/footer.html | $(DEST)
+	cp $< $@
 
-$(DEST)/views/homepage.html: config/homepage.html config/cmsocial.ini | $(DEST)
-	./instantiate.sh $< > $@
+$(DEST)/views/homepage.html: config/homepage.html | $(DEST)
+	cp $< $@
 
-$(DEST)/index.html: cmsocial-web/index.html node_modules config/cmsocial.ini | $(DEST)
-	./instantiate.sh <(node_modules/.bin/cdnify $(CDNFLAGS) $<) | $(STRIPDEBUG) > $@
+$(DEST)/index.html: cmsocial-web/index.html node_modules | $(DEST)
+	node_modules/.bin/cdnify $(CDNFLAGS) $< | $(STRIPDEBUG) > $@
 
-$(DEST)/%.html: cmsocial-web/%.html config/cmsocial.ini | $(DEST)
-	./instantiate.sh $< | $(STRIPDEBUG) > $@
+$(DEST)/%.html: cmsocial-web/%.html | $(DEST)
+	cat $< | $(STRIPDEBUG) > $@
 
 $(DEST)/styles/main.css: $(CSS)
 	cat $^ > $@
@@ -86,10 +92,10 @@ tmp/%.css: cmsocial-web/%.less node_modules | tmp
 	node_modules/.bin/lessc $< $@
 
 $(DEST)/scripts/app.processed.js: $(TMPJS) | node_modules
-	${UGLIFY} $^ > $@
+	${BABEL} $^ | ${UGLIFY} > $@
 
-tmp/%.js: cmsocial-web/%.js config/cmsocial.ini | tmp
-	./instantiate.sh $< | $(STRIPDEBUG) > $@
+tmp/%.js: cmsocial-web/%.js | tmp
+	cat $< | $(STRIPDEBUG) > $@
 
 $(DEST)/node_modules: node_modules
 	ln -s ../node_modules $(DEST)/node_modules
@@ -106,6 +112,3 @@ distclean: clean
 
 jshint:
 	./node_modules/.bin/jshint --reporter=node_modules/jshint-stylish $(JS)
-
-bsync:
-	./node_modules/.bin/browser-sync start --config bs-config.js

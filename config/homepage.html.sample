@@ -1,8 +1,8 @@
 <div>
   <div class="jumbotron" style="margin-top:-20px">
     <div class="container">
-      <h2>Title</h2>
-      <p>Your homepage</p>
+      <h2>{{cm.getContest().title}}</h2>
+      <p>{{cm.getContest().description}}</p>
     </div>
   </div>
 </div>

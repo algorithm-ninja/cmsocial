@@ -15,8 +15,8 @@ angular.module('cmsocial')
     };
   })
   .controller('TaskbarCtrl', function($scope, $stateParams, $http, $state,
-        $rootScope, $timeout, userManager, notificationHub, taskbarManager,
-        l10n, API_PREFIX) {
+    $rootScope, $timeout, notificationHub, taskbarManager,
+    l10n, contestManager, API_PREFIX) {
 
     delete $rootScope.task;
 
@@ -26,91 +26,88 @@ angular.module('cmsocial')
 
     $scope.tag = {};
     $scope.isActiveTab = taskbarManager.isActiveTab;
-    $scope.isLogged = userManager.isLogged;
+    $scope.isLogged = contestManager.hasParticipation;
     $scope.taskName = $stateParams.taskName;
 
     $scope.tagClicked = function(tag) {
       $("#tags_detail").modal('hide');
       $('#tags_detail').on('hidden.bs.modal', function(e) {
-        $state.go('tasklist.page', {'pageNum': 1, 'tag': tag});
+        $state.go('tasklist.page', {
+          'pageNum': 1,
+          'tag': tag
+        });
       });
     };
 
     $scope.tagAdd = function() {
       $http.post(API_PREFIX + 'tag', {
-        'action': 'add',
-        'tag': $scope.tag.newtag,
-        'task': $rootScope.task.name,
-        'username': userManager.getUser().username,
-        'token': userManager.getUser().token
-      })
-      .success(function(data, status, headers, config) {
-        if (data.success === 0) {
-          notificationHub.createAlert('danger', l10n.get(data['error']), 3);
-        } else {
-          $scope.loadTaskPromise = $scope.loadTask()
-          notificationHub.createAlert('success', l10n.get('Task correctly tagged'), 2)
-        }
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
-    };
-
-    $scope.tagDelete = function(tag) {
-      if (confirm("Are you sure?")) {
-        $http.post(API_PREFIX + 'tag', {
-          'action': 'remove',
-          'tag': tag,
+          'action': 'add',
+          'tag': $scope.tag.newtag,
           'task': $rootScope.task.name,
-          'username': userManager.getUser().username,
-          'token': userManager.getUser().token
         })
         .success(function(data, status, headers, config) {
           if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get(data['error']), 3);
           } else {
-            $scope.loadTaskPromise = $scope.loadTask()
-            notificationHub.createAlert('success', l10n.get('Task correctly untagged'), 2)
+            $scope.loadTaskPromise = $scope.loadTask();
+            notificationHub.createAlert('success', l10n.get('Task correctly tagged'), 2);
           }
         })
         .error(function(data, status, headers, config) {
           notificationHub.serverError(status);
         });
+    };
+
+    $scope.tagDelete = function(tag) {
+      if (confirm("Are you sure?")) {
+        $http.post(API_PREFIX + 'tag', {
+            'action': 'remove',
+            'tag': tag,
+            'task': $rootScope.task.name,
+          })
+          .success(function(data, status, headers, config) {
+            if (data.success === 0) {
+              notificationHub.createAlert('danger', l10n.get(data['error']), 3);
+            } else {
+              $scope.loadTaskPromise = $scope.loadTask();
+              notificationHub.createAlert('success', l10n.get('Task correctly untagged'), 2);
+            }
+          })
+          .error(function(data, status, headers, config) {
+            notificationHub.serverError(status);
+          });
       }
     };
 
     $scope.newTag = function() {
       $(".newtagstuff").show();
       $http.post(API_PREFIX + 'tag', {
-        'action': 'list'
-      })
-      .success(function(data, status, headers, config) {
-        $scope.tags = data['tags'];
-        $("#tagloader").hide();
-        $("#tagseparator").show();
-        $("#tagchooser").removeAttr("disabled");
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
+          'action': 'list'
+        })
+        .success(function(data, status, headers, config) {
+          $scope.tags = data['tags'];
+          $("#tagloader").hide();
+          $("#tagseparator").show();
+          $("#tagchooser").removeAttr("disabled");
+        })
+        .error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+        });
     };
 
     $scope.loadTask = function() {
       return $http.post(API_PREFIX + 'task', {
-        'name': $stateParams.taskName,
-        'username': userManager.getUser().username,
-        'token': userManager.getUser().token,
-        'action': 'get'
-      })
-      .then(
-        function(result) {
-          $rootScope.task = result.data;
-        },
-        function(result) {
-          notificationHub.serverError(result.status);
-        }
-      );
+          'name': $stateParams.taskName,
+          'action': 'get'
+        })
+        .then(
+          function(result) {
+            $rootScope.task = result.data;
+          },
+          function(result) {
+            notificationHub.serverError(result.status);
+          }
+        );
     };
 
     $scope.loadTaskPromise = $scope.loadTask();
@@ -122,117 +119,141 @@ angular.module('cmsocial')
     taskbarManager.setActiveTab(2);
   })
   .controller('StatsCtrl', function($scope, $stateParams, $http,
-      notificationHub, userManager, taskbarManager, l10n, API_PREFIX) {
+    notificationHub, taskbarManager, l10n, API_PREFIX) {
     taskbarManager.setActiveTab(3);
     $scope.getStats = function() {
       $http.post(API_PREFIX + 'task', {
-        'name': $stateParams.taskName,
-        'username': userManager.getUser().username,
-        'token': userManager.getUser().token,
-        'action': 'stats'
-      }).success(function(data, status, headers, config) {
-        $scope.nsubs = data.nsubs;
-        $scope.nusers = data.nusers;
-        $scope.nsubscorrect = data.nsubscorrect;
-        $scope.nuserscorrect = data.nuserscorrect;
-        $scope.best = data.best;
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
-    }
+          'name': $stateParams.taskName,
+          'action': 'stats'
+        }).success(function(data, status, headers, config) {
+          $scope.nsubs = data.nsubs;
+          $scope.nusers = data.nusers;
+          $scope.nsubscorrect = data.nsubscorrect;
+          $scope.nuserscorrect = data.nuserscorrect;
+          $scope.best = data.best;
+        })
+        .error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+        });
+    };
     $scope.getStats();
   })
   .controller('SubmissionsCtrl', function($scope, $stateParams, $location,
-      $http, $timeout, $rootScope, userManager, notificationHub,
-      subsDatabase, taskbarManager, l10n, API_PREFIX) {
+    $http, $timeout, $rootScope, notificationHub,
+    subsDatabase, taskbarManager, l10n, contestManager, API_PREFIX) {
     taskbarManager.setActiveTab(4);
     subsDatabase.load($stateParams.taskName);
     $scope.areThereSubs = function(name) {
-      return $rootScope.submissions[name] !== undefined
-          && $rootScope.submissions[name].length > 0;
+      return $rootScope.submissions[name] !== undefined &&
+        $rootScope.submissions[name].length > 0;
     };
-    var aceModeMap = {"C": "c_cpp", "C++": "c_cpp", "Pascal": "pascal"}
-    var langExtMap = {"C": ".c", "C++": ".cpp", "Pascal": ".pas"}
-    $scope.languages = ["C", "C++", "Pascal"];
+    var aceModeMap = {
+      "C": "c_cpp",
+      "C++": "c_cpp",
+      "Pascal": "pascal",
+      "Python": "python"
+    };
+    var langExtMap = {
+      "C": ".c",
+      "C++": ".cpp",
+      "Pascal": ".pas",
+      "Python": ".py"
+    };
+    var cmsLanguageMap = {
+      "C11 / gcc": "C",
+      "C++11 / g++": "C++",
+      "Pascal / fpc": "Pascal",
+      "Python 2 / CPython": "Python"
+    };
+    $scope.languages = [];
+    contestManager.getContestPromise().then(function(response) {
+        for (var lang in contestManager.getContest().languages) {
+          $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
+        }
 
-    if (!localStorage.getItem("preferred_language")) {
-      localStorage.setItem("preferred_language", "C++")
-    }
+        var preferred_language_key = "preferred_language_" + contestManager.getContest().name;
 
-    $scope.language = localStorage.getItem("preferred_language")
-    $scope.aceOption = {
-      mode: aceModeMap[$scope.language],
-      showPrintMargin: false,
-      onLoad: function (_ace) {
-        $scope.aceSession = _ace.getSession();
-        $scope.languageChanged = function (newL) {
-          $scope.language = newL;
-          localStorage.setItem("preferred_language", newL)
-          $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
+        if (!localStorage.getItem(preferred_language_key) ||
+          $scope.languages.indexOf(localStorage.getItem(preferred_language_key)) == -1) {
+          localStorage.setItem(preferred_language_key, $scope.languages[0]);
+        }
+
+        $scope.language = localStorage.getItem(preferred_language_key);
+
+        $scope.aceOption = {
+          mode: aceModeMap[$scope.language],
+          showPrintMargin: false,
+          onLoad: function(_ace) {
+            $scope.aceSession = _ace.getSession();
+            $scope.languageChanged = function(newL) {
+              $scope.language = newL;
+              localStorage.setItem(preferred_language_key, newL);
+              $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
+            };
+          },
+          onChange: function(_ace) {
+            $scope.aceModel = $scope.aceSession.getDocument().getValue();
+            localStorage.setItem("source_code", $scope.aceModel);
+          }
         };
-      },
-      onChange: function (_ace) {
-        $scope.aceModel = $scope.aceSession.getDocument().getValue();
-        localStorage.setItem("source_code", $scope.aceModel)
-      }
-    };
+    });
 
     if (localStorage.getItem("source_code") === null) {
-      localStorage.setItem("source_code", l10n.get("Write your code here"))
+      localStorage.setItem("source_code", l10n.get("Write your code here"));
     }
-    $scope.aceModel = localStorage.getItem("source_code")
+    $scope.aceModel = localStorage.getItem("source_code");
 
-    $scope.loadAce = function () {
+    $scope.loadAce = function() {
       if (!subsDatabase.submitCompleted) {
-        return notificationHub.createAlert('warning', 'You have a pending submission', 2)
+        return notificationHub.createAlert('warning', 'You have a pending submission', 2);
       }
 
-      $scope.files = {}
+      $scope.files = {};
       $scope.files[$rootScope.task.submission_format[0]] = {
         'filename': "ace" + langExtMap[$scope.language],
         'data': btoa(unescape(encodeURIComponent($scope.aceSession.getDocument().getValue())))
-        // HACK above: http://stackoverflow.com/a/26603875/747654
-      }
+          // HACK above: http://stackoverflow.com/a/26603875/747654
+      };
       $scope.submitFiles();
-    }
+    };
 
-    $scope.resetAce = function () {
-      localStorage.setItem("source_code", l10n.get("Write your code here"))
-      $scope.aceSession.getDocument().setValue(localStorage.getItem("source_code"))
-    }
+    $scope.resetAce = function() {
+      localStorage.setItem("source_code", l10n.get("Write your code here"));
+      $scope.aceSession.getDocument().setValue(localStorage.getItem("source_code"));
+    };
 
     $scope.loadFile = function(event) {
-      var reader = new FileReader()
+      var reader = new FileReader();
 
       reader.onload = function(e) {
-        $scope.aceSession.getDocument().setValue(e.target.result)
-      }
+        $scope.aceSession.getDocument().setValue(e.target.result);
+      };
 
-      reader.readAsText(event.target.files[0])
-    }
+      reader.readAsText(event.target.files[0]);
+    };
 
     $scope.loadFiles = function(formid) {
       var input = $("#" + formid + " input");
       $scope.files = {};
       var reader = new FileReader();
+
       function readFile(i) {
-        if (i==input.length) {
+        if (i == input.length) {
           $scope.submitFiles();
           return;
         }
         if (input[i].files.length < 1) {
-          readFile(i+1);
+          readFile(i + 1);
           return;
         }
-        reader.filename = input[i].files[0].name
-        reader.inputname = input[i].name
-        reader.onloadend = function(){
+        reader.filename = input[i].files[0].name;
+        reader.inputname = input[i].name;
+        reader.onloadend = function() {
           $scope.files[reader.inputname] = {
             'filename': reader.filename,
             'data': reader.result
           };
-          readFile(i+1);
+          readFile(i + 1);
         };
         reader.readAsDataURL(input[i].files[0]);
       }
@@ -240,38 +261,36 @@ angular.module('cmsocial')
     };
 
     $scope.submitCompleted = function() {
-      return subsDatabase.submitCompleted
-    }
+      return subsDatabase.submitCompleted;
+    };
 
     $scope.submitFiles = function() {
       var data = {};
-      data['username'] = userManager.getUser().username;
-      data['token'] = userManager.getUser().token;
       data['files'] = $scope.files;
       data['action'] = 'new';
       data['task_name'] = $scope.taskName;
       delete $scope.files;
 
-      subsDatabase.submitCompleted = false;  // start loading
+      subsDatabase.submitCompleted = false; // start loading
 
       $http.post(API_PREFIX + 'submission',
-        data
-      )
-      .success(function(data, status, headers, config) {
-        if (data['success']) {
-          subsDatabase.addSub($scope.taskName, data);
-          $("#submitform").each(function() {
-            this.reset();
-          });
-        }
-        else {
-          notificationHub.createAlert('danger', l10n.get(data['error']), 2);
-          subsDatabase.submitCompleted = true;  // stop loading
-        }
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
+          data
+        )
+        .success(function(data, status, headers, config) {
+          if (data['success']) {
+            subsDatabase.addSub($scope.taskName, data);
+            $("#submitform").each(function() {
+              this.reset();
+            });
+          } else {
+            notificationHub.createAlert('danger', l10n.get(data['error']), 2);
+          }
+          subsDatabase.submitCompleted = true; // stop loading
+        })
+        .error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+          subsDatabase.submitCompleted = true; // stop loading
+        });
     };
     $scope.showDetails = function(id) {
       subsDatabase.subDetails(id);
@@ -284,14 +303,23 @@ angular.module('cmsocial')
         scope.loadTaskPromise.then(function() {
           var goodBrowser = !!$window.Worker;
           var hasBuiltInPdf = !("ActiveXObject" in window) && !/iPhone|iPod|Android|BlackBerry|Opera Mini|Phone|Mobile/i.test(navigator.userAgent);
-          var pdfURL = location.pathname.replace(/[^\/]*$/, '') + API_PREFIX + 'files/' + scope.task.statements.it + '/testo.pdf';
+          var statementLanguage = l10n.getLanguage();
+          if (!(statementLanguage in scope.task.statements)) {
+            if ('en' in scope.task.statements)
+              statementLanguage = 'en';
+            else if ('it' in scope.task.statements)
+              statementLanguage = 'it';
+            else
+              statementLanguage = Object.keys(scope.task.statements)[0];
+          }
+          var pdfURL = location.pathname.replace(/[^\/]*$/, '') + API_PREFIX + 'files/' + scope.task.statements[statementLanguage] + '/testo.pdf';
           var downloadButton = '<a href="' + pdfURL + '" class="btn btn-success" style="margin-top:5px;">Download PDF</a>';
           if (goodBrowser && hasBuiltInPdf)
             element.replaceWith('<object data="' + pdfURL + '" type="application/pdf" class="' + attrs.class +
               '">' + l10n.get('Your browser is outdated or your PDF plugin is deactivated') + '<br>' + downloadButton + '</object>');
           else if (goodBrowser)
             element.replaceWith('<iframe seamless src="https://mozilla.github.io/pdf.js/web/viewer.html?file=' + location.origin + pdfURL +
-              '" class="' + attrs.class +'"/>');
+              '" class="' + attrs.class + '"/>');
           else
             element.raplaceWith(downloadButton);
         });
@@ -303,16 +331,16 @@ angular.module('cmsocial')
     //      the File API to be unavailable (thanks, IE9)
     return {
       restrict: 'A',
-      link: function (scope, element, attrs) {
-        var onChangeHandler = scope.$eval(attrs.customOnChange)
-        element.bind('change', onChangeHandler)
+      link: function(scope, element, attrs) {
+        var onChangeHandler = scope.$eval(attrs.customOnChange);
+        element.bind('change', onChangeHandler);
 
         // XXX: ugly hack, needed to have a 'change' event fire even if the same
         //      file is selected twice (e.g. you select, then click "reset",
         //      then select again)
         element.bind('click', function(e) {
-          e.target.value = null
-        })
+          e.target.value = null;
+        });
       }
     };
   });

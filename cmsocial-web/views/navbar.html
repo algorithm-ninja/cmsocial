@@ -6,7 +6,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" ui-sref="overview"><i class="fa fa-home fa-lg"></i> [[top_left_name]]</a>
+      <a class="navbar-brand" ui-sref="overview"><i class="fa fa-home fa-lg"></i> {{cm.getContest().top_left_name}}</a>
     </div>
     <div class="navbar-collapse collapse" ng-controller="SignCtrl">
       <ul class="nav navbar-nav">
@@ -33,14 +33,20 @@
         <li ng-class="{active: isActiveTab(4)}">
           <a ui-sref="ranking.page({ pageNum: 1 })"><i class="fa fa-trophy fa-lg"></i> {{'Ranking' | l10n}}</a>
         </li>
-        <li>
-          <a ng-if="!me.isLogged()" href="[[forum_url]]"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
-          <a ng-if="me.isLogged()" href="[[forum_url]]/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
+        <li ng-if="cm.getContest().forum != null">
+          <a ng-if="!me.isLogged()" href="{{cm.getContest().forum}}"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
+          <a ng-if="me.isLogged()" href="{{cm.getContest().forum}}"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
         </li>
         <li ng-class="{active: isActiveTab(5)}" ng-if="!me.isLogged()">
           <a ui-sref="signup"><i class="fa fa-pencil fa-lg"></i> {{'Sign up' | l10n}}</a>
         </li>
+        <li ng-if="me.isLogged() && !cm.hasParticipation()">
+          <p class="navbar-btn">
+            <a ng-click="participate()" class="btn btn-success"><i class="fa fa-sign-in"></i>{{'Enter the contest' | l10n}}</a>
+          </p>
+        </li>
       </ul>
+
       <ul class="nav navbar-nav navbar-right">
         <li ng-if="!me.isLogged()" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-in fa-lg"></i> {{'Log in' | l10n}} <b class="caret"></b></a>
@@ -55,9 +61,13 @@
                 <input class="form-control" type="password" id="password" name="password" ng-model="user.password" placeholder="Password" />
               </div>
               <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> {{'Log in' | l10n}}</button>
+              <div class="form-group" style="margin: 6px 0px 0px 0px" ng-if="cm.getContest().mail_enabled">
+                <a data-toggle="dropdown" ui-sref="forgot-account">{{'Forgot account?' | l10n}}</a>
+              </div>
             </form>
           </div>
         </li>
+
         <li ng-if="me.isLogged()" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-user fa-lg"></i>
@@ -79,6 +89,14 @@
               </a>
             </li>
           </ul>
+        </li>
+
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-language fa-lg"></i>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu" id="langsel"></ul>
         </li>
       </ul>
     </div><!--/.navbar-collapse -->

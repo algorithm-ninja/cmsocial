@@ -1,53 +1,61 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import os
-import io
-import re
-import hmac
-import json
-import urllib
-import logging
-import hashlib
-import tempfile
-import mimetypes
-import traceback
-import pkg_resources
 import ConfigParser
-import requests
-
+import hashlib
+import hmac
+import io
+import json
+import logging
+import mimetypes
+import os
+import re
+import smtplib
+import socket
+import tempfile
+import traceback
+import urllib
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
+from email.mime.text import MIMEText
 from shutil import copyfileobj, rmtree
 
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc
-from sqlalchemy.sql import or_, and_
-
-from cms import ServiceCoord, SOURCE_EXT_TO_LANGUAGE_MAP
-from cms.io import Service
-from cms.db.filecacher import FileCacher
-
-from cms.db import SessionGen, User, Submission, File, Task, Participation, Testcase, Contest
-
-from cmsocial.db.test import Test, TestScore
-from cmsocial.db.socialtask import SocialTask, TaskScore, Tag, TaskTag
-from cmsocial.db.socialuser import SocialUser
-from cmsocial.db.lesson import Lesson
-from cmsocial.db.location import Institute, Region, Province, City
-
-from cmscommon.datetime import make_timestamp, make_datetime
-from cmscommon.archive import Archive
-
-from werkzeug.wrappers import Response, Request
-from werkzeug.wsgi import SharedDataMiddleware, wrap_file, responder
-from werkzeug.routing import Map, Rule
-from werkzeug.exceptions import HTTPException, NotFound, BadRequest, \
-    InternalServerError
-
+import bcrypt
 import gevent
 import gevent.local
 import gevent.wsgi
+import pkg_resources
+import requests
+from gevent import monkey
+from gevent.subprocess import check_output, CalledProcessError, STDOUT
+from sqlalchemy import desc
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import and_, or_
+from werkzeug.exceptions import (BadRequest, HTTPException,
+                                 InternalServerError, NotFound)
+from werkzeug.routing import Map, Rule, RequestRedirect
+from werkzeug.wrappers import Request, Response
+from werkzeug.wsgi import SharedDataMiddleware, responder, wrap_file
+
+import jwt
+from cms import ServiceCoord
+from cms.grading.languagemanager import SOURCE_EXTS, filename_to_language
+from cms.db import (Contest, File, Participation, SessionGen, Submission, Task,
+                    Testcase, User)
+from cms.db.filecacher import FileCacher
+from cms.io import Service
+from cmscommon.archive import Archive
+from cmscommon.datetime import make_datetime, make_timestamp
+from cmsocial.db.lesson import Lesson
+from cmsocial.db.material import Material
+from cmsocial.db.location import City, Institute, Province, Region
+from cmsocial.db.socialcontest import SocialContest
+from cmsocial.db.socialtask import SocialTask, Tag, TaskScore, TaskTag
+from cmsocial.db.socialuser import SocialParticipation, SocialUser
+from cmsocial.db.test import Test, TestScore
+
+monkey.patch_all()
+
 
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
@@ -57,6 +65,7 @@ config.read('/usr/local/etc/cmsocial.ini')
 
 
 class WSGIHandler(gevent.wsgi.WSGIHandler):
+
     def format_request(self):
         if self.time_finish:
             delta = '%.6f' % (self.time_finish - self.time_start)
@@ -82,19 +91,28 @@ class Server(gevent.wsgi.WSGIServer):
 
 
 class APIHandler(object):
+
     def __init__(self, parent):
         self.router = Map([
-            Rule('/files/<digest>', methods=['GET', 'POST'],
+            Rule('/api/<target>', methods=['POST'], endpoint='globaljsondata'),
+            Rule('/static/<path:path>',
+                 methods=['GET'], endpoint='globalstaticfile'),
+            Rule('/<contest>/api/files/<digest>', methods=['GET', 'POST'],
                  endpoint='dbfile'),
-            Rule('/files/<digest>/<name>', methods=['GET', 'POST'],
+            Rule('/<contest>/api/files/<digest>/<name>', methods=['GET', 'POST'],
                  endpoint='dbfile'),
-            Rule('/<target>', methods=['POST'], endpoint='jsondata')
+            Rule('/<contest>/api/<target>',
+                 methods=['POST'], endpoint='jsondata'),
+            Rule('/<contest>/<path:path>',
+                 methods=['GET'], endpoint='staticfile'),
+            Rule('/<contest>/', methods=['GET'], endpoint='index'),
+            Rule('/<contest>', redirect_to='/<contest>/'),
+            Rule('/', methods=['GET'], endpoint='globalindex')
         ], encoding_errors='strict')
         self.file_cacher = parent.file_cacher
         self.evaluation_service = parent.evaluation_service
         self.EMAIL_REG = re.compile(r'[^@]+@[^@]+\.[^@]+')
         self.USERNAME_REG = re.compile(r'^[A-Za-z0-9_\.]+$')
-        self.CONTEST_ID = 1
 
     @responder
     def __call__(self, environ, start_response):
@@ -109,6 +127,8 @@ class APIHandler(object):
 
         try:
             endpoint, args = route.match()
+        except RequestRedirect as e:
+            return e
         except HTTPException:
             return NotFound()
 
@@ -117,6 +137,16 @@ class APIHandler(object):
                 return self.dbfile_handler(environ, args)
         except HTTPException as e:
             return e
+
+        # static_file_handler checks for a valid contest
+        if endpoint == 'globalstaticfile':
+            return self.static_file_handler(environ, args['path'])
+        elif endpoint == 'staticfile':
+            return self.static_file_handler(environ, args['path'], args['contest'])
+        elif endpoint == 'index':
+            return self.static_file_handler(environ, 'index.html', args['contest'])
+        elif endpoint == 'globalindex':
+            return self.static_file_handler(environ, 'index.html')
 
         request = Request(environ)
         if request.mimetype != 'application/json':
@@ -135,17 +165,45 @@ class APIHandler(object):
                     return BadRequest()
 
         with SessionGen() as local.session:
+            if 'contest' in args:
+                local.contest = local.session.query(Contest)\
+                    .join(SocialContest)\
+                    .filter(Contest.name == args['contest'])\
+                    .filter(SocialContest.social_enabled == True).first()
+            else:
+                local.contest = None
             try:
-                username = data['username']
-                token = data['token']
-                local.participation = self.get_participation(username, token)
-                local.user = local.participation.user
-            except (BadRequest, KeyError):
+                local.jwt_payload = request.cookies.get("token")
+                if local.jwt_payload is None:
+                    auth_data = dict()
+                else:
+                    auth_data = jwt.decode(
+                        local.jwt_payload, config.get('core', 'secret'))
+                username = auth_data['username']
+
+                local.participation = self.get_participation(
+                    local.contest, username)
+                if local.participation is None:
+                    local.user = self.get_user(username)
+                else:
+                    local.user = local.participation.user
+            except (BadRequest, KeyError, jwt.exceptions.InvalidTokenError):
                 local.user = None
+                local.participation = None
             if local.user is None:
                 local.access_level = 7  # Access level of unlogged user
+                local.global_access_level = 7  # Access level of unlogged user
             else:
-                local.access_level = local.user.social_user.access_level
+                local.global_access_level = local.user.social_user.access_level
+                if local.participation is None:
+                    local.access_level = None
+                else:
+                    local.access_level = local.participation.social_participation.access_level
+                if local.access_level is None:
+                    local.access_level = local.global_access_level
+
+            if local.contest is None:
+                return NotFound()
 
             try:
                 local.data = data
@@ -160,30 +218,83 @@ class APIHandler(object):
                 logger.error(traceback.format_exc())
                 return BadRequest()
 
-        response = Response()
+        if getattr(local, 'response', None) is None:
+            response = Response()
+        else:
+            response = local.response
         response.mimetype = 'application/json'
         response.status_code = 200
         if ans is None:
             response.data = json.dumps(local.resp)
         else:
-            response.data = json.dumps({'success': 0, 'error': ans})
+            if 'log' in local.resp:
+                response.data = json.dumps({'success': 0, 'error': ans, 'log': local.resp['log']})
+            else:
+                response.data = json.dumps({'success': 0, 'error': ans})
         return response
 
     # Useful methods
+    def decode_file(self, f):
+        f['data'] = f['data'].split(',')[-1]
+        f['body'] = b64decode(f['data'])
+        del f['data']
+        return f
+
     def sliced_query(self, query):
         res = query.slice(local.data['first'], local.data['last']).all()
         num = query.count()
         return (res, num)
 
-    def get_participation(self, username, token):
+    def validate_user(self, user, password):
+        if self.validate(password, user.password):
+            return True
+        elif self.old_validate(password, user.password):
+            try:
+                with SessionGen() as session:
+                    user2 = session.query(User).filter(
+                        User.id == user.id).first()
+                    user2.password = self.hashpw(password)
+                    session.commit()
+            except:
+                traceback.print_exc()
+            return True
+        else:
+            return False
+
+    def get_participation(self, contest, username, password=None):
         try:
-            return local.session.query(Participation)\
+            participation = local.session.query(Participation)\
                 .join(User)\
-                .filter(Participation.contest_id == self.CONTEST_ID)\
-                .filter(User.username == username)\
-                .filter(User.password == token).first()
+                .filter(Participation.contest_id == contest.id)\
+                .filter(User.username == username).first()
+            if participation is None:
+                return None
+            if password is None or self.validate_user(participation.user, password):
+                return participation
         except UnicodeDecodeError:
             return None
+
+    def get_user(self, username, password=None):
+        try:
+            user = local.session.query(User)\
+                .filter(User.username == username).first()
+            if user is None:
+                return None
+            if password is None or self.validate_user(user, password):
+                return user
+        except UnicodeDecodeError:
+            return None
+
+    def build_token(self):
+        data = {
+            'id': local.user.id,
+            'username': local.user.username,
+            'email': local.user.email,
+            'firstName': local.user.first_name,
+            'lastName': local.user.last_name,
+            'picture': '//gravatar.com/avatar/%s?d=identicon' % (self.hash(local.user.email, 'md5'))
+        }
+        return jwt.encode(data, config.get('core', 'secret'), algorithm='HS256')
 
     def check_user(self, username):
         if len(username) < 4:
@@ -212,8 +323,57 @@ class APIHandler(object):
         sha.update(string)
         return sha.hexdigest()
 
-    def hashpw(self, pw):
+    def old_hashpw(self, pw):
         return self.hash(pw + config.get("core", "secret"))
+
+    def old_validate(self, pw, storedpw):
+        return self.old_hashpw(pw) == storedpw
+
+    def hashpw(self, pw):
+        pw = pw.encode('utf-8')
+        payload = bcrypt.hashpw(pw, bcrypt.gensalt())
+        return "bcrypt:%s" % payload
+
+    def validate(self, pw, storedpw):
+        if not storedpw.startswith("bcrypt:"):
+            return False
+        payload = storedpw.split(":", 1)[1].encode("utf-8")
+        pw = pw.encode("utf-8")
+        return bcrypt.hashpw(pw, payload) == payload
+
+    def gencode(self):
+        from string import ascii_lowercase, ascii_uppercase, digits
+        from random import choice
+
+        return ''.join([choice(ascii_lowercase + ascii_uppercase + digits) for i in range(20)])
+
+    def send_mail(self, to, subject, body):
+        server = smtplib.SMTP(local.contest.social_contest.mail_server)
+        server.ehlo()
+        server.starttls()
+        server.login(local.contest.social_contest.mail_username,
+                     local.contest.social_contest.mail_password)
+
+        msg = MIMEText(body)
+        msg['Subject'] = subject
+        msg['From'] = local.contest.social_contest.mail_from
+        msg['To'] = to
+
+        sent = False
+        nretries = 0
+        while sent is False:
+            try:
+                server.sendmail(local.contest.social_contest.mail_from,
+                                [to], msg.as_string())
+                sent = True
+            except socket.timeout:
+                traceback.print_exc()
+                nretries += 1
+                if nretries > 10:
+                    break
+
+        server.quit()
+        return sent
 
     def get_institute_info(self, institute_id):
         info = dict()
@@ -230,15 +390,22 @@ class APIHandler(object):
     def get_user_info(self, user):
         info = dict()
         info['username'] = user.username
-        info['access_level'] = user.social_user.access_level
+        info['global_access_level'] = user.social_user.access_level
+        info['access_level'] = info['global_access_level']
         info['join_date'] = make_timestamp(user.social_user.registration_time)
         info['mail_hash'] = self.hash(user.email, 'md5')
-        #info['post_count'] = len(user.posts)
-        info['score'] = user.social_user.score
-        info['institute'] = self.get_institute_info(user.social_user.institute_id)
+        info['institute'] = self.get_institute_info(
+            user.social_user.institute_id)
         info['first_name'] = user.first_name
         info['last_name'] = user.last_name
         info['tasks_solved'] = -1
+        return info
+
+    def get_participation_info(self, participation):
+        info = self.get_user_info(participation.user)
+        info['score'] = participation.social_participation.score
+        if participation.social_participation.access_level is not None:
+            info['access_level'] = participation.social_participation.access_level
         return info
 
     # Handlers that do not require JSON data
@@ -256,9 +423,10 @@ class APIHandler(object):
             if args["name"].endswith(".pdf"):
                 # Add header to allow the official pdf.js to work
                 response.headers.add_header(b'Access-Control-Allow-Origin',
-                        b'https://mozilla.github.io')
+                                            b'https://mozilla.github.io')
             else:
-                # Don't do this on pdf files because it breaks the native pdf reader
+                # Don't do this on pdf files because it breaks the native pdf
+                # reader
                 response.headers.add_header(
                     b'Content-Disposition', b'attachment',
                     filename=args['name'])
@@ -270,6 +438,46 @@ class APIHandler(object):
         response.direct_passthrough = True
         response.cache_control.max_age = 31536000
         response.cache_control.public = True
+        return response
+
+    def static_file_handler(self, environ, filename, contest_name=None):
+        # TODO: implement files that do not depend on the contest
+        if contest_name is None:
+            return NotFound()
+
+        with SessionGen() as session:
+            social_contest = session.query(SocialContest)\
+                .join(Contest)\
+                .filter(SocialContest.social_enabled == True)\
+                .filter(Contest.name == contest_name).first()
+            if social_contest is None:
+                return NotFound()
+            if filename == 'views/homepage.html':
+                if social_contest.homepage is not None:
+                    return self.dbfile_handler(environ, {
+                        'digest': social_contest.homepage,
+                        'name': 'homepage.html'})
+        path = os.path.join(
+            pkg_resources.resource_filename('cmsocial-web-build', ''),
+            filename)
+
+        try:
+            response = Response()
+            response.status_code = 200
+            response.mimetype = 'application/octet-stream'
+            mimetype = mimetypes.guess_type(filename)[0]
+            if mimetype is not None:
+                response.mimetype = mimetype
+            response.last_modified = \
+                datetime.utcfromtimestamp(os.path.getmtime(path))\
+                        .replace(microsecond=0)
+            response.response = wrap_file(environ, io.open(path, 'rb'))
+            response.direct_passthrough = True
+        except OSError:
+            response = Response()
+            response.status_code = 404
+            response.data = "404 Not Found"
+
         return response
 
     # Handlers that require JSON data
@@ -354,24 +562,26 @@ class APIHandler(object):
             try:
                 username = local.data['username']
                 password = local.data['password']
-                email = local.data['email']
+                email = local.data['email'].lower()
                 firstname = local.data['firstname']
                 lastname = local.data['lastname']
-                recaptcha_response = local.data['recaptcha_response']
+                recaptcha_response = local.data['recaptcha_response'] if \
+                    'recaptcha_response' in local.data else None
             except KeyError:
                 logger.warning('Missing parameters')
                 return 'Bad request'
 
-            # Check captcha
-            r = requests.post(
-                "https://www.google.com/recaptcha/api/siteverify",
-                data={'secret': config.get("core", "recaptcha_secret_key"),
-                      'response': recaptcha_response}, #, 'remoteip': ''},
-                verify=False)
-            try:
-                assert r.json()["success"] == True
-            except:
-                return "Bad request"
+            # Check captcha if we changed the secret key
+            if local.contest.social_contest.is_captcha_enabled():
+                r = requests.post(
+                    "https://www.google.com/recaptcha/api/siteverify",
+                    data={'secret': local.contest.social_contest.recaptcha_secret_key,
+                          'response': recaptcha_response},  # , 'remoteip': ''},
+                    verify=False)
+                try:
+                    assert r.json()["success"] is True
+                except:
+                    return "Anti-spam check failed"
 
             token = self.hashpw(password)
 
@@ -381,6 +591,10 @@ class APIHandler(object):
             err = self.check_email(email)
             if err is not None:
                 return err
+
+            if local.contest is not None and    \
+                    local.contest.social_contest.access_level < local.global_access_level:
+                return 'Unauthorized'
 
             user = User(
                 first_name=firstname,
@@ -393,14 +607,6 @@ class APIHandler(object):
                 access_level=6,
                 registration_time=make_datetime()
             )
-            contest = local.session.query(Contest)\
-                .filter(Contest.id == self.CONTEST_ID)\
-                .first()
-            participation = Participation(
-                user=user,
-                contest=contest
-            )
-
             social_user.user = user
 
             if 'institute' in local.data:
@@ -409,10 +615,49 @@ class APIHandler(object):
             try:
                 local.session.add(user)
                 local.session.add(social_user)
-                local.session.add(participation)
                 local.session.commit()
             except IntegrityError:
                 return 'User already exists'
+
+            if local.contest is not None:
+                participation = Participation(
+                    user=user,
+                    contest=local.contest
+                )
+                social_participation = SocialParticipation()
+                social_participation.participation = participation
+
+                try:
+                    local.session.add(participation)
+                    local.session.add(social_participation)
+                    local.session.commit()
+                except IntegrityError:
+                    return "Participation already exists"
+            local.user = user
+            local.response = Response()
+            local.response.set_cookie(
+                'token', value=self.build_token(), domain=local.contest.social_contest.cookie_domain)
+        elif local.data['action'] == 'newparticipation':
+            if local.user is None:
+                return 'Unauthorized'
+            if local.contest is None:
+                return 'Bad request'
+            if local.contest.social_contest.access_level < local.global_access_level:
+                return 'Unauthorized'
+
+            participation = Participation(
+                user=local.user,
+                contest=local.contest
+            )
+            social_participation = SocialParticipation()
+            social_participation.participation = participation
+
+            try:
+                local.session.add(participation)
+                local.session.add(social_participation)
+                local.session.commit()
+            except IntegrityError:
+                return "Participation already exists"
         elif local.data['action'] == 'login':
             try:
                 username = local.data['username']
@@ -421,54 +666,69 @@ class APIHandler(object):
                 logger.warning('Missing parameter')
                 return 'Bad request'
 
-            token = self.hashpw(password)
-
-            participation = self.get_participation(username, token)
+            participation = self.get_participation(
+                local.contest, username, password)
             if participation is None:
-                return 'login.error'
+                local.user = self.get_user(username, password)
+                if local.user is None:
+                    return 'login.error'
             else:
-                user = participation.user
-                local.resp['token'] = token
-                local.resp['user'] = self.get_user_info(user)
+                local.user = participation.user
+            local.response = Response()
+            local.response.set_cookie(
+                'token', value=self.build_token(), domain=local.contest.social_contest.cookie_domain)
+        elif local.data['action'] == 'me':
+            if local.user is None:
+                return 'Unauthorized'
+            if local.participation is None:
+                local.resp['user'] = self.get_user_info(local.user)
+            else:
+                local.resp['user'] = self.get_participation_info(
+                    local.participation)
         elif local.data['action'] == 'get':
-            user = local.session.query(User)\
-                .filter(User.username == local.data['username']).first()
-            if user is None:
+            participation = self.get_participation(
+                local.contest, local.data['username'])
+            if participation is None:
                 return 'Not found'
-            local.resp = self.get_user_info(user)
+            local.resp = self.get_participation_info(participation)
             # Append scores of tried tasks
             local.resp['scores'] = []
-            for ts in user.social_user.taskscores:
+            for ts in participation.taskscores:
                 taskinfo = dict()
                 taskinfo['name'] = ts.task.name
                 taskinfo['score'] = ts.score
                 taskinfo['title'] = ts.task.title
                 local.resp['scores'].append(taskinfo)
         elif local.data['action'] == 'list':
-            query = local.session.query(User)\
-                .join(SocialUser)\
-                .order_by(desc(SocialUser.score))\
-                .order_by(desc(SocialUser.id))
+            if local.contest is None:
+                return "Bad request"
+            query = local.session.query(Participation)\
+                .join(User)\
+                .join(SocialParticipation)\
+                .filter(Participation.contest_id == local.contest.id)\
+                .order_by(desc(SocialParticipation.score))\
+                .order_by(desc(User.id))
             if 'institute' in local.data:
                 query = query\
                     .filter(SocialUser.institute_id == local.data['institute'])
-            users, local.resp['num'] = self.sliced_query(query)
-            local.resp['users'] = map(self.get_user_info, users)
+            participations, local.resp['num'] = self.sliced_query(query)
+            local.resp['users'] = map(
+                self.get_participation_info, participations)
         elif local.data['action'] == 'update':
             if local.user is None:
                 return 'Unauthorized'
             if 'institute' in local.data and \
-               local.data['institute'] is not None:
+                    local.data['institute'] is not None:
                 local.user.institute_id = int(local.data['institute'])
             if 'email' in local.data and \
-               local.data['email'] != '' and \
-               local.user.email != local.data['email']:
+                    local.data['email'] != '' and \
+                    local.user.email != local.data['email']:
                 err = self.check_email(local.data['email'])
                 if err is not None:
                     return err
                 local.user.email = local.data['email']
             if 'old_password' in local.data and \
-               local.data['old_password'] != '':
+                    local.data['old_password'] != '':
                 old_token = self.hashpw(local.data['old_password'])
                 if local.user.password != old_token:
                     return 'Wrong password'
@@ -478,52 +738,263 @@ class APIHandler(object):
                 local.user.password = new_token
                 local.resp['token'] = new_token
             local.session.commit()
+        elif local.data['action'] == 'recover':
+            user = local.session.query(User)\
+                .filter(User.email == local.data['email'])\
+                .first()
+
+            if user is None:
+                return 'No such user'
+
+            if len(local.data['code']) > 0:
+                local.resp['type'] = 1
+
+                if local.data['code'] == user.social_user.recover_code:
+                    user.social_user.recover_code = None
+
+                    # Generate new password an mail it
+                    tmp_password = self.gencode()
+                    user.password = self.hashpw(tmp_password)
+                    local.session.commit()
+
+                    if self.send_mail(user.email, "Password reset",
+                                      "New password: %s" % tmp_password):
+                        del tmp_password
+
+                        local.resp['message'] = \
+                            'Your new password was mailed to you'
+                    else:
+                        return 'Internal Server Error'
+                else:
+                    return 'Wrong code'
+            else:
+                local.resp['type'] = 2
+
+                # Check if enough time has passed
+                if datetime.utcnow() - user.social_user.last_recover < timedelta(days=1):
+                    local.resp['message'] = 'You should already have received an email, if not, try tomorrow'
+                else:
+                    # Generate new code and mail it
+                    user.social_user.recover_code = self.gencode()
+                    user.social_user.lastLesson_recover = datetime.utcnow()
+                    local.session.commit()
+
+                    if self.send_mail(user.email, "Code for password reset",
+                                      "Code: %s" % user.social_user.recover_code):
+                        local.resp['message'] = 'A code was sent, check your inbox'
+                    else:
+                        return 'Internal Server Error'
         else:
             return 'Bad request'
 
     def heartbeat_handler(self):
+        local.response = Response()
         if local.user is None:
+            local.response.set_cookie(
+                'token', expires=datetime.utcnow(), domain=local.contest.social_contest.cookie_domain)
             return 'Unauthorized'
+        else:
+            new_token = self.build_token()
+            if new_token != local.jwt_payload:
+                local.response.set_cookie(
+                    'token', value=new_token, domain=local.contest.social_contest.cookie_domain)
+
+    def contest_handler(self):
+        if local.data['action'] == 'list':
+            local.resp['contests'] = []
+            query = local.session.query(Contest)\
+                .join(SocialContest)\
+                .filter(SocialContest.access_level >= local.global_access_level)\
+                .filter(SocialContest.social_enabled == True)\
+                .order_by(Contest.description)
+            for c in query:
+                contest = dict()
+                contest['name'] = c.name
+                contest['description'] = c.description
+                local.resp['contests'].append(contest)
+        elif local.data['action'] == 'get':
+            if local.contest is None:
+                return 'Bad Request'
+            local.resp['name'] = local.contest.name
+            local.resp['description'] = local.contest.description
+            local.resp['languages'] = local.contest.languages
+            local.resp['participates'] = local.participation is not None
+            local.resp[
+                'top_left_name'] = local.contest.social_contest.top_left_name
+            local.resp['title'] = local.contest.social_contest.title
+            local.resp['forum'] = local.contest.social_contest.forum
+            local.resp['mail_enabled'] = local.contest.social_contest\
+                .is_mail_enabled()
+            local.resp['captcha_enabled'] = local.contest.social_contest\
+                .is_captcha_enabled()
+            if local.contest.social_contest.is_captcha_enabled():
+                local.resp['recaptcha_public_key'] = local.contest\
+                    .social_contest.recaptcha_public_key
+            local.resp['analytics'] = local.contest.social_contest.analytics
+            local.resp[
+                'cookie_domain'] = local.contest.social_contest.cookie_domain
+        else:
+            return 'Bad Request'
 
     def lessons_handler(self):
         if local.data['action'] == 'list':
             query = local.session.query(Lesson)\
-                .filter(Lesson.contest_id == self.CONTEST_ID)\
+                .filter(Lesson.contest_id == local.contest.id)\
                 .filter(Lesson.access_level >= local.access_level)\
                 .order_by(desc(Lesson.id))
             local.resp['lessons'] = []
             for l in query:
                 data = dict()
+                data['id'] = l.id
                 data['title'] = l.title
+                data['access_level'] = l.access_level
                 data['tasks'] = []
                 for t in l.tasks:
                     task = dict()
                     task['num'] = t.num
                     task['name'] = t.task.name
                     task['title'] = t.task.title
-                    if local.user is not None:
+                    if local.participation is not None:
                         taskscore = local.session.query(TaskScore)\
                             .filter(TaskScore.task_id == t.task.id)\
-                            .filter(TaskScore.user_id == local.user.id).first()
+                            .filter(TaskScore.participation_id == local.participation.id).first()
                         if taskscore is not None:
                             task['score'] = taskscore.score
                     data['tasks'].append(task)
                 data['tasks'].sort(key=lambda x: x['num'])
                 local.resp['lessons'].append(data)
+        elif local.data['action'] == 'alter':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                lesson = local.session.query(Lesson)\
+                    .filter(Lesson.contest_id == local.contest.id)\
+                    .filter(Lesson.id == local.data['id']).first()
+                lesson.access_level = local.data['access_level']
+                for lt in lesson.tasks:
+                    lt.task.social_task.access_level = lesson.access_level
+                    local.session.add(lt.task)
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
+        elif local.data['action'] == 'delete':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                lesson = local.session.query(Lesson)\
+                    .filter(Lesson.contest_id == local.contest.id)\
+                    .filter(Lesson.id == local.data['id']).first()
+                deleted_tasks = []
+                for lt in lesson.tasks:
+                    deleted_tasks.append(lt.task.num)
+                    local.session.delete(lt.task.social_task)
+                    local.session.delete(lt.task)
+                    local.session.delete(lt)
+                local.session.delete(lesson)
+                local.session.flush()
+                for tn in sorted(deleted_tasks, reverse=True):
+                    for t in local.session.query(Task)\
+                        .filter(Task.contest_id == local.contest.id)\
+                        .filter(Task.num > tn).all():
+                        t.num -= 1
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
+        elif local.data['action'] == 'new':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            archive_data = self.decode_file(local.data['files']['submission'])
+            with tempfile.NamedTemporaryFile() as temp:
+                temp.write(archive_data['body'])
+                temp.flush()
+                status = 0
+                script_file = os.path.join(
+                    pkg_resources.resource_filename('cmsocial', 'scripts'),
+                    'import_lessons_from_zip.sh')
+                try:
+                    local.resp['log'] = check_output([
+                        script_file,
+                        str(local.contest.id),
+                        temp.name], stderr=STDOUT)
+                except CalledProcessError as e:
+                    status = e.returncode
+                    local.resp['log'] = e.output
+            if status != 0:
+                return 'Error %s in script' % status
+        else:
+            return 'Bad Request'
+
+    def materials_handler(self):
+        if local.data['action'] == 'list':
+            query = local.session.query(Material)\
+                .filter(Material.contest_id == Material.contest.id)\
+                .filter(Material.access_level >= Material.access_level)\
+                .order_by(desc(Material.id))
+            local.resp['materials'] = [{
+                    'id': m.id,
+                    'title': m.title,
+                    'access_level': m.access_level,
+                    'text': m.text
+                } for m in query]
+        elif local.data['action'] == 'alter':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                material = local.session.query(Material)\
+                    .filter(Material.contest_id == local.contest.id)\
+                    .filter(Material.id == local.data['id']).first()
+                if 'access_level' in local.data:
+                    material.access_level = local.data['access_level']
+                if 'text' in local.data:
+                    material.text = local.data['text']
+                if 'title' in local.data:
+                    material.title = local.data['title']
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
+        elif local.data['action'] == 'delete':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                material = local.session.query(Material)\
+                    .filter(Material.contest_id == local.contest.id)\
+                    .filter(Material.id == local.data['id']).first()
+                local.session.delete(material)
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
+        elif local.data['action'] == 'new':
+            if local.access_level != 0:
+                return 'Unauthorized'
+            try:
+                material = Material(
+                    contest_id = local.contest.id,
+                    access_level = 0,
+                    text = local.data['text'],
+                    title = local.data['title'])
+                local.session.add(material)
+                local.session.commit()
+            except KeyError, ValueError:
+                return 'Bad Request'
         else:
             return 'Bad Request'
 
     def task_handler(self):
         if local.data['action'] == 'list':
+            if local.contest is None:
+                return 'Bad request'
             query = local.session.query(Task)\
                 .join(SocialTask)\
+                .filter(Task.contest_id == local.contest.id)\
                 .filter(SocialTask.access_level >= local.access_level)\
                 .order_by(desc(SocialTask.id))
 
             if 'tag' in local.data and local.data['tag'] is not None:
-                tags = local.data['tag'].split(',')[:5]  # Ignore requests with more that 5 tags
+                # Ignore requests with more that 5 tags
+                tags = local.data['tag'].split(',')[:5]
                 conditions = [Tag.name == tname for tname in tags]
-                targets = local.session.query(Tag).filter(or_(*conditions)).all()
+                targets = local.session.query(
+                    Tag).filter(or_(*conditions)).all()
                 local.resp['tags'] = []
                 for tag in targets:
                     local.resp['tags'].append(tag.name)
@@ -543,10 +1014,10 @@ class APIHandler(object):
                 task['name'] = t.name
                 task['title'] = t.title
 
-                if local.user is not None:
+                if local.participation is not None:
                     taskscore = local.session.query(TaskScore)\
                         .filter(TaskScore.task_id == t.id)\
-                        .filter(TaskScore.user_id == local.user.id).first()
+                        .filter(TaskScore.participation_id == local.participation.id).first()
 
                     if taskscore is not None:
                         task['score'] = taskscore.score
@@ -556,6 +1027,7 @@ class APIHandler(object):
         elif local.data['action'] == 'get':
             t = local.session.query(Task)\
                 .join(SocialTask)\
+                .filter(Task.contest_id == local.contest.id)\
                 .filter(Task.name == local.data['name'])\
                 .filter(SocialTask.access_level >= local.access_level).first()
             if t is None:
@@ -582,9 +1054,8 @@ class APIHandler(object):
                         tag['can_delete'] = False
                     else:
                         tag['can_delete'] = (local.user.social_user is tasktag.user and not tasktag.approved) or \
-                                local.user.social_user.access_level == 0
+                            local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
-
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
                 .join(SocialTask)\
@@ -601,7 +1072,7 @@ class APIHandler(object):
                 .filter(TaskScore.score == 100)\
                 .order_by(TaskScore.time)\
                 .slice(0, 10).all()
-            local.resp['best'] = [{'username': b.user.user.username,
+            local.resp['best'] = [{'username': b.participation.user.username,
                                    'time': b.time} for b in best]
         else:
             return 'Bad request'
@@ -610,8 +1081,15 @@ class APIHandler(object):
         if local.data['action'] == 'list':
             tags = local.session.query(Tag)\
                 .order_by(Tag.id)\
-                .filter(Tag.hidden == False).all()
-            local.resp['tags'] = [t.name for t in tags]
+                .filter(Tag.hidden == False)
+
+            if local.data.get('filter') == 'techniques':
+                tags = tags.filter(Tag.is_technique == True)
+
+            if local.data.get('filter') == 'events':
+                tags = tags.filter(Tag.is_event == True)
+
+            local.resp['tags'] = [t.name for t in tags.all()]
         elif local.data['action'] == 'create':
             if local.access_level >= 4:
                 return 'Unauthorized'
@@ -653,7 +1131,8 @@ class APIHandler(object):
                 return 'Task does not exist'
             else:
                 try:
-                    local.session.add(TaskTag(task=task.social_task, tag=tag, user=local.user.social_user))
+                    local.session.add(
+                        TaskTag(task=task.social_task, tag=tag, user=local.user.social_user))
                     local.session.commit()
                 except IntegrityError:
                     return 'The task already has this tag'
@@ -680,11 +1159,12 @@ class APIHandler(object):
             return 'Bad request'
 
     def help_handler(self):
-        if local.user is None:
+        if local.participation is None:
             return 'Unauthorized'
 
         task = local.session.query(Task)\
             .filter(Task.name == local.data['task'])\
+            .filter(Task.contest_id == local.contest.id)\
             .first()
 
         if task is None:
@@ -695,7 +1175,8 @@ class APIHandler(object):
                 .filter(Testcase.dataset == task.active_dataset)\
                 .all()
 
-            local.resp['testcases'] = [{'codename': t.codename} for t in testcases]
+            local.resp['testcases'] = [
+                {'codename': t.codename} for t in testcases]
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
@@ -703,7 +1184,8 @@ class APIHandler(object):
                 return 'Questo task non accetta richieste di testcase.'
 
             # Make sure that the user is allowed to request
-            if datetime.utcnow() - local.user.social_user.last_help_time < timedelta(hours=1):
+            # TODO: de-hardcode this.
+            if datetime.utcnow() - local.participation.social_participation.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
@@ -718,8 +1200,8 @@ class APIHandler(object):
             logger.info("User \"%s\" requested testcase %s for task \"%s\"." % (
                 local.user.username, local.data['testcase'], local.data['task']
             ))
-            local.user.social_user.last_help_time = datetime.utcnow()
-            local.user.social_user.help_count += 1
+            local.participation.social_participation.last_help_time = datetime.utcnow()
+            local.participation.social_participation.help_count += 1
             local.session.commit()
 
             # Return hashes
@@ -730,6 +1212,7 @@ class APIHandler(object):
         if local.data['action'] == 'list':
             tests = local.session.query(Test)\
                 .filter(Test.access_level >= local.access_level)\
+                .filter(Test.contest_id >= local.contest.id)\
                 .order_by(Test.id).all()
             local.resp['tests'] = []
             for t in tests:
@@ -748,6 +1231,7 @@ class APIHandler(object):
         elif local.data['action'] == 'get':
             test = local.session.query(Test)\
                 .filter(Test.name == local.data['test_name'])\
+                .filter(Test.contest_id >= local.contest.id)\
                 .filter(Test.access_level >= local.access_level).first()
             if test is None:
                 return 'Not found'
@@ -766,8 +1250,11 @@ class APIHandler(object):
                     q['answers'] = [[t[0], len(t[1])] for t in ansdata]
                 local.resp['questions'].append(q)
         elif local.data['action'] == 'answer':
+            if local.participation is None:
+                return "Not authorized"
             test = local.session.query(Test)\
                 .filter(Test.name == local.data['test_name'])\
+                .filter(Test.contest_id >= local.contest.id)\
                 .filter(Test.access_level >= local.access_level).first()
             if test is None:
                 return 'Not found'
@@ -799,7 +1286,8 @@ class APIHandler(object):
                                     an = float(ans[a])
                                     cor = float(correct[a])
                                 except:
-                                    # Hack to make the answer wrong if the user triggers a TypeError
+                                    # Hack to make the answer wrong if the user
+                                    # triggers a TypeError
                                     an = 1
                                     cor = 2
                             else:
@@ -809,27 +1297,27 @@ class APIHandler(object):
                                 local.resp[i] = [q.wrong_score, 'wrong']
                     if local.resp.get(i, None) is None:
                         local.resp[i] = [q.score, 'correct']
-            if local.user is not None:
-                score = sum([local.resp[i][0] for i in
-                             xrange(len(test.questions))])
-                testscore = local.session.query(TestScore)\
-                    .filter(TestScore.test_id == test.id)\
-                    .filter(TestScore.user_id == local.user.id).first()
-                if testscore is None:
-                    testscore = TestScore(score=score)
-                    testscore.user = local.user.social_user
-                    testscore.test = test
-                    local.session.add(testscore)
-                else:
-                    if score > testscore.score:
-                        testscore.score = score
-                local.session.commit()
+            score = sum([local.resp[i][0] for i in
+                         xrange(len(test.questions))])
+            testscore = local.session.query(TestScore)\
+                .filter(TestScore.test_id == test.id)\
+                .filter(TestScore.participation_id == local.participation.id).first()
+            if testscore is None:
+                testscore = TestScore(score=score)
+                testscore.participation = local.participation
+                testscore.test = test
+                local.session.add(testscore)
+            else:
+                if score > testscore.score:
+                    testscore.score = score
+            local.session.commit()
         else:
             return 'Bad request'
 
     def submission_handler(self):
         if local.data['action'] == 'list':
             task = local.session.query(Task)\
+                .filter(Task.contest_id == local.contest.id)\
                 .filter(Task.name == local.data['task_name']).first()
             if task is None:
                 return 'Not found'
@@ -919,20 +1407,15 @@ class APIHandler(object):
             try:
                 task = local.session.query(Task)\
                     .join(SocialTask)\
+                    .filter(Task.contest_id == local.contest.id)\
                     .filter(Task.name == local.data['task_name'])\
                     .filter(SocialTask.access_level >= local.access_level).first()
             except KeyError:
                 return 'Not found'
 
-            def decode_file(f):
-                f['data'] = f['data'].split(',')[-1]
-                f['body'] = b64decode(f['data'])
-                del f['data']
-                return f
-
             if len(local.data['files']) == 1 and \
                'submission' in local.data['files']:
-                archive_data = decode_file(local.data['files']['submission'])
+                archive_data = self.decode_file(local.data['files']['submission'])
                 del local.data['files']['submission']
 
                 # Create the archive.
@@ -945,7 +1428,8 @@ class APIHandler(object):
                 unpacked_dir = archive.unpack()
                 for name in archive.namelist():
                     filename = os.path.basename(name)
-                    body = open(os.path.join(unpacked_dir, filename), "r").read()
+                    body = open(os.path.join(
+                        unpacked_dir, filename), "r").read()
                     local.data['files'][filename] = {
                         'filename': filename,
                         'body': body
@@ -956,7 +1440,7 @@ class APIHandler(object):
                 archive.cleanup()
             else:
                 files_sent = \
-                    dict([(k, decode_file(v))
+                    dict([(k, self.decode_file(v))
                           for k, v in local.data['files'].iteritems()])
 
             # TODO: implement partial submissions (?)
@@ -974,7 +1458,8 @@ class APIHandler(object):
                 files.append(f)
                 if sfe.filename.endswith('.%l'):
                     language = None
-                    for ext, l in SOURCE_EXT_TO_LANGUAGE_MAP.iteritems():
+                    for ext in SOURCE_EXTS:
+                        l = filename_to_language(ext)
                         if f['filename'].endswith(ext):
                             language = l
                     if language is None:
@@ -988,7 +1473,7 @@ class APIHandler(object):
             # Add the submission
             timestamp = make_datetime()
             submission = Submission(timestamp,
-                                    sub_lang,
+                                    sub_lang.name,
                                     participation=local.participation,
                                     task=task)
             for f in files:
@@ -1032,6 +1517,7 @@ class PracticeWebServer(Service):
     '''Service that runs the web server for practice.
 
     '''
+
     def __init__(self, args):
         Service.__init__(self, shard=args.shard)
 
@@ -1055,8 +1541,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument("-s", "--shard", action="store", type=int, default=0,
-        help="Shard number (default: 0)")
+                        help="Shard number (default: 0)")
 
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
 
     PracticeWebServer(args).run()

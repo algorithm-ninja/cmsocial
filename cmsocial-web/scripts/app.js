@@ -19,11 +19,10 @@ angular
     'ui.router',
     'ui.ace',
     'angular-md5',
-    'vcRecaptcha',
   ])
-  .constant('API_PREFIX', '[[api_prefix]]')
+  .constant('API_PREFIX', 'api/')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
-    $locationProvider.html5Mode(false)//.hashPrefix('!')
+    $locationProvider.html5Mode(false); //.hashPrefix('!')
     // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
 
     $urlRouterProvider
@@ -31,7 +30,8 @@ angular
       .when('/task/{taskName}', '/task/{taskName}/statement')
       .when('/user/{userId}', '/user/{userId}/profile')
       .when('/ranking/', '/ranking/1')
-      .otherwise('/overview')
+      .when('/tecniques', '/techniques')
+      .otherwise('/overview');
 
     $stateProvider
       .state('overview', {
@@ -40,18 +40,8 @@ angular
         controller: 'HomepageCtrl'
       })
       .state('sso', {
-         url: '/sso',
-         controller: 'SSOCtrl'
-      })
-      .state('tecniche', {
-        url: '/tags/tecniques',
-        templateUrl: 'views/tecniche.html',
-        controller: 'TecnichePage'
-      })
-      .state('eventi', {
-        url: '/tags/events',
-        templateUrl: 'views/eventi.html',
-        controller: 'EventiPage'
+        url: '/sso',
+        controller: 'SSOCtrl'
       })
       .state('tasklist', {
         templateUrl: 'views/tasklist.html',
@@ -116,6 +106,11 @@ angular
         templateUrl: 'views/signup.html',
         controller: 'SignupCtrl'
       })
+      .state('forgot-account', {
+        url: '/forgot-account',
+        templateUrl: 'views/forgot-account.html',
+        controller: 'ForgotAccountCtrl'
+      })
       .state('help', {
         url: '/help/{taskName}',
         templateUrl: 'views/help.html',
@@ -136,14 +131,107 @@ angular
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
       })
+      .state('techniques', {
+        url: '/tags/techniques',
+        controller: 'TechniquesPage',
+        template: `<div class="container">
+  <legend>Tasks by technique</legend>
+  <div class="tag-group">
+    <span class="tag-group-item" ng-repeat="tag in tags" style="padding: 5px;">
+      <a ui-sref="tasklist.page({tag: tag, pageNum: 1})" class="label btn-info">
+        <i class="fa fa-tag"></i>
+        {{tag}}
+      </a>
+    </span>
+  </div>
+</div>`
+      })
+      .state('events', {
+        url: '/tags/events',
+        controller: 'EventsPage',
+        template: `<div class="container">
+  <div class="col-sm-5">
+    <legend>IOI</legend>
+    <div class="well">
+      <div ng-repeat="year in ioi" style="margin-bottom: 10px">
+        <em>Anno IOI: {{year}}</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year != 2010">
+            <a ui-sref="tasklist.page({tag: 'ioi' + year + ',territoriali', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> selezioni territoriali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year == 2010">
+            <a class="label btn-warning" title="non svolte">
+              <i class="fa fa-tag"></i> selezioni territoriali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year != 2009">
+            <a ui-sref="tasklist.page({tag: 'ioi' + year + ',nazionali', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> selezioni nazionali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;" ng-if="year == 2009">
+            <a class="label btn-warning" title="non svolte">
+              <i class="fa fa-tag"></i> selezioni nazionali
+            </a>
+          </span>
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'ioi' + year + ',ioi', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> ioi
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-5">
+    <legend>Altre gare</legend>
+    <div class="well">
+      <div style="margin-bottom: 10px">
+        <em>OIS: Olimpiadi di Informatica a Squadre</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'ois', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> ois
+            </a>
+          </span>
+        </div>
+      </div>
+      <div style="margin-bottom: 10px">
+        <em>GATOR: Gara di Allenamento Tor Vergata</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'gator', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> gator
+            </a>
+          </span>
+        </div>
+      </div>
+      <div style="margin-bottom: 10px">
+        <em>ABC: Algoritmi Bergamo Contest</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'abc', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> abc
+            </a>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`
+      })
+
   })
-  .controller('HomepageCtrl', function($scope, navbarManager, userManager) {
+  .controller('HomepageCtrl', function($scope, navbarManager, userManager, contestManager) {
     $scope.me = userManager;
+    $scope.cm = contestManager;
     navbarManager.setActiveTab(0);
   })
   .filter('repext', function() {
     return function(input) {
-      return input.replace(/.%l$/, ".(cpp|c|pas)")
+      return input.replace(/.%l$/, ".(cpp|c|pas)");
     };
   })
   .filter('outcomeToClass', function() {
@@ -166,10 +254,10 @@ angular
     return function(input) {
       if (input == undefined)
         return "N/A";
-      if (input>1024*1024)
-        return (input/(1024*1024)).toFixed(1) + " MiB";
-      else if (input>1024)
-        return (input/1024).toFixed(0) + " KiB";
+      if (input > 1024 * 1024)
+        return (input / (1024 * 1024)).toFixed(1) + " MiB";
+      else if (input > 1024)
+        return (input / 1024).toFixed(0) + " KiB";
       return input + " B";
     };
   })
@@ -182,8 +270,8 @@ angular
       if (d.toDateString() == new Date(Date.now()).toDateString())
         return "ieri, " + ('0' + d.getHours()).substr(-2) + ":" + ('0' + d.getMinutes()).substr(-2);
       d.setDate(d.getDate() - 1);
-      return ('0' + d.getDate()).substr(-2) + "/" + ('0' + (d.getMonth()+1)).substr(-2)
-             + "/" + d.getFullYear() + ", " + ('0' + d.getHours()).substr(-2) + ":"
-             + ('0' + d.getMinutes()).substr(-2);
+      return ('0' + d.getDate()).substr(-2) + "/" + ('0' + (d.getMonth() + 1)).substr(-2) +
+        "/" + d.getFullYear() + ", " + ('0' + d.getHours()).substr(-2) + ":" +
+        ('0' + d.getMinutes()).substr(-2);
     };
   });
