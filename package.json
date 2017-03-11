@@ -28,6 +28,7 @@
     "angular-ui-ace": "^0.2.3",
     "angular-ui-router": "0.2.15",
     "bootstrap": "^3.3.6",
+    "commonmark": "^0.27.0",
     "font-awesome": "^4.5.0",
     "jquery": "^2.1.4",
     "less": "^2.5.3",

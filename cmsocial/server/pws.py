@@ -927,9 +927,9 @@ class APIHandler(object):
     def material_handler(self):
         if local.data['action'] == 'list':
             query = local.session.query(Material)\
-                .filter(Material.contest_id == Material.contest.id)\
-                .filter(Material.access_level >= Material.access_level)\
-                .order_by(asc(Material.position))
+                .filter(Material.contest_id == local.contest.id)\
+                .filter(Material.access_level >= local.access_level)\
+                .order_by(Material.id.desc())
             local.resp['materials'] = [{
                     'id': m.id,
                     'title': m.title,
@@ -980,15 +980,19 @@ class APIHandler(object):
         elif local.data['action'] == 'new':
             if local.access_level != 0:
                 return 'Unauthorized'
+
+            archive_data = self.decode_file(local.data['files']['mdfile'])
+
             try:
-                material = Material(
-                    contest_id = local.contest.id,
-                    access_level = 0,
-                    text = local.data['text'],
-                    title = local.data['title'])
+                material = Material()
+                material.contest = local.contest
+                material.access_level = 0
+                material.text = archive_data['body']
+                material.title = local.data['title']
+
                 local.session.add(material)
                 local.session.commit()
-            except KeyError, ValueError:
+            except ValueError:
                 return 'Bad Request'
         else:
             return 'Bad Request'
