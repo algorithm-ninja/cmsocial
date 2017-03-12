@@ -96,11 +96,6 @@ begin;
 		update social_tasks
 		set nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
 		where id = t_id;
-
-		update social_participations
-		set score = total_score
-		where id = p_id;
-		return new;
 	end;
 	$$ language plpgsql;
 	drop trigger if exists submission_scored on submission_results;
