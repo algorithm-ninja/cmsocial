@@ -729,8 +729,7 @@ class APIHandler(object):
                 local.user.email = local.data['email']
             if 'old_password' in local.data and \
                     local.data['old_password'] != '':
-                old_token = self.hashpw(local.data['old_password'])
-                if local.user.password != old_token:
+                if not self.validate_user(local.user, local.data['old_password']):
                     return 'Wrong password'
                 if len(local.data['password']) < 5:
                     return 'Password\'s too short'

@@ -136,7 +136,7 @@ begin;
 		begin
 		    -- todo: fare meglio di un hard-coded 7
 			insert into social_contests (id, access_level, social_enabled, top_left_name, title, recaptcha_public_key, recaptcha_secret_key)
-			values (new.id, 7, true, new.name, new.description, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe');
+			values (new.id, 7, true, new.name, new.description, NULL, NULL);
 		exception when unique_violation then
 			return null;
 		end;
