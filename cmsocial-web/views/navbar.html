@@ -11,13 +11,13 @@
     <div class="navbar-collapse collapse" ng-controller="SignCtrl">
       <ul class="nav navbar-nav">
         <li ng-repeat="category in cm.getMenu(me.getUser().access_level)" ng-class="{dropdown: category.entries.length > 1}" ng-if="category.entries.length > 0">
-          <a ng-if="category.entries.length == 1" ng-href="{{$state.href(category.entries[0].sref, category.entries[0].params)}}"><i class="fa {{category.entries[0].icon}} fa-lg"></i> {{category.entries[0].title | l10n}}</a>
+          <a ng-if="category.entries.length == 1" ng-href="{{rt(category.entries[0])}}"><i class="fa {{category.entries[0].icon}} fa-lg"></i> {{category.entries[0].title | l10n}}</a>
           <a class="dropdown-toggle" data-toggle="dropdown" ng-if="category.entries.length > 1">
             <i class="fa {{category.icon}} fa-lg"></i> {{category.title | l10n}} <b class="caret"></b>
           </a>
           <ul class="dropdown-menu" ng-if="category.entries.length > 1">
             <li ng-repeat="entry in category.entries">
-                <a ng-href="{{$state.href(entry.sref, entry.params)}}">
+                <a ng-href="{{rt(entry)}}">
                     <i class="fa {{entry.icon}} fa-fw"></i> {{entry.title | l10n}}
                 </a>
             </li>

@@ -37,7 +37,7 @@ angular.module('cmsocial')
       controller: 'NavbarCtrl'
     };
   })
-  .controller('NavbarCtrl', function($scope, $location, userManager,
+  .controller('NavbarCtrl', function($scope, $location, $state, userManager,
         contestManager, l10n) {
     $('.signin-form input').click(function(e) {
       e.stopPropagation();
@@ -45,6 +45,7 @@ angular.module('cmsocial')
     $scope.me = userManager;
     $scope.cm = contestManager;
     $scope.participate = contestManager.participate;
+    $scope.rt = function(entry) {return $state.href(entry.sref, entry.params)};
 
     _l10n = l10n;
 
