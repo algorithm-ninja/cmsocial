@@ -1,5 +1,5 @@
 begin;
-	create function on_submission_insert() returns trigger as $$
+	create or replace function on_submission_insert() returns trigger as $$
 	begin
 		begin
 			insert into taskscores (participation_id, task_id, score, time)
@@ -13,7 +13,8 @@ begin;
 	drop trigger if exists submission_insert on submissions;
 	create trigger submission_insert after insert on submissions for each row execute procedure on_submission_insert();
 
-	create function on_submission_scored() returns trigger as $$
+	create or replace function on_submission_scored() returns trigger as $$
+    << vars >>
 	declare
 		t_id integer;
 		p_id integer;
@@ -96,12 +97,13 @@ begin;
 		update social_tasks
 		set nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
 		where id = t_id;
+		return new;
 	end;
 	$$ language plpgsql;
 	drop trigger if exists submission_scored on submission_results;
 	create trigger submission_scored after update or insert on submission_results for each row when (new.score is not null) execute procedure on_submission_scored();
 
-	create function on_user_insert() returns trigger as $$
+	create or replace function on_user_insert() returns trigger as $$
 	begin
 		begin
 		    -- todo: fare meglio di un hard-coded 6
@@ -116,7 +118,7 @@ begin;
 	drop trigger if exists user_insert on users;
 	create constraint trigger user_insert after insert on users deferrable initially deferred for each row execute procedure on_user_insert();
 
-	create function on_task_insert() returns trigger as $$
+	create or replace function on_task_insert() returns trigger as $$
 	begin
 		begin
 		    -- todo: fare meglio di un hard-coded 7
@@ -131,7 +133,7 @@ begin;
 	drop trigger if exists task_insert on tasks;
 	create constraint trigger task_insert after insert on tasks deferrable initially deferred for each row execute procedure on_task_insert();
 
-	create function on_contest_insert() returns trigger as $$
+	create or replace function on_contest_insert() returns trigger as $$
 	begin
 		begin
 		    -- todo: fare meglio di un hard-coded 7
@@ -146,7 +148,7 @@ begin;
 	drop trigger if exists contest_insert on contests;
 	create constraint trigger contest_insert after insert on contests deferrable initially deferred for each row execute procedure on_contest_insert();
 
-	create function on_participation_insert() returns trigger as $$
+	create or replace function on_participation_insert() returns trigger as $$
 	begin
 		begin
 			insert into social_participations (id, access_level, score, last_help_time, help_count)

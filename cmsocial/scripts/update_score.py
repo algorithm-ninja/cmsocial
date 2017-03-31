@@ -15,7 +15,7 @@ from cms.db import SessionGen
 
 from cmsocial.db.socialtask import TaskScore
 try:
-    from cmsocial.db.socialparticipation import SocialParticipation as ScoreClass
+    from cmsocial.db import SocialParticipation as ScoreClass
 except:
     # legacy non-multicontest version
     from cmsocial.db.socialuser import SocialUser as ScoreClass
