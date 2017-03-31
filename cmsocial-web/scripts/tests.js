@@ -21,9 +21,7 @@
 /* Test handling page */
 
 angular.module('cmsocial')
-  .controller('TestsCtrl', function($scope, $http, notificationHub,
-    navbarManager, l10n, API_PREFIX) {
-    navbarManager.setActiveTab(0);
+  .controller('TestsCtrl', function($scope, $http, notificationHub, l10n, API_PREFIX) {
     $http.post(API_PREFIX + 'test', {
         "action": "list"
       })
@@ -47,8 +45,7 @@ angular.module('cmsocial')
       });
   })
   .controller('TestpageCtrl', function($scope, $stateParams, $http,
-    $sce, notificationHub, navbarManager, l10n, API_PREFIX) {
-    navbarManager.setActiveTab(0);
+    $sce, notificationHub, l10n, API_PREFIX) {
     $scope.score = function() {
       var data = [];
       for (var i in $scope.test["questions"]) {

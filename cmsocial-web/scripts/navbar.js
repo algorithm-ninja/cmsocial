@@ -37,26 +37,14 @@ angular.module('cmsocial')
       controller: 'NavbarCtrl'
     };
   })
-  .factory('navbarManager', function() {
-    var activeTab = 0;
-    return {
-      isActiveTab: function(tab) {
-        return tab == activeTab;
-      },
-      setActiveTab: function(tab) {
-        activeTab = tab;
-      }
-    };
-  })
   .controller('NavbarCtrl', function($scope, $location, userManager,
-        navbarManager, contestManager, l10n) {
+        contestManager, l10n) {
     $('.signin-form input').click(function(e) {
       e.stopPropagation();
     });
     $scope.me = userManager;
     $scope.cm = contestManager;
     $scope.participate = contestManager.participate;
-    $scope.isActiveTab = navbarManager.isActiveTab;
 
     _l10n = l10n;
 

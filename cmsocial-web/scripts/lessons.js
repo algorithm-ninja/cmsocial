@@ -3,9 +3,8 @@
 /* Lesson page */
 
 angular.module('cmsocial')
-  .controller('LessonsCtrl', function($scope, $state, navbarManager,
+  .controller('LessonsCtrl', function($scope, $state,
     $http, notificationHub, userManager, l10n, API_PREFIX) {
-    navbarManager.setActiveTab(2);
     $scope.userManager = userManager;
     $scope.getLessons = function() {
       var data = {

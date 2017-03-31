@@ -229,10 +229,9 @@ angular
       })
 
   })
-  .controller('HomepageCtrl', function($scope, navbarManager, userManager, contestManager) {
+  .controller('HomepageCtrl', function($scope, userManager, contestManager) {
     $scope.me = userManager;
     $scope.cm = contestManager;
-    navbarManager.setActiveTab(0);
   })
   .filter('repext', function() {
     return function(input) {

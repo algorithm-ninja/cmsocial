@@ -21,8 +21,7 @@
 /* Ranking page */
 
 angular.module('cmsocial')
-  .controller('RankingSkel', function($scope, navbarManager) {
-    navbarManager.setActiveTab(4);
+  .controller('RankingSkel', function($scope) {
     $scope.pagination = {
       perPage: 20
     };

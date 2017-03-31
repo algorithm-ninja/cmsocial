@@ -3,9 +3,8 @@
 /* Materials page */
 
 angular.module('cmsocial')
-  .controller('MaterialCtrl', function($scope, $state, navbarManager,
+  .controller('MaterialCtrl', function($scope, $state,
       $http, notificationHub, userManager, l10n, API_PREFIX, $sce) {
-    navbarManager.setActiveTab(2);
     $scope.userManager = userManager;
     $scope.getMaterial = function() {
       var data = {

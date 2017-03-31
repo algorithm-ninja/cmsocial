@@ -83,8 +83,7 @@ angular.module('cmsocial')
     };
   })
   .controller('ForgotAccountCtrl', function($scope, $http, $state, notificationHub,
-    l10n, navbarManager, API_PREFIX) {
-    navbarManager.setActiveTab(0);
+    l10n, API_PREFIX) {
     $scope.user = {
       'recoverEmail': '',
       'recoverCode': ''
