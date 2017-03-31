@@ -73,6 +73,7 @@ angular.module('cmsocial')
         return contest;
       },
       getMenu: function(access_level) {
+        if (access_level == undefined) access_level = 7;
         return menu[access_level];
       },
       getContestPromise: function() {
