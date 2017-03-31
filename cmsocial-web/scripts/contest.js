@@ -73,7 +73,6 @@ angular.module('cmsocial')
         return contest;
       },
       getMenu: function(access_level) {
-        console.log(menu);
         return menu[access_level];
       },
       getContestPromise: function() {
