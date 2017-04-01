@@ -252,6 +252,9 @@ angular.module('cmsocial')
     'Lessons': {
       it: 'Lezioni'
     },
+    'Material': {
+      it: 'Materiale'
+    },
     'Task categories': {
       it: 'Problemi per categoria'
     },

@@ -8,12 +8,9 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from sqlalchemy.schema import Column, ForeignKey, CheckConstraint, \
-    UniqueConstraint, ForeignKeyConstraint, Table
-from sqlalchemy.types import Boolean, Integer, Float, String, Unicode, \
-    Interval, Enum, Text
+from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.types import Integer, Unicode
 from sqlalchemy.orm import backref, relationship
-from sqlalchemy.ext.orderinglist import ordering_list
 
 from cms.db import Contest
 
@@ -28,7 +25,7 @@ class Material(Base):
 
     id = Column(Integer, primary_key=True, unique=True)
 
-    title = Column(String)
+    title = Column(Unicode)
 
     # Access level required
     access_level = Column(
@@ -37,7 +34,7 @@ class Material(Base):
         default=7
     )
 
-    # "Contest" the lesson is part of
+    # "Contest" the material is part of
     contest_id = Column(
         Integer,
         ForeignKey(
@@ -52,11 +49,11 @@ class Material(Base):
     contest = relationship(
         Contest,
         backref=backref(
-            'lessons',
+            'materials',
             cascade="all, delete-orphan",
             passive_deletes=True
         )
     )
 
     # Text (in Markdown) of that material
-    text = Column(Text, nullable=False, default='')
+    text = Column(Unicode, nullable=False, default='')

@@ -29,7 +29,8 @@ setup(
             "cmsPracticeWebServer=cmsocial.server.pws:main",
             "cmsocialSyncTasks=cmsocial.scripts.synctasks:main",
             "cmsocialSyncUsers=cmsocial.scripts.syncusers:main",
-            "cmsocialDuplicateContest=cmsocial.scripts.duplicate_contest:main"
+            "cmsocialDuplicateContest=cmsocial.scripts.duplicate_contest:main",
+            "cmsocialUpdateScore=cmsocial.scripts.update_score:main"
         ]
     },
     keywords="ioi programming contest grader management system",

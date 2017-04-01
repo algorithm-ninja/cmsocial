@@ -1,0 +1,36 @@
+<div class="container">
+  <div class="row container">
+    <div>
+      <div class="well" ng-if="userManager.getUser().access_level == 0">
+      {{"Here you can upload new material. You should send a single .md file containing CommonMark-compatible text." | l10n}}
+      </div>
+      <div class="row container" ng-if="userManager.getUser().access_level == 0">
+        <form class="col-md-4 form-horizontal" ng-submit="loadFiles()" id="mdform" class="pull-right">
+          <div class="form-group">
+            <label class="control-label" for="mdtitle"><i class="fa fa-tag"></i> {{'Material title' | l10n}}</label>
+            <input class="form-control" type="text" id="mdtitle" name="mdtitle"/>
+            <label class="control-label" for="mdtext"><i class="fa fa-pencil-square-o"></i> {{'Material text' | l10n}}</label>
+            <input class="form-control" type="file" id="mdfile" name="mdfile"/>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="form-control btn btn-success"><i class="fa" ng-class="{'fa-spin': !submitCompleted, 'fa-paper-plane': submitCompleted,   'fa-circle-o-notch': !submitCompleted}"></i> {{'Submit' | l10n}}</button>
+          </div>
+        </form>
+      </div>
+
+      <hr ng-if="userManager.getUser().access_level == 0">
+
+      <div ng-repeat="material in materials">
+        <span ng-if="userManager.getUser().access_level == 0" class="public-toggle">Public <input type="checkbox" ng-model="material.access_level" ng-true-value="7" ng-false-value="0" ng-change="togglePublic(material)"/></span>
+        <span ng-if="userManager.getUser().access_level == 0" class="delete-lesson"><input class="btn btn-danger" type="button" ng-click="deleteMaterial(material)" value="Delete"/></span>
+        <span ng-if="userManager.getUser().access_level == 0" class="delete-lesson"><input class="btn btn-primary" type="button" ng-click="downloadMaterial(material)" value="Download"/></span>
+        <h3 role="button" ng-click="material.visible = !material.visible">
+          <i class="fa fa-angle-right" ng-if="!material.visible"></i>
+          <i class="fa fa-angle-down" ng-if="material.visible"></i>
+          {{material.title}}
+        </h3>
+        <div ng-bind-html="material.html" ng-if="material.visible"></div>
+      </div>
+    </div>
+  </div>
+</div>

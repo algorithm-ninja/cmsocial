@@ -1,21 +1,21 @@
-BEGIN;
-	CREATE OR REPLACE FUNCTION on_submission_insert() RETURNS TRIGGER AS $$
-	BEGIN
-		BEGIN
-			INSERT INTO taskscores (participation_id, task_id, score, time)
-			VALUES (NEW.participation_id, NEW.task_id, 0, 0);
-		EXCEPTION WHEN unique_violation THEN
-			RETURN NULL;
-		END;
-		RETURN NEW;
-	END;
-	$$ LANGUAGE plpgsql;
-	DROP TRIGGER IF EXISTS submission_insert ON submissions;
-	CREATE TRIGGER submission_insert AFTER INSERT ON submissions FOR EACH ROW EXECUTE PROCEDURE on_submission_insert();
+begin;
+	create or replace function on_submission_insert() returns trigger as $$
+	begin
+		begin
+			insert into taskscores (participation_id, task_id, score, time)
+			values (new.participation_id, new.task_id, 0, 0);
+		exception when unique_violation then
+			return null;
+		end;
+		return new;
+	end;
+	$$ language plpgsql;
+	drop trigger if exists submission_insert on submissions;
+	create trigger submission_insert after insert on submissions for each row execute procedure on_submission_insert();
 
-	CREATE OR REPLACE FUNCTION on_submission_scored() RETURNS TRIGGER AS $$
-	<< vars >>
-	DECLARE
+	create or replace function on_submission_scored() returns trigger as $$
+    << vars >>
+	declare
 		t_id integer;
 		p_id integer;
 		nsubs integer;
@@ -25,144 +25,140 @@ BEGIN;
 		max_score integer;
 		max_time float;
 		total_score integer;
-	BEGIN
-		-- Find task and user ID.
-		SELECT task_id, participation_id INTO t_id, p_id
-		FROM submissions
-		WHERE submissions.id = NEW.submission_id;
+	begin
+		-- find task and user id.
+		select task_id, participation_id into t_id, p_id
+		from submissions
+		where submissions.id = new.submission_id;
 
-		-- Number of submissions
-		SELECT count(*) INTO nsubs
-		FROM submission_results
-		INNER JOIN submissions ON submission_results.submission_id = submissions.id
-		WHERE task_id = t_id;
+		-- number of submissions
+		select count(*) into nsubs
+		from submission_results
+		inner join submissions on submission_results.submission_id = submissions.id
+		where task_id = t_id;
 
-		-- Number of correct submissions
-		SELECT count(*) INTO nsubscorrect
-		FROM submission_results
-		INNER JOIN submissions ON submission_results.submission_id = submissions.id
-		WHERE task_id = t_id AND score::integer = 100;
+		-- number of correct submissions
+		select count(*) into nsubscorrect
+		from submission_results
+		inner join submissions on submission_results.submission_id = submissions.id
+		where task_id = t_id and score::integer = 100;
 
-		-- Best score
-		SELECT max(score)::integer INTO max_score
-		FROM submission_results
-		INNER JOIN submissions ON submissions.id = submission_results.submission_id
-		WHERE task_id = t_id AND participation_id = p_id;
+		-- best score
+		select max(score)::integer into max_score
+		from submission_results
+		inner join submissions on submissions.id = submission_results.submission_id
+		where task_id = t_id and participation_id = p_id;
 
-		-- Best time
-		WITH tc_info AS (
-			SELECT json_array_elements(score_details::json) AS s_details, submission_id AS id
-			FROM submission_results
-			INNER JOIN submissions ON submissions.id = submission_results.submission_id
-			WHERE task_id = t_id AND participation_id = p_id AND score::integer = 100
+		-- best time
+		with tc_info as (
+			select json_array_elements(score_details::json) as s_details, submission_id as id
+			from submission_results
+			inner join submissions on submissions.id = submission_results.submission_id
+			where task_id = t_id and participation_id = p_id and score::integer = 100
 		)
-		SELECT min(s_time) INTO max_time
-		FROM (
-			SELECT max(time) AS s_time
-			FROM (
-				SELECT (json_array_elements(tc_info.s_details->'testcases')->>'time')::float AS time, id
-				FROM tc_info
-				WHERE (tc_info.s_details->'testcases') IS NOT NULL
-				UNION
-				SELECT (tc_info.s_details->>'time')::float AS time, id
-				FROM tc_info
-				WHERE (tc_info.s_details->'testcases') IS NULL
-			) AS times
-			GROUP BY id
-		) AS s_times;
+		select min(s_time) into max_time
+		from (
+			select max(time) as s_time
+			from (
+				select (json_array_elements(tc_info.s_details->'testcases')->>'time')::float as time, id
+				from tc_info
+				where (tc_info.s_details->'testcases') is not null
+				union
+				select (tc_info.s_details->>'time')::float as time, id
+				from tc_info
+				where (tc_info.s_details->'testcases') is null
+			) as times
+			group by id
+		) as s_times;
 
-		IF max_time IS NULL THEN
+		if max_time is null then
 			max_time = 0;
-		END IF;
+		end if;
 
-		UPDATE taskscores
-		SET score = max_score, time = max_time
-		WHERE task_id = t_id AND participation_id = p_id;
+		update taskscores
+		set score = max_score, time = max_time
+		where task_id = t_id and participation_id = p_id;
 
-		-- Number of users that tried this task
-		SELECT count(id) INTO nusers
-		FROM taskscores
-		WHERE task_id = t_id;
+		-- number of users that tried this task
+		select count(id) into nusers
+		from taskscores
+		where task_id = t_id;
 
-		-- Number of users that solved this task
-		SELECT count(id) INTO nuserscorrect
-		FROM taskscores
-		WHERE task_id = t_id AND score::integer = 100;
+		-- number of users that solved this task
+		select count(id) into nuserscorrect
+		from taskscores
+		where task_id = t_id and score::integer = 100;
 
-		-- Total score of user
-		SELECT sum(score) INTO total_score
-		FROM taskscores
-		WHERE participation_id = p_id;
+		-- total score of user
+		select sum(score) into total_score
+		from taskscores
+		where participation_id = p_id;
 
-		UPDATE social_tasks
-		SET nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
-		WHERE id = t_id;
+		update social_tasks
+		set nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
+		where id = t_id;
+		return new;
+	end;
+	$$ language plpgsql;
+	drop trigger if exists submission_scored on submission_results;
+	create trigger submission_scored after update or insert on submission_results for each row when (new.score is not null) execute procedure on_submission_scored();
 
-		UPDATE social_participations
-		SET score = total_score
-		WHERE id = p_id;
-		RETURN NEW;
-	END;
-	$$ LANGUAGE plpgsql;
-	DROP TRIGGER IF EXISTS submission_scored ON submission_results;
-	CREATE TRIGGER submission_scored AFTER UPDATE OR INSERT ON submission_results FOR EACH ROW WHEN (NEW.score IS NOT NULL) EXECUTE PROCEDURE on_submission_scored();
+	create or replace function on_user_insert() returns trigger as $$
+	begin
+		begin
+		    -- todo: fare meglio di un hard-coded 6
+			insert into social_users (id, registration_time, access_level, last_recover)
+			values (new.id, now(), 6, '1970-01-01 00:00:00');
+		exception when unique_violation then
+			return null;
+		end;
+		return new;
+	end;
+	$$ language plpgsql;
+	drop trigger if exists user_insert on users;
+	create constraint trigger user_insert after insert on users deferrable initially deferred for each row execute procedure on_user_insert();
 
-	CREATE OR REPLACE FUNCTION on_user_insert() RETURNS TRIGGER AS $$
-	BEGIN
-		BEGIN
-		    -- TODO: fare meglio di un hard-coded 6
-			INSERT INTO social_users (id, registration_time, access_level, last_recover)
-			VALUES (NEW.id, now(), 6, '1970-01-01 00:00:00');
-		EXCEPTION WHEN unique_violation THEN
-			RETURN NULL;
-		END;
-		RETURN NEW;
-	END;
-	$$ LANGUAGE plpgsql;
-	DROP TRIGGER IF EXISTS user_insert ON users;
-	CREATE CONSTRAINT TRIGGER user_insert AFTER INSERT ON users DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_user_insert();
+	create or replace function on_task_insert() returns trigger as $$
+	begin
+		begin
+		    -- todo: fare meglio di un hard-coded 7
+			insert into social_tasks (id, access_level, help_available, nsubs, nsubscorrect, nusers, nuserscorrect)
+			values (new.id, 7, 'f', 0, 0, 0, 0);
+		exception when unique_violation then
+			return null;
+		end;
+		return new;
+	end;
+	$$ language plpgsql;
+	drop trigger if exists task_insert on tasks;
+	create constraint trigger task_insert after insert on tasks deferrable initially deferred for each row execute procedure on_task_insert();
 
-	CREATE OR REPLACE FUNCTION on_task_insert() RETURNS TRIGGER AS $$
-	BEGIN
-		BEGIN
-		    -- TODO: fare meglio di un hard-coded 7
-			INSERT INTO social_tasks (id, access_level, help_available, nsubs, nsubscorrect, nusers, nuserscorrect)
-			VALUES (NEW.id, 7, 'f', 0, 0, 0, 0);
-		EXCEPTION WHEN unique_violation THEN
-			RETURN NULL;
-		END;
-		RETURN NEW;
-	END;
-	$$ LANGUAGE plpgsql;
-	DROP TRIGGER IF EXISTS task_insert ON tasks;
-	CREATE CONSTRAINT TRIGGER task_insert AFTER INSERT ON tasks DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_task_insert();
+	create or replace function on_contest_insert() returns trigger as $$
+	begin
+		begin
+		    -- todo: fare meglio di un hard-coded 7
+			insert into social_contests (id, access_level, social_enabled, top_left_name, title, recaptcha_public_key, recaptcha_secret_key)
+			values (new.id, 7, true, new.name, new.description, NULL, NULL);
+		exception when unique_violation then
+			return null;
+		end;
+		return new;
+	end;
+	$$ language plpgsql;
+	drop trigger if exists contest_insert on contests;
+	create constraint trigger contest_insert after insert on contests deferrable initially deferred for each row execute procedure on_contest_insert();
 
-	CREATE OR REPLACE FUNCTION on_contest_insert() RETURNS TRIGGER AS $$
-	BEGIN
-		BEGIN
-		    -- TODO: fare meglio di un hard-coded 7
-			INSERT INTO social_contests (id, access_level, social_enabled, top_left_name, title, recaptcha_public_key, recaptcha_secret_key)
-			VALUES (NEW.id, 7, true, NEW.name, NEW.description, '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe');
-		EXCEPTION WHEN unique_violation THEN
-			RETURN NULL;
-		END;
-		RETURN NEW;
-	END;
-	$$ LANGUAGE plpgsql;
-	DROP TRIGGER IF EXISTS contest_insert ON contests;
-	CREATE CONSTRAINT TRIGGER contest_insert AFTER INSERT ON contests DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_contest_insert();
-
-	CREATE OR REPLACE FUNCTION on_participation_insert() RETURNS TRIGGER AS $$
-	BEGIN
-		BEGIN
-			INSERT INTO social_participations (id, access_level, score, last_help_time, help_count)
-			VALUES (NEW.id, NULL, 0, '1970-01-01 00:00:00', 0);
-		EXCEPTION WHEN unique_violation THEN
-			RETURN NULL;
-		END;
-		RETURN NEW;
-	END;
-	$$ LANGUAGE plpgsql;
-	DROP TRIGGER IF EXISTS participation_insert ON participations;
-	CREATE CONSTRAINT TRIGGER participation_insert AFTER INSERT ON participations DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE PROCEDURE on_participation_insert();
-COMMIT;
+	create or replace function on_participation_insert() returns trigger as $$
+	begin
+		begin
+			insert into social_participations (id, access_level, score, last_help_time, help_count)
+			values (new.id, null, 0, '1970-01-01 00:00:00', 0);
+		exception when unique_violation then
+			return null;
+		end;
+		return new;
+	end;
+	$$ language plpgsql;
+	drop trigger if exists participation_insert on participations;
+	create constraint trigger participation_insert after insert on participations deferrable initially deferred for each row execute procedure on_participation_insert();
+commit;

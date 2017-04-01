@@ -81,6 +81,15 @@ class SocialContest(Base):
     # default home page.
     homepage = Column(Unicode, nullable=True)
 
+    # Menu - null means we want to use the default menu, otherwise a JSON
+    # describing the menu: an array of categories, which are objects with
+    # three fields: "title", "icon" (the name of the fa-icon), and "entries".
+    # "entries" is an array of objects with fields "title", "icon", exactly
+    # either "sref"+"params" (internal link) or "href" (external link), and
+    # (optionally) "display", which may have values 'always', 'logged',
+    # 'unlogged' and 'admin'
+    menu = Column(Unicode, nullable=True)
+
     def is_mail_enabled(self):
         return self.mail_server is not None and \
             self.mail_username is not None and \

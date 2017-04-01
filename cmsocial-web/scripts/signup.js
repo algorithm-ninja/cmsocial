@@ -21,8 +21,7 @@
 
 angular.module('cmsocial')
   .controller('SignupCtrl', function($scope, $http, $state, md5,
-    notificationHub, navbarManager, userManager, contestManager, API_PREFIX) {
-    navbarManager.setActiveTab(5);
+    notificationHub, userManager, contestManager, API_PREFIX) {
     $scope.cm = contestManager;
 
     contestManager.getContestPromise().then(function(response) {

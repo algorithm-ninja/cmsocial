@@ -121,6 +121,11 @@ angular
         templateUrl: 'views/tests.html',
         controller: 'TestsCtrl'
       })
+      .state('material', {
+        url: '/material',
+        templateUrl: 'views/material.html',
+        controller: 'MaterialCtrl'
+      })
       .state('lessons', {
         url: '/lessons',
         templateUrl: 'views/lessons.html',
@@ -224,10 +229,9 @@ angular
       })
 
   })
-  .controller('HomepageCtrl', function($scope, navbarManager, userManager, contestManager) {
+  .controller('HomepageCtrl', function($scope, userManager, contestManager) {
     $scope.me = userManager;
     $scope.cm = contestManager;
-    navbarManager.setActiveTab(0);
   })
   .filter('repext', function() {
     return function(input) {

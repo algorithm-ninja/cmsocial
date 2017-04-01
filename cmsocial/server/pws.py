@@ -729,8 +729,7 @@ class APIHandler(object):
                 local.user.email = local.data['email']
             if 'old_password' in local.data and \
                     local.data['old_password'] != '':
-                old_token = self.hashpw(local.data['old_password'])
-                if local.user.password != old_token:
+                if not self.validate_user(local.user, local.data['old_password']):
                     return 'Wrong password'
                 if len(local.data['password']) < 5:
                     return 'Password\'s too short'
@@ -822,7 +821,6 @@ class APIHandler(object):
             local.resp[
                 'top_left_name'] = local.contest.social_contest.top_left_name
             local.resp['title'] = local.contest.social_contest.title
-            local.resp['forum'] = local.contest.social_contest.forum
             local.resp['mail_enabled'] = local.contest.social_contest\
                 .is_mail_enabled()
             local.resp['captcha_enabled'] = local.contest.social_contest\
@@ -833,6 +831,74 @@ class APIHandler(object):
             local.resp['analytics'] = local.contest.social_contest.analytics
             local.resp[
                 'cookie_domain'] = local.contest.social_contest.cookie_domain
+            menu = local.contest.social_contest.menu
+            if menu is not None:
+                menu = json.loads(menu)
+            else:
+                def display(var):
+                    return 'always' if len(var) > 0 else 'admin'
+                task_menu = [{
+                        "title": "All tasks",
+                        "icon": "fa-list-ol",
+                        "sref": "tasklist.page",
+                        "params": {"pageNum": 1, "tag": None, "q": None}
+                    }, {
+                        "title": "Tasks by technique",
+                        "icon": "fa-rocket",
+                        "sref": "techniques"
+                    }, {
+                        "title": "Tasks by event",
+                        "icon": "fa-trophy",
+                        "sref": "events"
+                    }, {
+                        "title": "Lessons",
+                        "icon": "fa-pencil",
+                        "sref": "lessons",
+                        "display": display(local.contest.lessons)
+                    }, {
+                        "title": "Material",
+                        "icon": "fa-pencil",
+                        "sref": "material",
+                        "display": display(local.contest.materials)
+                    }, {
+                        "title": "Quizzes",
+                        "icon": "fa-pencil",
+                        "sref": "tests",
+                        "display": display(local.contest.tests)
+                    }]
+                menu = [{
+                    "title": "Task & quiz archive",
+                    "icon":  "fa-archive",
+                    "entries": task_menu
+                }, {
+                    "title": "Ranking",
+                    "icon": "fa-trophy",
+                    "entries": [{
+                        "title": "Ranking",
+                        "icon": "fa-trophy",
+                        "sref": "ranking.page",
+                        "params": {"pageNum": 1}
+                    }]
+                }]
+                if local.contest.social_contest.forum is not None:
+                    menu.append({
+                        "title": "Forum",
+                        "icon": "fa-trophy",
+                        "entries": [{
+                            "title": "Forum",
+                            "icon": "fa-comments",
+                            "href": local.contest.social_contest.forum
+                        }]})
+                menu.append({
+                    "title": "Sign up",
+                    "icon": "fa-pencil",
+                    "entries": [{
+                        "title": "Sign up",
+                        "icon": "fa-pencil",
+                        "sref": "signup",
+                        "display": "unlogged"
+                    }]})
+            local.resp["menu"] = menu
         else:
             return 'Bad Request'
 
@@ -924,12 +990,12 @@ class APIHandler(object):
         else:
             return 'Bad Request'
 
-    def materials_handler(self):
+    def material_handler(self):
         if local.data['action'] == 'list':
             query = local.session.query(Material)\
-                .filter(Material.contest_id == Material.contest.id)\
-                .filter(Material.access_level >= Material.access_level)\
-                .order_by(desc(Material.id))
+                .filter(Material.contest_id == local.contest.id)\
+                .filter(Material.access_level >= local.access_level)\
+                .order_by(Material.id.desc())
             local.resp['materials'] = [{
                     'id': m.id,
                     'title': m.title,
@@ -952,6 +1018,20 @@ class APIHandler(object):
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
+        # elif local.data['action'] == 'swap':
+        #     if local.access_level != 0:
+        #         return 'Unauthorized'
+        #     try:
+        #         material1 = local.session.query(Material)\
+        #             .filter(Material.contest_id == local.contest.id)\
+        #             .filter(Material.id == local.data['id1']).first()
+        #         material2 = local.session.query(Material)\
+        #             .filter(Material.contest_id == local.contest.id)\
+        #             .filter(Material.id == local.data['id2']).first()
+        #         material1.position, material2.position = material2.position, material1.position
+        #         local.session.commit()
+        #     except KeyError, ValueError:
+        #         return 'Bad Request'
         elif local.data['action'] == 'delete':
             if local.access_level != 0:
                 return 'Unauthorized'
@@ -966,15 +1046,19 @@ class APIHandler(object):
         elif local.data['action'] == 'new':
             if local.access_level != 0:
                 return 'Unauthorized'
+
+            archive_data = self.decode_file(local.data['files']['mdfile'])
+
             try:
-                material = Material(
-                    contest_id = local.contest.id,
-                    access_level = 0,
-                    text = local.data['text'],
-                    title = local.data['title'])
+                material = Material()
+                material.contest = local.contest
+                material.access_level = 0
+                material.text = archive_data['body']
+                material.title = local.data['title']
+
                 local.session.add(material)
                 local.session.commit()
-            except KeyError, ValueError:
+            except ValueError:
                 return 'Bad Request'
         else:
             return 'Bad Request'
