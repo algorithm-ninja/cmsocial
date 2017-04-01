@@ -249,6 +249,12 @@ angular.module('cmsocial')
     'All tasks': {
       it: 'Tutti i problemi'
     },
+    'Tasks by technique': {
+      it: 'Problemi per tecnica'
+    },
+    'Tasks by event': {
+      it: 'Problemi per evento'
+    },
     'Lessons': {
       it: 'Lezioni'
     },
