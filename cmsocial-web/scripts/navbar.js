@@ -45,7 +45,10 @@ angular.module('cmsocial')
     $scope.me = userManager;
     $scope.cm = contestManager;
     $scope.participate = contestManager.participate;
-    $scope.rt = function(entry) {return $state.href(entry.sref, entry.params)};
+    $scope.rt = function(entry) {
+        if (entry.href != null) return entry.href;
+        return $state.href(entry.sref, entry.params)
+    };
 
     _l10n = l10n;
 
