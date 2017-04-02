@@ -831,6 +831,7 @@ class APIHandler(object):
             local.resp['analytics'] = local.contest.social_contest.analytics
             local.resp[
                 'cookie_domain'] = local.contest.social_contest.cookie_domain
+            local.resp['forum_url'] = local.contest.social_contest.forum
             menu = local.contest.social_contest.menu
             if menu is not None:
                 menu = json.loads(menu)
