@@ -25,7 +25,7 @@ WEBDIRS=$(shell find cmsocial-web -type d)
 TMPDIRS=$(patsubst cmsocial-web%,tmp%,$(WEBDIRS))
 DESTDIRS=$(patsubst cmsocial-web%,$(DEST)%,$(WEBDIRS))
 
-JS=$(shell find cmsocial-web -type f -name '*.js' | sort)
+JS=$(shell echo cmsocial-web/scripts/app.js; find cmsocial-web -type f -name '*.js' -and -not -name 'app.js' | sort)
 LESS=$(shell find cmsocial-web -type f -name '*.less')
 HTML=$(shell find cmsocial-web -type f -name '*.html')
 DESTHTML=$(patsubst cmsocial-web/%,$(DEST)/%,$(HTML))
