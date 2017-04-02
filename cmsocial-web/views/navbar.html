@@ -81,6 +81,11 @@
           </a>
           <ul class="dropdown-menu" id="langsel"></ul>
         </li>
+        <li ng-if="me.getUser().access_level == 0">
+          <a ui-sref="admin">
+            <i class="fa fa-key fa-lg"></i> Administration
+          </a>
+        </li>
       </ul>
     </div><!--/.navbar-collapse -->
   </div>
