@@ -39,7 +39,7 @@ from werkzeug.wsgi import SharedDataMiddleware, responder, wrap_file
 
 import jwt
 from cms import ServiceCoord
-from cms.grading.languagemanager import SOURCE_EXTS, filename_to_language
+from cms.grading.languagemanager import SOURCE_EXTS, filename_to_language, get_language
 from cms.db import (Contest, File, Participation, SessionGen, Submission, Task,
                     Testcase, User)
 from cms.db.filecacher import FileCacher
@@ -1424,7 +1424,8 @@ class APIHandler(object):
                     if s.language is None:
                         fi['name'] = name
                     else:
-                        fi['name'] = name.replace('%l', s.language)
+                        ext = get_language(s.language).source_extension[1:]
+                        fi['name'] = name.replace('%l', ext)
                     fi['digest'] = f.digest
                     submission['files'].append(fi)
                 result = s.get_result()
