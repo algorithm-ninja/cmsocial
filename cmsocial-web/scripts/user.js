@@ -161,7 +161,9 @@ angular.module('cmsocial')
       })
       .success(function(data, status, headers, config) {
         if (data.success === 1) {
-          window.location.replace(contestManager.getContest().forum_url + '/session/sso_login?' + data.parameters);
+          contestManager.getContestPromise().then(function(response) {
+            window.location.replace(contestManager.getContest().forum_url + '/session/sso_login?' + data.parameters);
+          });
         } else {
           notificationHub.createAlert('danger', l10n.get('Sign on failed - please make sure to be logged in on the main website!'), 3);
           $state.go('overview');
