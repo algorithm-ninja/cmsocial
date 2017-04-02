@@ -27,6 +27,7 @@
     "angular-touch": "1.5.x",
     "angular-ui-ace": "^0.2.3",
     "angular-ui-router": "0.2.15",
+    "babel-polyfill": "^6.23.0",
     "bootstrap": "^3.3.6",
     "commonmark": "^0.27.0",
     "font-awesome": "^4.5.0",
