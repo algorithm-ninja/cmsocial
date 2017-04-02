@@ -1309,7 +1309,7 @@ class APIHandler(object):
                 if local.user is not None:
                     testscore = local.session.query(TestScore)\
                         .filter(TestScore.test_id == t.id)\
-                        .filter(TestScore.user_id == local.user.id).first()
+                        .filter(TestScore.participation_id == local.participation.id).first()
                     if testscore is not None:
                         test['score'] = testscore.score
                 local.resp['tests'].append(test)
