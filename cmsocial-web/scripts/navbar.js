@@ -59,7 +59,7 @@ angular.module('cmsocial')
 
     // ugly hack because of react limitation
     let x = document.getElementsByTagName("something");
-    for (let y of x) {
+    for (let y of Array.from(x)) {
         while (y.childNodes.length > 0) {
             y.parentNode.appendChild(y.childNodes[0]);
         }
