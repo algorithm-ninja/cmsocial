@@ -115,8 +115,23 @@ angular.module('cmsocial')
   .controller('StatementCtrl', function($scope, $window, taskbarManager) {
     taskbarManager.setActiveTab(1);
   })
-  .controller('AttachmentsCtrl', function(taskbarManager) {
+  .controller('AttachmentsCtrl', function($scope, $stateParams, $http,
+    $window, taskbarManager, notificationHub, API_PREFIX) {
     taskbarManager.setActiveTab(2);
+    $scope.bulkDownload = function() {
+      $http.post(API_PREFIX + 'task', {
+        'name': $stateParams.taskName,
+        'action': 'bulk_download',
+        'attachments': $scope.task.attachments
+      })
+      .success(function(data, status, headers, config) {
+        $window.location.assign(API_PREFIX + 'files/' + data.digest +
+                                '/' + $stateParams.taskName + ".zip");
+      })
+      .error(function(data, status, headers, config) {
+        notificationHub.serverError(status);
+      });
+    };
   })
   .controller('StatsCtrl', function($scope, $stateParams, $http,
     notificationHub, taskbarManager, l10n, API_PREFIX) {

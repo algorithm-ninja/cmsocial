@@ -136,6 +136,11 @@ angular
         templateUrl: 'views/testpage.html',
         controller: 'TestpageCtrl'
       })
+      .state('admin', {
+        url: '/admin',
+        templateUrl: 'views/admin.html',
+        controller: 'AdminCtrl'
+      })
       .state('techniques', {
         url: '/tags/techniques',
         controller: 'TechniquesPage',

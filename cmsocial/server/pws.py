@@ -39,7 +39,8 @@ from werkzeug.wsgi import SharedDataMiddleware, responder, wrap_file
 
 import jwt
 from cms import ServiceCoord
-from cms.grading.languagemanager import SOURCE_EXTS, filename_to_language, get_language
+from cms.grading.languagemanager import (LANGUAGES, SOURCE_EXTS,
+                                         filename_to_language, get_language)
 from cms.db import (Contest, File, Participation, SessionGen, Submission, Task,
                     Testcase, User)
 from cms.db.filecacher import FileCacher
@@ -228,7 +229,8 @@ class APIHandler(object):
             response.data = json.dumps(local.resp)
         else:
             if 'log' in local.resp:
-                response.data = json.dumps({'success': 0, 'error': ans, 'log': local.resp['log']})
+                response.data = json.dumps(
+                    {'success': 0, 'error': ans, 'log': local.resp['log']})
             else:
                 response.data = json.dumps({'success': 0, 'error': ans})
         return response
@@ -269,7 +271,8 @@ class APIHandler(object):
                 .filter(User.username == username).first()
             if participation is None:
                 return None
-            if password is None or self.validate_user(participation.user, password):
+            if password is None or \
+               self.validate_user(participation.user, password):
                 return participation
         except UnicodeDecodeError:
             return None
@@ -286,13 +289,14 @@ class APIHandler(object):
             return None
 
     def build_token(self):
+        mh = self.hash(local.user.email, 'md5')
         data = {
             'id': local.user.id,
             'username': local.user.username,
             'email': local.user.email,
             'firstName': local.user.first_name,
             'lastName': local.user.last_name,
-            'picture': '//gravatar.com/avatar/%s?d=identicon' % (self.hash(local.user.email, 'md5'))
+            'picture': '//gravatar.com/avatar/%s?d=identicon' % mh
         }
         return jwt.encode(data, config.get('core', 'secret'), algorithm='HS256')
 
@@ -345,9 +349,11 @@ class APIHandler(object):
         from string import ascii_lowercase, ascii_uppercase, digits
         from random import choice
 
-        return ''.join([choice(ascii_lowercase + ascii_uppercase + digits) for i in range(20)])
+        return ''.join([choice(ascii_lowercase + ascii_uppercase + digits)
+                        for i in range(20)])
 
     def send_mail(self, to, subject, body):
+        # TODO: cache SMTP connections
         server = smtplib.SMTP(local.contest.social_contest.mail_server)
         server.ehlo()
         server.starttls()
@@ -407,6 +413,20 @@ class APIHandler(object):
         if participation.social_participation.access_level is not None:
             info['access_level'] = participation.social_participation.access_level
         return info
+
+    def update_from_data(self, obj, *args, **kwargs):
+        for field in args:
+            if field in local.data:
+                setattr(obj, field, local.data[field])
+        for field, data_field in kwargs.iteritems():
+            if data_field in local.data:
+                setattr(obj, field, local.data[data_field])
+
+    def add_info(self, obj, dct, *args, **kwargs):
+        for field in args:
+            dct[field] = getattr(obj, field)
+        for field, data_field in kwargs.iteritems():
+            dct[data_field] = getattr(obj, field)
 
     # Handlers that do not require JSON data
     def dbfile_handler(self, environ, args):
@@ -592,8 +612,8 @@ class APIHandler(object):
             if err is not None:
                 return err
 
-            if local.contest is not None and    \
-                    local.contest.social_contest.access_level < local.global_access_level:
+            if local.contest is not None and \
+               local.contest.social_contest.access_level < local.global_access_level:
                 return 'Unauthorized'
 
             user = User(
@@ -636,7 +656,8 @@ class APIHandler(object):
             local.user = user
             local.response = Response()
             local.response.set_cookie(
-                'token', value=self.build_token(), domain=local.contest.social_contest.cookie_domain)
+                'token', value=self.build_token(),
+                domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'newparticipation':
             if local.user is None:
                 return 'Unauthorized'
@@ -676,7 +697,8 @@ class APIHandler(object):
                 local.user = participation.user
             local.response = Response()
             local.response.set_cookie(
-                'token', value=self.build_token(), domain=local.contest.social_contest.cookie_domain)
+                'token', value=self.build_token(),
+                domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'me':
             if local.user is None:
                 return 'Unauthorized'
@@ -796,14 +818,16 @@ class APIHandler(object):
             new_token = self.build_token()
             if new_token != local.jwt_payload:
                 local.response.set_cookie(
-                    'token', value=new_token, domain=local.contest.social_contest.cookie_domain)
+                    'token', value=new_token,
+                    domain=local.contest.social_contest.cookie_domain)
 
     def contest_handler(self):
         if local.data['action'] == 'list':
             local.resp['contests'] = []
             query = local.session.query(Contest)\
                 .join(SocialContest)\
-                .filter(SocialContest.access_level >= local.global_access_level)\
+                .filter(SocialContest.access_level >=
+                        local.global_access_level)\
                 .filter(SocialContest.social_enabled == True)\
                 .order_by(Contest.description)
             for c in query:
@@ -811,16 +835,33 @@ class APIHandler(object):
                 contest['name'] = c.name
                 contest['description'] = c.description
                 local.resp['contests'].append(contest)
+        elif local.data['action'] == 'alter':
+            if local.contest is None:
+                return 'Bad Request'
+            if local.access_level != 0:
+                return 'Unauthorized'
+            self.update_from_data(local.contest, 'description', 'languages')
+            self.update_from_data(
+                local.contest.social_contest, 'top_left_name', 'title',
+                'recaptcha_public_key', 'recaptcha_secret_key', 'mail_server',
+                'mail_username', 'mail_password', 'mail_from', 'analytics',
+                'cookie_domain', 'homepage', forum='forum_url')
+            if 'menu' in local.data:
+                if local.data['menu'] is not None:
+                    local.contest.social_contest.menu = \
+                        json.dumps(local.data['menu'])
+                else:
+                    local.contest.social_contest.menu = None
+            local.session.commit()
         elif local.data['action'] == 'get':
             if local.contest is None:
                 return 'Bad Request'
-            local.resp['name'] = local.contest.name
-            local.resp['description'] = local.contest.description
-            local.resp['languages'] = local.contest.languages
+            self.add_info(local.contest, local.resp, 'name', 'description',
+                          'languages')
             local.resp['participates'] = local.participation is not None
-            local.resp[
-                'top_left_name'] = local.contest.social_contest.top_left_name
-            local.resp['title'] = local.contest.social_contest.title
+            self.add_info(local.contest.social_contest, local.resp,
+                          'top_left_name', 'title', 'analytics',
+                          'cookie_domain', forum='forum_url')
             local.resp['mail_enabled'] = local.contest.social_contest\
                 .is_mail_enabled()
             local.resp['captcha_enabled'] = local.contest.social_contest\
@@ -828,10 +869,15 @@ class APIHandler(object):
             if local.contest.social_contest.is_captcha_enabled():
                 local.resp['recaptcha_public_key'] = local.contest\
                     .social_contest.recaptcha_public_key
-            local.resp['analytics'] = local.contest.social_contest.analytics
-            local.resp[
-                'cookie_domain'] = local.contest.social_contest.cookie_domain
-            local.resp['forum_url'] = local.contest.social_contest.forum
+            if local.access_level == 0:
+                self.add_info(local.contest.social_contest, local.resp,
+                              'recaptcha_public_key', 'recaptcha_secret_key',
+                              'mail_server', 'mail_username', 'mail_password',
+                              'mail_from', menu='menu_on_db')
+                local.resp['all_languages'] = map(lambda x: x.name, LANGUAGES)
+                if local.resp['menu_on_db'] is not None:
+                    local.resp['menu_on_db'] = \
+                        json.loads(local.resp['menu_on_db'])
             menu = local.contest.social_contest.menu
             if menu is not None:
                 menu = json.loads(menu)
@@ -924,7 +970,8 @@ class APIHandler(object):
                     if local.participation is not None:
                         taskscore = local.session.query(TaskScore)\
                             .filter(TaskScore.task_id == t.task.id)\
-                            .filter(TaskScore.participation_id == local.participation.id).first()
+                            .filter(TaskScore.participation_id ==
+                                    local.participation.id).first()
                         if taskscore is not None:
                             task['score'] = taskscore.score
                     data['tasks'].append(task)
@@ -1010,12 +1057,7 @@ class APIHandler(object):
                 material = local.session.query(Material)\
                     .filter(Material.contest_id == local.contest.id)\
                     .filter(Material.id == local.data['id']).first()
-                if 'access_level' in local.data:
-                    material.access_level = local.data['access_level']
-                if 'text' in local.data:
-                    material.text = local.data['text']
-                if 'title' in local.data:
-                    material.title = local.data['title']
+                self.update_from_data(material, 'text', 'title', 'access_level')
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
@@ -1102,7 +1144,8 @@ class APIHandler(object):
                 if local.participation is not None:
                     taskscore = local.session.query(TaskScore)\
                         .filter(TaskScore.task_id == t.id)\
-                        .filter(TaskScore.participation_id == local.participation.id).first()
+                        .filter(TaskScore.participation_id ==
+                                local.participation.id).first()
 
                     if taskscore is not None:
                         task['score'] = taskscore.score
@@ -1138,7 +1181,9 @@ class APIHandler(object):
                     if local.user is None:
                         tag['can_delete'] = False
                     else:
-                        tag['can_delete'] = (local.user.social_user is tasktag.user and not tasktag.approved) or \
+                        tag['can_delete'] = \
+                                (local.user.social_user is tasktag.user and
+                                 not tasktag.approved) or \
                             local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
         elif local.data['action'] == 'stats':
@@ -1159,6 +1204,30 @@ class APIHandler(object):
                 .slice(0, 10).all()
             local.resp['best'] = [{'username': b.participation.user.username,
                                    'time': b.time} for b in best]
+        elif local.data['action'] == 'bulk_download':
+            tmp_path = tempfile.mkdtemp()
+
+            for f in local.data['attachments']:
+                # Retrieve each attachment by its digest and store it with
+                # its name.
+                self.file_cacher.get_file_to_path(
+                    f[1],
+                    os.path.join(tmp_path, f[0]))
+
+            # Create a zip archive named after task name.
+            archive_name = next(tempfile._get_candidate_names()) + '.zip'
+            archive_path = os.path.join(tmp_path, archive_name)
+            Archive.create_from_dir(tmp_path, archive_path)
+
+            # Store the archive in FileCacher and return its digest.
+            digest = self.file_cacher.put_file_from_path(archive_path)
+            local.resp['digest'] = digest
+
+            # Cleanup
+            try:
+                rmtree(tmp_path)
+            except:
+                pass
         else:
             return 'Bad request'
 
@@ -1217,7 +1286,8 @@ class APIHandler(object):
             else:
                 try:
                     local.session.add(
-                        TaskTag(task=task.social_task, tag=tag, user=local.user.social_user))
+                        TaskTag(task=task.social_task, tag=tag,
+                                user=local.user.social_user))
                     local.session.commit()
                 except IntegrityError:
                     return 'The task already has this tag'
@@ -1233,7 +1303,8 @@ class APIHandler(object):
                 .filter(TaskTag.tag == tag)\
                 .filter(TaskTag.task == task).first()
             if local.access_level > 0:
-                if tag.hidden or tasktag.approved or local.user.social_user is not tasktag.user:
+                if tag.hidden or tasktag.approved or \
+                   local.user.social_user is not tasktag.user:
                     return 'Unauthorized'
             elif tasktag is None:
                 return 'Task does not have tag'
@@ -1268,9 +1339,10 @@ class APIHandler(object):
             if not task.social_task.help_available:
                 return 'Questo task non accetta richieste di testcase.'
 
+            socpart = local.participation.social_participation
             # Make sure that the user is allowed to request
             # TODO: de-hardcode this.
-            if datetime.utcnow() - local.participation.social_participation.last_help_time < timedelta(hours=1):
+            if datetime.utcnow() - socpart.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
@@ -1285,8 +1357,8 @@ class APIHandler(object):
             logger.info("User \"%s\" requested testcase %s for task \"%s\"." % (
                 local.user.username, local.data['testcase'], local.data['task']
             ))
-            local.participation.social_participation.last_help_time = datetime.utcnow()
-            local.participation.social_participation.help_count += 1
+            socpart.last_help_time = datetime.utcnow()
+            socpart.help_count += 1
             local.session.commit()
 
             # Return hashes
@@ -1309,7 +1381,8 @@ class APIHandler(object):
                 if local.user is not None:
                     testscore = local.session.query(TestScore)\
                         .filter(TestScore.test_id == t.id)\
-                        .filter(TestScore.participation_id == local.participation.id).first()
+                        .filter(TestScore.participation_id ==
+                                local.participation.id).first()
                     if testscore is not None:
                         test['score'] = testscore.score
                 local.resp['tests'].append(test)

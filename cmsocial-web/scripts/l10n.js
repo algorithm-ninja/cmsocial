@@ -100,6 +100,9 @@ angular.module('cmsocial')
     'Attachments': {
       it: 'Allegati'
     },
+    'Download everything as zip': {
+      it: 'Scarica tutto come zip'
+    },
     'Stats': {
       it: 'Statistiche'
     },
