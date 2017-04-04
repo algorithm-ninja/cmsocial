@@ -35,7 +35,7 @@ def recursive_clone(session, cls, tree, flt, edit, backedit):
     objects = session.query(cls)
     flt_info = flt.get(cls, (lambda x: x, dict()))
     objects = apply_filter(objects, cls, flt_info[0], flt_info[1])
-    objects = objects.all()
+    objects = objects.order_by(cls.id).all()
 
     if verbose:
         print "Cloning %d %s" % (len(objects), cls.__name__)
