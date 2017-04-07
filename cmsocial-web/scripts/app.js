@@ -228,6 +228,16 @@ angular
           </span>
         </div>
       </div>
+      <div style="margin-bottom: 10px">
+        <em>Gare di allenamento Istituto Roiti Ferrara</em>
+        <div class="tag-group">
+          <span class="tag-group-item" style="padding: 5px;">
+            <a ui-sref="tasklist.page({tag: 'roiti', pageNum: 1})" class="label btn-info">
+              <i class="fa fa-tag"></i> roiti
+            </a>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </div>`
