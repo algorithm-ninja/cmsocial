@@ -74,7 +74,10 @@ def compute_smart_score(user_to_task, task_to_user):
             sum_score_over_ability = 0
             for uid, score in task_to_user.get(tid, []):
                 sum_score_over_ability += score/abilities[uid]
-            difficulties[tid] = attempts_sqrt[tid] / sum_score_over_ability
+            if sum_score_over_ability == 0:
+                difficulties[tid] = 10.0
+            else:
+                difficulties[tid] = attempts_sqrt[tid] / sum_score_over_ability
             if difficulties[tid] > 10.0:
                 difficulties[tid] = 10.0
             if difficulties[tid] < 0.1:
