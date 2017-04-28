@@ -695,9 +695,15 @@ class APIHandler(object):
                     return 'login.error'
             else:
                 local.user = participation.user
+
+            # When the user explicitly requests, make the cookie expire
+            # after 30 days (instead of at the end of the browser's session).
+            keep_signed = local.data.get('keep_signed', False)
+            cookie_duration = 30 * 86400 if keep_signed else None
             local.response = Response()
             local.response.set_cookie(
                 'token', value=self.build_token(),
+                max_age = cookie_duration,
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'me':
             if local.user is None:

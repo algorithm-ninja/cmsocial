@@ -134,6 +134,7 @@ angular.module('cmsocial')
           'action': 'login',
           'username': $scope.user.username,
           'password': $scope.user.password,
+          'keep_signed': $("#keep_signed").prop("checked")
         })
         .success(function(data, status, headers, config) {
           if (data.success == 1) {
