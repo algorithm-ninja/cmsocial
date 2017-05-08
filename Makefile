@@ -32,9 +32,11 @@ DESTHTML=$(patsubst cmsocial-web/%,$(DEST)/%,$(HTML))
 CSS=$(patsubst cmsocial-web/%.less,tmp/%.css,$(LESS))
 TMPJS=$(patsubst cmsocial-web/%.js,tmp/%.js,$(JS))
 
+COMMITID=$(shell git rev-parse HEAD)
+
 .PHONY: all dirs other-files config-files js-deps clean distclean jshint bsync
 
-all: $(DESTHTML) $(DEST)/styles/main.css $(DEST)/scripts/app.processed.js js-deps other-files config-files | dirs
+all: $(DESTHTML) $(DEST)/styles/main.css $(DEST)/scripts/app.$(COMMITID).js js-deps other-files config-files | dirs
 
 other-files: $(DEST)/robots.txt $(DEST)/images/loader.gif $(DEST)/__init__.py
 
@@ -81,6 +83,7 @@ $(DEST)/views/homepage.html: config/homepage.html | $(DEST)
 
 $(DEST)/index.html: cmsocial-web/index.html node_modules | $(DEST)
 	node_modules/.bin/cdnify $(CDNFLAGS) $< | $(STRIPDEBUG) > $@
+	sed "s/COMMIT_ID_HERE/$(COMMITID)/" -i $@
 
 $(DEST)/%.html: cmsocial-web/%.html | $(DEST)
 	cat $< | $(STRIPDEBUG) > $@
@@ -91,7 +94,7 @@ $(DEST)/styles/main.css: $(CSS)
 tmp/%.css: cmsocial-web/%.less node_modules | tmp
 	node_modules/.bin/lessc $< $@
 
-$(DEST)/scripts/app.processed.js: $(TMPJS) | node_modules
+$(DEST)/scripts/app.$(COMMITID).js: $(TMPJS) | node_modules
 	${BABEL} $^ | ${UGLIFY} > $@
 
 tmp/%.js: cmsocial-web/%.js | tmp
