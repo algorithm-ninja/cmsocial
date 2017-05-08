@@ -285,6 +285,9 @@ angular.module('cmsocial')
     'Log out': {
       it: 'Esci'
     },
+    'Stay signed in': {
+      it: 'Resta connesso'
+    },
     'Forgot account?':
     {it: 'Hai dimenticato le credenziali?'},
     'No such user':

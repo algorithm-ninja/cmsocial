@@ -43,7 +43,15 @@
                 <label class="sr-only" for="password">{{'Password' | l10n}}</label>
                 <input class="form-control" type="password" id="password" name="password" ng-model="user.password" placeholder="Password" />
               </div>
-              <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> {{'Log in' | l10n}}</button>
+              <div class="row vertical-center">
+                <div class="col-xs-8">
+                  <input type="checkbox" id="keep_signed" name="keep_signed" checked="checked" />
+                  <label for="keep_signed">{{'Stay signed in' | l10n}}</label>
+                </div>
+                <div class="col-xs-4">
+                  <button type="submit" class="btn btn-success pull-right"><i class="fa fa-sign-in"></i> {{'Log in' | l10n}}</button>
+                </div>
+              </div>
               <div class="form-group" style="margin: 6px 0px 0px 0px" ng-if="cm.getContest().mail_enabled">
                 <a data-toggle="dropdown" ui-sref="forgot-account">{{'Forgot account?' | l10n}}</a>
               </div>
