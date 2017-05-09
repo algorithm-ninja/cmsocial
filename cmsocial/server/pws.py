@@ -498,6 +498,15 @@ class APIHandler(object):
             response.status_code = 404
             response.data = "404 Not Found"
 
+        if filename == "index.html":
+            # Disable cache, so that the user will notice if the
+            # app.COMMIT_ID.js file has a new name
+
+            response.headers['Last-Modified'] = datetime.now()
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '-1'
+
         return response
 
     # Handlers that require JSON data
