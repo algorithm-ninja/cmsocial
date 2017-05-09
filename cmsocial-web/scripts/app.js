@@ -36,7 +36,7 @@ angular
     $stateProvider
       .state('overview', {
         url: '/overview',
-        templateUrl: 'views/homepage.html',
+        templateUrl: 'COMMIT_ID_HERE/views/homepage.html',
         controller: 'HomepageCtrl'
       })
       .state('sso', {
@@ -44,101 +44,101 @@ angular
         controller: 'SSOCtrl'
       })
       .state('tasklist', {
-        templateUrl: 'views/tasklist.html',
+        templateUrl: 'COMMIT_ID_HERE/views/tasklist.html',
         controller: 'TasklistSkel'
       })
       .state('tasklist.page', {
         url: '/tasks/{pageNum}?tag&q',
-        templateUrl: 'views/tasks.html',
+        templateUrl: 'COMMIT_ID_HERE/views/tasks.html',
         controller: 'TasklistPage'
       })
       .state('task', {
         url: '/task/{taskName}',
-        templateUrl: 'views/task.html',
+        templateUrl: 'COMMIT_ID_HERE/views/task.html',
         controller: 'TaskbarCtrl'
       })
       .state('task.statement', {
         url: '/statement',
-        templateUrl: 'views/task.statement.html',
+        templateUrl: 'COMMIT_ID_HERE/views/task.statement.html',
         controller: 'StatementCtrl'
       })
       .state('task.submissions', {
         url: '/submissions',
-        templateUrl: 'views/task.submissions.html',
+        templateUrl: 'COMMIT_ID_HERE/views/task.submissions.html',
         controller: 'SubmissionsCtrl'
       })
       .state('task.attachments', {
         url: '/attachments',
-        templateUrl: 'views/task.attachments.html',
+        templateUrl: 'COMMIT_ID_HERE/views/task.attachments.html',
         controller: 'AttachmentsCtrl'
       })
       .state('task.stats', {
         url: '/stats',
-        templateUrl: 'views/task.stats.html',
+        templateUrl: 'COMMIT_ID_HERE/views/task.stats.html',
         controller: 'StatsCtrl'
       })
       .state('ranking', {
-        templateUrl: 'views/ranking.html',
+        templateUrl: 'COMMIT_ID_HERE/views/ranking.html',
         controller: 'RankingSkel'
       })
       .state('ranking.page', {
         url: '/ranking/{pageNum}',
-        templateUrl: 'views/ranking.page.html',
+        templateUrl: 'COMMIT_ID_HERE/views/ranking.page.html',
         controller: 'RankingCtrl'
       })
       .state('user', {
         url: '/user/{userId}',
-        templateUrl: 'views/user.html',
+        templateUrl: 'COMMIT_ID_HERE/views/user.html',
         controller: 'UserbarCtrl'
       })
       .state('user.edit', {
         url: '/edit',
-        templateUrl: 'views/user.edit.html',
+        templateUrl: 'COMMIT_ID_HERE/views/user.edit.html',
         controller: 'EdituserCtrl'
       })
       .state('user.profile', {
         url: '/profile',
-        templateUrl: 'views/user.profile.html',
+        templateUrl: 'COMMIT_ID_HERE/views/user.profile.html',
         controller: 'UserpageCtrl'
       })
       .state('signup', {
         url: '/signup',
-        templateUrl: 'views/signup.html',
+        templateUrl: 'COMMIT_ID_HERE/views/signup.html',
         controller: 'SignupCtrl'
       })
       .state('forgot-account', {
         url: '/forgot-account',
-        templateUrl: 'views/forgot-account.html',
+        templateUrl: 'COMMIT_ID_HERE/views/forgot-account.html',
         controller: 'ForgotAccountCtrl'
       })
       .state('help', {
         url: '/help/{taskName}',
-        templateUrl: 'views/help.html',
+        templateUrl: 'COMMIT_ID_HERE/views/help.html',
         controller: 'HelpCtrl'
       })
       .state('tests', {
         url: '/tests',
-        templateUrl: 'views/tests.html',
+        templateUrl: 'COMMIT_ID_HERE/views/tests.html',
         controller: 'TestsCtrl'
       })
       .state('material', {
         url: '/material',
-        templateUrl: 'views/material.html',
+        templateUrl: 'COMMIT_ID_HERE/views/material.html',
         controller: 'MaterialCtrl'
       })
       .state('lessons', {
         url: '/lessons',
-        templateUrl: 'views/lessons.html',
+        templateUrl: 'COMMIT_ID_HERE/views/lessons.html',
         controller: 'LessonsCtrl'
       })
       .state('test', {
         url: '/test/{testName}',
-        templateUrl: 'views/testpage.html',
+        templateUrl: 'COMMIT_ID_HERE/views/testpage.html',
         controller: 'TestpageCtrl'
       })
       .state('admin', {
         url: '/admin',
-        templateUrl: 'views/admin.html',
+        templateUrl: 'COMMIT_ID_HERE/views/admin.html',
         controller: 'AdminCtrl'
       })
       .state('techniques', {
