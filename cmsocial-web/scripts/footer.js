@@ -4,6 +4,6 @@ angular.module('cmsocial')
   .directive('foot', function() {
     return {
       restrict: 'E',
-      templateUrl: 'views/footer.html',
+      templateUrl: 'COMMIT_ID_HERE/views/footer.html',
     }
   })

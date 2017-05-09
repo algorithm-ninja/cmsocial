@@ -25,7 +25,7 @@ angular.module('cmsocial')
         totalPages: '=',
         onSelectPage: '&'
       },
-      templateUrl: 'views/pagination.html',
+      templateUrl: 'COMMIT_ID_HERE/views/pagination.html',
       replace: true,
       link: function(scope, elem, attrs) {
         scope.selectPage = function(newPage) {

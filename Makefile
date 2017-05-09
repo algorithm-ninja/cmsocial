@@ -1,4 +1,7 @@
-DEST=cmsocial-web-build
+COMMITID=$(shell git rev-parse HEAD)
+
+ROOT=cmsocial-web-build
+DEST=$(ROOT)/$(COMMITID)
 MAKEROOT=$(shell pwd)
 SHELL := /bin/bash
 
@@ -32,20 +35,18 @@ DESTHTML=$(patsubst cmsocial-web/%,$(DEST)/%,$(HTML))
 CSS=$(patsubst cmsocial-web/%.less,tmp/%.css,$(LESS))
 TMPJS=$(patsubst cmsocial-web/%.js,tmp/%.js,$(JS))
 
-COMMITID=$(shell git rev-parse HEAD)
-
 .PHONY: all dirs other-files config-files js-deps clean distclean jshint bsync
 
-all: $(DESTHTML) $(DEST)/styles/main.css $(DEST)/scripts/app.$(COMMITID).js js-deps other-files config-files | dirs
+all: $(DESTHTML) $(ROOT)/index.html $(DEST)/styles/main.css $(DEST)/scripts/app.js js-deps other-files config-files | dirs
 
-other-files: $(DEST)/robots.txt $(DEST)/images/loader.gif $(DEST)/__init__.py
+other-files: $(DEST)/robots.txt $(DEST)/images/loader.gif $(ROOT)/__init__.py
 
 config-files: $(DEST)/custom_images $(DEST)/favicon.ico $(DEST)/views/footer.html $(DEST)/views/homepage.html
 
 ifeq ($(ONLINE), 1)
 js-deps:
 else
-js-deps: $(DEST)/node_modules
+js-deps: $(ROOT)/node_modules
 endif
 
 config/%: | config/%.sample
@@ -55,13 +56,13 @@ node_modules: package.json
 	npm install
 	touch node_modules
 
-dirs: $(DEST) tmp $(DEST)/__init__.py
+dirs: $(DEST) tmp $(ROOT)/__init__.py
 
 $(DEST): cmsocial-web
 	mkdir -p $(DESTDIRS)
 	touch $(DEST)
 
-$(DEST)/__init__.py: cmsocial-web/__init__.py
+$(ROOT)/__init__.py: cmsocial-web/__init__.py
 	cp cmsocial-web/__init__.py $@
 
 tmp: cmsocial-web
@@ -81,12 +82,13 @@ $(DEST)/views/footer.html: config/footer.html | $(DEST)
 $(DEST)/views/homepage.html: config/homepage.html | $(DEST)
 	cp $< $@
 
-$(DEST)/index.html: cmsocial-web/index.html node_modules | $(DEST)
-	node_modules/.bin/cdnify $(CDNFLAGS) $< | $(STRIPDEBUG) > $@
-	sed "s/COMMIT_ID_HERE/$(COMMITID)/" -i $@
-
 $(DEST)/%.html: cmsocial-web/%.html | $(DEST)
 	cat $< | $(STRIPDEBUG) > $@
+
+$(ROOT)/index.html: cmsocial-web/index.html node_modules | $(DEST)
+	node_modules/.bin/cdnify $(CDNFLAGS) $< | $(STRIPDEBUG) > $@
+	sed "s/COMMIT_ID_HERE/$(COMMITID)/" -i $@
+	rm $(DEST)/index.html
 
 $(DEST)/styles/main.css: $(CSS)
 	cat $^ > $@
@@ -94,21 +96,21 @@ $(DEST)/styles/main.css: $(CSS)
 tmp/%.css: cmsocial-web/%.less node_modules | tmp
 	node_modules/.bin/lessc $< $@
 
-$(DEST)/scripts/app.$(COMMITID).js: $(TMPJS) | node_modules
-	${BABEL} $^ | ${UGLIFY} > $@
+$(DEST)/scripts/app.js: $(TMPJS) | node_modules
+	${BABEL} $^ | sed "s/COMMIT_ID_HERE/$(COMMITID)/" | ${UGLIFY} > $@
 
 tmp/%.js: cmsocial-web/%.js | tmp
 	cat $< | $(STRIPDEBUG) > $@
 
-$(DEST)/node_modules: node_modules
-	ln -s ../node_modules $(DEST)/node_modules
-	touch $(DEST)/node_modules
+$(ROOT)/node_modules: node_modules
+	ln -s ../node_modules $@
+	touch $(ROOT)/node_modules
 
 $(DEST)/%: cmsocial-web/%
 	cp $^ $@
 
 clean:
-	rm -rf tmp/ $(DEST) build/ cmsocial.egg-info/ dist/
+	rm -rf tmp/ $(ROOT)/ build/ cmsocial.egg-info/ dist/
 
 distclean: clean
 	rm -rf node_modules

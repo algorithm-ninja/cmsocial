@@ -31,7 +31,7 @@ angular.module('cmsocial')
     return {
       restrict: 'E',
       scope: {},
-      templateUrl: 'views/navbar.html',
+      templateUrl: 'COMMIT_ID_HERE/views/navbar.html',
       replace: true,
       transclude: true,
       controller: 'NavbarCtrl'
