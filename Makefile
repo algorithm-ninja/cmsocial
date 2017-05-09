@@ -41,7 +41,7 @@ all: $(DESTHTML) $(ROOT)/index.html $(DEST)/styles/main.css $(DEST)/scripts/app.
 
 other-files: $(DEST)/robots.txt $(DEST)/images/loader.gif $(ROOT)/__init__.py
 
-config-files: $(DEST)/custom_images $(DEST)/favicon.ico $(DEST)/views/footer.html $(DEST)/views/homepage.html
+config-files: $(ROOT)/custom_images $(DEST)/favicon.ico $(DEST)/views/footer.html $(DEST)/views/homepage.html
 
 ifeq ($(ONLINE), 1)
 js-deps:
@@ -70,7 +70,7 @@ tmp: cmsocial-web
 	cp cmsocial-web/.babelrc tmp
 	touch tmp
 
-$(DEST)/custom_images: config/custom_images | $(DEST)
+$(ROOT)/custom_images: config/custom_images | $(DEST)
 	cp -r $^ $@
 
 $(DEST)/favicon.ico: config/favicon.ico | $(DEST)
