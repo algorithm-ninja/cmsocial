@@ -220,7 +220,7 @@ angular.module('cmsocial')
 
     $scope.loadAce = function() {
       if (!subsDatabase.submitCompleted) {
-        return notificationHub.createAlert('warning', 'You have a pending submission', 2);
+        return notificationHub.createAlert('warning', l10n.get('You have a pending submission'), 2);
       }
 
       $scope.files = {};
