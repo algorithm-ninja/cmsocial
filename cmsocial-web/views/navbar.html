@@ -46,6 +46,7 @@
           <a ng-if="!me.isLogged()" href="[[forum_url]]"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
           <a ng-if="me.isLogged()" href="[[forum_url]]/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
         </li>
+        <li><a ui-sref="faq"><i class="fa fa-question-circle fa-fw"></i> FAQ</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li ng-if="!me.isLogged()" class="dropdown">

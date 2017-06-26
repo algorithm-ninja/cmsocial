@@ -159,6 +159,11 @@ angular
         templateUrl: 'views/resources.videos.html',
         controller: 'VideoSel'
       })
+      .state('faq', {
+        url: '/faq',
+        templateUrl: 'views/faq.html',
+        controller: 'FAQCtrl'
+      })
   })
   .controller('HomepageCtrl', function($scope, navbarManager, userManager) {
     $scope.me = userManager;
