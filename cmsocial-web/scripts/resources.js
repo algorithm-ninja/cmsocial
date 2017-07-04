@@ -377,13 +377,17 @@ angular.module('cmsocial')
     		answer: "L'unico obbligo è di totalizzare durante la miniolimpiade un punteggio positivo ad almeno 3 dei 7 problemi proposti. La quantità di problemi da svolgere durante il corso va in relazione alla dimestichezza del singolo e non determina il diritto al certificato."
     	},
 		{
+			question: "Come funziona la miniolimpiade?",
+			answer: "In data da definire, saranno inseriti nella piattaforma i 7 problemi della miniolimpiade. Una volta usciti, avrete a disposizione una settimana per svolgerli. Il punteggio minimo da ottenere è un punteggio strettamente positivo su 3 dei 7 problemi."
+		},
+		{
 			question: "Esistono delle prove intermedie?",
 			answer: "No, durante il corso vi è la possibilità di autovalutarsi cimentandosi con i problemi di programmazione presenti sulla piattaforma. Il forum è un utile strumento per lo scambio di opinioni sia tra i corsisti che con i membri dello staff, sempre pronti a dispensare consigli."
 			},
 		{
 			question: "Come funziona il corso?",
 			answer: "Questo corso si struttura nel seguente modo: una volta scelto il linguaggio, si possono seguire principalmente due strade, in base anche a quanto ci si sente pronti. Si può iniziare seguendo le videolezioni, che permettono di iniziare in maniera soft, oppure si può iniziare direttamente a programmare. Nella sezione \"Problemi di programmazione\" della barra di navigazione in alto si apre al click una tendina. Cliccando su \"Tutti i problemi\" si apre una pagina con tutti i problemi di programmazione disponibili (ognuno può essere risolto in qualsiasi linguaggio), tra i quali è possibile effettuare una ricerca per pattern matching del nome, mediante il bottone a forma di lente di ingrandimento. Si suggerisce comunque di iniziare con \"easy1\", \"easy2\", \"easy3\", che sono i più basilari e permettono di autovalutarsi, anche con lo scopo di capire se può essere necessaria la visione delle videolezioni oppure se ci si può concentrare su problemi più \"difficili\"."
-		},
+			},
 		{
 			question: "Come deve essere inviata la soluzione?",
 			answer: "La soluzione può essere scritta direttamente nell'editor fornito dalla piattaforma e può essere compilata ed inviata direttamente cliccando sul bottone \"sottometti\". Naturalmente, è perfettamente legittimo sviluppare il codice in un qualsiasi editor per poi incollarlo nell'apposito spazio per poi inviare la sottoposizione. Quando il codice viene compilato, l'eseguibile viene fatto girare su un server e vengono mostrati i risultati (il numero di testcase superati ed il tempo impiegato per l'esecuzione) nella pagina web."
@@ -403,10 +407,14 @@ angular.module('cmsocial')
 		{
 			question: "È possibile scegliere il linguaggio di programmazione da usare?",
 			answer: "Certamente! È possibile scegliere il linguaggio con il quale ci si trova meglio tra le varie proposte (i linguaggi ufficiali delle IOI) e potenziare le proprie competenze esclusivamente su quello. La piattaforma permette comunque di cambiare linguaggio in qualsiasi momento, nel caso ci si accorgesse in corso d'opera di preferire un altro tra i linguaggi di programmazione supportati."
-		},
+			},
 		{
 			question: "Come deve essere fatta una soluzione?",
-			answer: "In fase di scrittura del codice è necessario leggere attentamente le specifiche nel testo. Infatti uno degli errori più comuni in fase iniziale è la mancata lettura/scrittura da/su file, che è richiesta in molti problemi. Inoltre, sono da evitare le stampe da \"interfaccia grafica\", ossia la scrittura di qualunque cosa che non sia strettamente il risultato del problema, poichè tali stampe fanno totalizzare 0 punti."
-		},
+			answer: "In fase di scrittura del codice è necessario leggere attentamente le specifiche nel testo. Infatti uno degli errori più comuni in fase iniziale è la mancata lettura/scrittura da/su file, che è richiesta in molti problemi. Inoltre, sono da evitare le stampe da \"interfaccia testuale\", ossia la scrittura di qualunque cosa che non sia strettamente il risultato del problema, poichè tali stampe fanno totalizzare 0 punti."
+			},
+		{
+			question: "Come mai il mio programma Pascal va in execution time out?",
+			answer: "Un problema molto comune in Pascal è l’utilizzo degli integer, al posto dei longint. Infatti i primi sono interi a 16 bit, mentre i secondi a 32 bit. In generale, è buona norma usare sempre e comunque i longint, che corrispondono agli int del C."
+		}
     ];
   });
