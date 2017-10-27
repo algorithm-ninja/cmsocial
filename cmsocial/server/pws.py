@@ -816,7 +816,8 @@ class APIHandler(object):
                     local.session.commit()
 
                     if self.send_mail(user.email, "Code for password reset",
-                                      "Code: %s" % user.social_user.recover_code):
+                                      """Username: %s
+Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                         local.resp['message'] = 'A code was sent, check your inbox'
                     else:
                         return 'Internal Server Error'
