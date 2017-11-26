@@ -6,40 +6,30 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" ui-sref="overview"><i class="fa fa-home fa-lg"></i> [[top_left_name]]</a>
+      <a class="navbar-brand" ui-sref="overview"><i class="fa fa-home fa-lg"></i> {{cm.getContest().top_left_name}}</a>
     </div>
     <div class="navbar-collapse collapse" ng-controller="SignCtrl">
       <ul class="nav navbar-nav">
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown">
-            <i class="fa fa-archive fa-lg"></i> {{'Task & quiz archive' | l10n}} <b class="caret"></b>
+        <li ng-repeat="category in cm.getMenu(me.getUser().access_level)" ng-class="{dropdown: category.entries.length > 1}" ng-if="category.entries.length > 0">
+          <a ng-if="category.entries.length == 1" ng-href="{{rt(category.entries[0])}}"><i class="fa {{category.entries[0].icon}} fa-lg"></i> {{category.entries[0].title | l10n}}</a>
+          <a class="dropdown-toggle" data-toggle="dropdown" ng-if="category.entries.length > 1">
+            <i class="fa {{category.icon}} fa-lg"></i> {{category.title | l10n}} <b class="caret"></b>
           </a>
-          <ul class="dropdown-menu">
-            <li><a ui-sref="tasklist.page({pageNum: 1})"><i class="fa fa-list-ol fa-fw"></i> {{'All tasks' | l10n}}</a></li>
-            <li><a ui-sref="tags"><i class="fa fa-tag fa-fw"></i> {{'Task categories' | l10n}}</a></li>
-<!--
-            <li><a href="#"><i class="fa fa-flask fa-fw"></i> Tutti i problemi, per tecnica</a></li>
-            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Fase nazionale OII, per anno</a></li>
-            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Fase territoriale OII, per anno</a></li>
-            <li class="divider"></li>
-            <li><a href="#"><i class="fa fa-ban fa-fw"></i> Problemi creati dagli utenti</a></li>
-            <li class="divider"></li>
--->
-            <li><a ui-sref="lessons"><i class="fa fa-pencil fa-fw"></i> {{'Lessons' | l10n}}</a></li>
-            <li><a ui-sref="tests"><i class="fa fa-pencil fa-fw"></i> {{'Quizzes' | l10n}}</a></li>
+          <ul class="dropdown-menu" ng-if="category.entries.length > 1">
+            <li ng-repeat="entry in category.entries">
+                <a ng-href="{{rt(entry)}}">
+                    <i class="fa {{entry.icon}} fa-fw"></i> {{entry.title | l10n}}
+                </a>
+            </li>
           </ul>
         </li>
-        <li ng-class="{active: isActiveTab(4)}">
-          <a ui-sref="ranking.page({ pageNum: 1 })"><i class="fa fa-trophy fa-lg"></i> {{'Ranking' | l10n}}</a>
-        </li>
-        <li>
-          <a ng-if="!me.isLogged()" href="[[forum_url]]"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
-          <a ng-if="me.isLogged()" href="[[forum_url]]/session/sso"><i class="fa fa-comments fa-lg"></i> {{'Forum' | l10n}}</a>
-        </li>
-        <li ng-class="{active: isActiveTab(5)}" ng-if="!me.isLogged()">
-          <a ui-sref="signup"><i class="fa fa-pencil fa-lg"></i> {{'Sign up' | l10n}}</a>
+        <li ng-if="me.isLogged() && !cm.hasParticipation()">
+          <p class="navbar-btn">
+            <a ng-click="participate()" class="btn btn-success"><i class="fa fa-sign-in"></i>{{'Enter the contest' | l10n}}</a>
+          </p>
         </li>
       </ul>
+
       <ul class="nav navbar-nav navbar-right">
         <li ng-if="!me.isLogged()" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-sign-in fa-lg"></i> {{'Log in' | l10n}} <b class="caret"></b></a>
@@ -53,10 +43,22 @@
                 <label class="sr-only" for="password">{{'Password' | l10n}}</label>
                 <input class="form-control" type="password" id="password" name="password" ng-model="user.password" placeholder="Password" />
               </div>
-              <button type="submit" class="btn btn-success"><i class="fa fa-sign-in"></i> {{'Log in' | l10n}}</button>
+              <div class="row vertical-center">
+                <div class="col-xs-8">
+                  <input type="checkbox" id="keep_signed" name="keep_signed" checked="checked" />
+                  <label for="keep_signed">{{'Stay signed in' | l10n}}</label>
+                </div>
+                <div class="col-xs-4">
+                  <button type="submit" class="btn btn-success pull-right"><i class="fa fa-sign-in"></i> {{'Log in' | l10n}}</button>
+                </div>
+              </div>
+              <div class="form-group" style="margin: 6px 0px 0px 0px" ng-if="cm.getContest().mail_enabled">
+                <a data-toggle="dropdown" ui-sref="forgot-account">{{'Forgot account?' | l10n}}</a>
+              </div>
             </form>
           </div>
         </li>
+
         <li ng-if="me.isLogged()" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown">
             <i class="fa fa-user fa-lg"></i>
@@ -78,6 +80,19 @@
               </a>
             </li>
           </ul>
+        </li>
+
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-language fa-lg"></i>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu" id="langsel"></ul>
+        </li>
+        <li ng-if="me.getUser().access_level == 0">
+          <a ui-sref="admin">
+            <i class="fa fa-key fa-lg"></i> Administration
+          </a>
         </li>
       </ul>
     </div><!--/.navbar-collapse -->

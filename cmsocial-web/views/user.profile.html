@@ -13,10 +13,14 @@
         <i class="fa fa-home fa-lg"></i> {{user.institute.name}} ({{user.institute.province}})
       </span>
       <br />
+      <span>
+        <i class="fa fa-star fa-lg"></i> {{user.score}} pt
+      </span>
+      <br />
     </div>
     <div class="col-xs-6">
-      <div ng-if="isMe()" class="pull-right well well-lg">
-        <a href="http://gravatar.com/emails/" target="_blank" class="avatar">
+      <div ng-if="isMe()" class="pull-right well">
+        <a href="http://gravatar.com/emails/" target="_blank">
           <img ng-show="user.mail_hash" class="my-tooltip avatar img-thumbnail"
                data-toggle="tooltip" data-placement="bottom"
                title="{{'Change your avatar at gravatar.com' | l10n}}"

@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-6">
+      <form class="form-horizontal" role="form" ng-submit="recover()">
+        <fieldset>
+          <legend>{{'Recover data' | l10n}}</legend>
+          <div class="form-group">
+            <label id="recover-label" class="col-sm-4 control-label" for="recover-email">{{'E-mail address' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" type="email" id="recover-email" name="recover-email" ng-model="user.recoverEmail"/>
+            </div>
+          </div>
+          <div class="form-group" id="code-div" style="display: none">
+            <label id="recover-label" class="col-sm-4 control-label" for="recover-code">{{'Code' | l10n}}</label>
+            <div class="col-sm-6">
+              <input class="form-control" autocomplete="off" type="text" id="recover-code" name="recover-code" ng-model="user.recoverCode"/>
+            </div>
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+            <button id="recover-button" type="submit" class="btn btn-default">{{'Recover data' | l10n}}</button>
+            <i id="loading-indicator" class="fa fa-spinner fa-spin" aria-hidden="true" style="display: none"></i>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

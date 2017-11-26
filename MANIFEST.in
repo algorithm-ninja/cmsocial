@@ -1,0 +1,2 @@
+recursive-include cmsocial-web-build *
+recursive-include cmsocial *

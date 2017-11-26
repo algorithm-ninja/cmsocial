@@ -4,7 +4,10 @@
   </div>
   <div class="panel-body">
     <div class="list-group">
-      <a ng-repeat="att in task.attachments" class="list-group-item" href="[[api_prefix]]files/{{att[1]}}/{{att[0]}}">{{att[0]}}</a>
+      <a ng-repeat="att in task.attachments" class="list-group-item" href="api/files/{{att[1]}}/{{att[0]}}">{{att[0]}}</a>
     </div>
+    <button class="btn btn-primary" ng-click="bulkDownload()">
+      <i class="fa fa-download"></i> {{'Download everything as zip' | l10n}}
+    </button>
   </div>
 </div>

@@ -22,12 +22,15 @@ setup(
     download_url="https://github.com/algorithm-ninja/cmsocial/archive/master.tar.gz",
     description="A web application that builds a social coding platform upon CMS",
     packages=find_packages(),
+    include_package_data=True,
     entry_points={
         "console_scripts": [
 #            "cmsocialServer=cmsocial.server.pws:main",   # we must rename this because of CMS's ResourceService
             "cmsPracticeWebServer=cmsocial.server.pws:main",
             "cmsocialSyncTasks=cmsocial.scripts.synctasks:main",
-            "cmsocialSyncUsers=cmsocial.scripts.syncusers:main"
+            "cmsocialSyncUsers=cmsocial.scripts.syncusers:main",
+            "cmsocialDuplicateContest=cmsocial.scripts.duplicate_contest:main",
+            "cmsocialUpdateScore=cmsocial.scripts.update_score:main"
         ]
     },
     keywords="ioi programming contest grader management system",

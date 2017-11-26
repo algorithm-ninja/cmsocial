@@ -15,7 +15,7 @@ from sqlalchemy.types import Boolean, Integer, String, Unicode, DateTime, \
     Interval
 from sqlalchemy.orm import relationship, backref
 
-from cms.db import Contest
+from cms.db import Contest, Participation, User
 
 from cmsocial.db.base import Base
 from cmsocial.db.location import Institute
@@ -39,11 +39,18 @@ class SocialUser(Base):
     )
 
     user = relationship(
-        "User",
+        User,
         backref=backref(
             "social_user",
             uselist=False
         )
+    )
+
+    # Registration time
+    registration_time = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow()
     )
 
     # Access level
@@ -53,31 +60,17 @@ class SocialUser(Base):
         default=6
     )
 
-    # Score
-    score = Column(
-        Integer,
-        nullable=False,
-        default=0
+    # Recover code (for password reset)
+    recover_code = Column(
+        String,
+        nullable=True
     )
 
-    registration_time = Column(
-        DateTime,
-        nullable=False,
-        default=datetime.utcnow()
-    )
-
-    # The last time this user requested a testcase
-    last_help_time = Column(
+    # The last time this user requested a new password
+    last_recover = Column(
         DateTime,
         nullable=False,
         default=datetime.utcfromtimestamp(0)
-    )
-
-    # Total number of helps received
-    help_count = Column(
-        Integer,
-        nullable=False,
-        default=0
     )
 
     # CUSTOM FIELDS:
@@ -106,3 +99,55 @@ class SocialUser(Base):
     # List of tasktags (not "approved" yet) created by this user
     # FIXME: the following causes a circular dependency
     # tasktags = relationship("TaskTag")
+
+
+class SocialParticipation(Base):
+    """Class to store stats and custom fields of a participation.
+
+    """
+    __tablename__ = 'social_participations'
+    # Participation.id == SocialParticipation.id
+    id = Column(
+        Integer,
+        ForeignKey(Participation.id,
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
+        primary_key=True,
+        unique=True
+    )
+
+    participation = relationship(
+        Participation,
+        backref=backref(
+            "social_participation",
+            uselist=False
+        )
+    )
+
+    # Access level for a given contest
+    access_level = Column(
+        Integer,
+        nullable=True
+    )
+
+    # Score
+    score = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+
+    # The last time this user requested a testcase in this contest
+    last_help_time = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcfromtimestamp(0)
+    )
+
+    # Total number of helps received in this contest
+    help_count = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
