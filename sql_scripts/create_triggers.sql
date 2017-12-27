@@ -89,15 +89,20 @@ begin;
 		from taskscores
 		where task_id = t_id and score::integer = 100;
 
-		-- total score of user
-		select sum(score) into total_score
+		-- total score of participation
+		select sum(score*social_tasks.score_multiplier) into total_score
 		from taskscores
+    join social_tasks on task_id = social_tasks.id
 		where participation_id = p_id;
 
 		update social_tasks
 		set nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
 		where id = t_id;
 		return new;
+
+    update social_participations
+    set score = total_score
+    where id = p_id; 
 	end;
 	$$ language plpgsql;
 	drop trigger if exists submission_scored on submission_results;
