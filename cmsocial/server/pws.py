@@ -1196,6 +1196,11 @@ class APIHandler(object):
                 .filter(Task.contest_id == local.contest.id)\
                 .filter(SocialTask.access_level >= local.access_level)\
                 .order_by(desc(SocialTask.id))
+            if 'order' in local.data:
+                if local.data['order'] == 'hardest':
+                    query = query.order_by(desc(SocialTask.score_multiplier))
+                elif local.data['order'] == 'easiest':
+                    query = query.order_by(SocialTask.score_multiplier)
 
             if 'tag' in local.data and local.data['tag'] is not None:
                 # Ignore requests with more that 5 tags
