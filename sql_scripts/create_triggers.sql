@@ -25,7 +25,6 @@ begin;
     max_score integer;
     max_time float;
     total_score integer;
-    current_access_level integer;
   begin
     -- find task and user id.
     select task_id, participation_id into t_id, p_id
@@ -96,18 +95,6 @@ begin;
     join social_tasks on task_id = social_tasks.id
     where participation_id = p_id;
 
-    -- Current access level
-    select access_level into current_access_level
-    from social_participations
-    where id = p_id;
-
-    if current_access_level is null then
-      select social_users.access_level into current_access_level
-      from social_users
-        join participations on participations.user_id = users.id
-      where participations.id = p_id;
-    end if;
-
     update social_tasks
     set nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
     where id = t_id;
@@ -116,13 +103,6 @@ begin;
     update social_participations
     set score = total_score
     where id = p_id; 
-
-    -- Possibly update access level
-    if total_score >= 300 and current_access_level = 6 then
-      update participations
-      set access_level = 5
-      where participation_id = p_id;
-    end if;
   end;
   $$ language plpgsql;
   drop trigger if exists submission_scored on submission_results;
@@ -186,4 +166,42 @@ begin;
   $$ language plpgsql;
   drop trigger if exists participation_insert on participations;
   create constraint trigger participation_insert after insert on participations deferrable initially deferred for each row execute procedure on_participation_insert();
+
+  create or replace function on_social_participation_update() returns trigger as $$
+    << vars >>
+  declare
+    current_access_level integer;
+  begin
+    -- Current access level
+    select new.access_level into current_access_level;
+
+    if current_access_level is null then
+      select social_users.access_level into current_access_level
+      from social_users
+        join participations on participations.user_id = social_users.id
+      where participations.id = new.id;
+    end if;
+
+    -- Possibly update access level
+    if new.score >= 300 and current_access_level = 6 then
+      update social_participations
+      set access_level = 5
+      where id = new.id;
+    end if;
+    if new.score < 300 and current_access_level = 5 then
+      update social_participations
+      set access_level = 6
+      where id = new.id;
+    end if;
+    return new;
+  end;
+  $$ language plpgsql;
+  drop trigger if exists social_participation_update on social_participations;
+  create trigger social_participation_update
+  after update
+  on social_participations
+  for each row
+  when (old.score is distinct from new.score)
+  execute procedure on_social_participation_update();
+
 commit;
