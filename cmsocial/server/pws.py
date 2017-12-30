@@ -839,11 +839,10 @@ class APIHandler(object):
                     user.social_user.lastLesson_recover = datetime.utcnow()
                     local.session.commit()
 
-                    if self.send_mail(
-                            user.email, "Code for password reset",
-                            "Code: %s" % user.social_user.recover_code):
-                        local.resp[
-                            'message'] = 'A code was sent, check your inbox'
+                    if self.send_mail(user.email, "Code for password reset",
+                                      """Username: %s
+Recovery code: %s""" % (user.username, user.social_user.recover_code)):
+                        local.resp['message'] = 'A code was sent, check your inbox'
                     else:
                         return 'Internal Server Error'
         else:
