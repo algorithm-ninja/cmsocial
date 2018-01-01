@@ -57,7 +57,6 @@ from cmsocial.db.test import Test, TestScore
 
 monkey.patch_all()
 
-
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
 
@@ -66,18 +65,15 @@ config.read('/usr/local/etc/cmsocial.ini')
 
 
 class WSGIHandler(gevent.wsgi.WSGIHandler):
-
     def format_request(self):
         if self.time_finish:
             delta = '%.6f' % (self.time_finish - self.time_start)
         else:
             delta = '-'
         client_address = self.environ['REMOTE_ADDR']
-        return '%s %s %s %s' % (
-            client_address or '-',
-            (getattr(self, 'status', None) or '000').split()[0],
-            delta,
-            getattr(self, 'requestline', ''))
+        return '%s %s %s %s' % (client_address or '-', (
+            getattr(self, 'status', None) or '000').split()[0], delta,
+                                getattr(self, 'requestline', ''))
 
     def log_request(self):
         logger.info(self.format_request())
@@ -92,24 +88,38 @@ class Server(gevent.wsgi.WSGIServer):
 
 
 class APIHandler(object):
-
     def __init__(self, parent):
-        self.router = Map([
-            Rule('/api/<target>', methods=['POST'], endpoint='globaljsondata'),
-            Rule('/static/<path:path>',
-                 methods=['GET'], endpoint='globalstaticfile'),
-            Rule('/<contest>/api/files/<digest>', methods=['GET', 'POST'],
-                 endpoint='dbfile'),
-            Rule('/<contest>/api/files/<digest>/<name>', methods=['GET', 'POST'],
-                 endpoint='dbfile'),
-            Rule('/<contest>/api/<target>',
-                 methods=['POST'], endpoint='jsondata'),
-            Rule('/<contest>/<path:path>',
-                 methods=['GET'], endpoint='staticfile'),
-            Rule('/<contest>/', methods=['GET'], endpoint='index'),
-            Rule('/<contest>', redirect_to='/<contest>/'),
-            Rule('/', methods=['GET'], endpoint='globalindex')
-        ], encoding_errors='strict')
+        self.router = Map(
+            [
+                Rule(
+                    '/api/<target>',
+                    methods=['POST'],
+                    endpoint='globaljsondata'),
+                Rule(
+                    '/static/<path:path>',
+                    methods=['GET'],
+                    endpoint='globalstaticfile'),
+                Rule(
+                    '/<contest>/api/files/<digest>',
+                    methods=['GET', 'POST'],
+                    endpoint='dbfile'),
+                Rule(
+                    '/<contest>/api/files/<digest>/<name>',
+                    methods=['GET', 'POST'],
+                    endpoint='dbfile'),
+                Rule(
+                    '/<contest>/api/<target>',
+                    methods=['POST'],
+                    endpoint='jsondata'),
+                Rule(
+                    '/<contest>/<path:path>',
+                    methods=['GET'],
+                    endpoint='staticfile'),
+                Rule('/<contest>/', methods=['GET'], endpoint='index'),
+                Rule('/<contest>', redirect_to='/<contest>/'),
+                Rule('/', methods=['GET'], endpoint='globalindex')
+            ],
+            encoding_errors='strict')
         self.file_cacher = parent.file_cacher
         self.evaluation_service = parent.evaluation_service
         self.EMAIL_REG = re.compile(r'[^@]+@[^@]+\.[^@]+')
@@ -143,9 +153,11 @@ class APIHandler(object):
         if endpoint == 'globalstaticfile':
             return self.static_file_handler(environ, args['path'])
         elif endpoint == 'staticfile':
-            return self.static_file_handler(environ, args['path'], args['contest'])
+            return self.static_file_handler(environ, args['path'],
+                                            args['contest'])
         elif endpoint == 'index':
-            return self.static_file_handler(environ, 'index.html', args['contest'])
+            return self.static_file_handler(environ, 'index.html',
+                                            args['contest'])
         elif endpoint == 'globalindex':
             return self.static_file_handler(environ, 'index.html')
 
@@ -178,8 +190,8 @@ class APIHandler(object):
                 if local.jwt_payload is None:
                     auth_data = dict()
                 else:
-                    auth_data = jwt.decode(
-                        local.jwt_payload, config.get('core', 'secret'))
+                    auth_data = jwt.decode(local.jwt_payload,
+                                           config.get('core', 'secret'))
                 username = auth_data['username']
 
                 local.participation = self.get_participation(
@@ -229,8 +241,11 @@ class APIHandler(object):
             response.data = json.dumps(local.resp)
         else:
             if 'log' in local.resp:
-                response.data = json.dumps(
-                    {'success': 0, 'error': ans, 'log': local.resp['log']})
+                response.data = json.dumps({
+                    'success': 0,
+                    'error': ans,
+                    'log': local.resp['log']
+                })
             else:
                 response.data = json.dumps({'success': 0, 'error': ans})
         return response
@@ -298,7 +313,8 @@ class APIHandler(object):
             'lastName': local.user.last_name,
             'picture': '//gravatar.com/avatar/%s?d=identicon' % mh
         }
-        return jwt.encode(data, config.get('core', 'secret'), algorithm='HS256')
+        return jwt.encode(
+            data, config.get('core', 'secret'), algorithm='HS256')
 
     def check_user(self, username):
         if len(username) < 4:
@@ -349,8 +365,10 @@ class APIHandler(object):
         from string import ascii_lowercase, ascii_uppercase, digits
         from random import choice
 
-        return ''.join([choice(ascii_lowercase + ascii_uppercase + digits)
-                        for i in range(20)])
+        return ''.join([
+            choice(ascii_lowercase + ascii_uppercase + digits)
+            for i in range(20)
+        ])
 
     def send_mail(self, to, subject, body):
         # TODO: cache SMTP connections
@@ -369,8 +387,8 @@ class APIHandler(object):
         nretries = 0
         while sent is False:
             try:
-                server.sendmail(local.contest.social_contest.mail_from,
-                                [to], msg.as_string())
+                server.sendmail(local.contest.social_contest.mail_from, [to],
+                                msg.as_string())
                 sent = True
             except socket.timeout:
                 traceback.print_exc()
@@ -411,7 +429,8 @@ class APIHandler(object):
         info = self.get_user_info(participation.user)
         info['score'] = participation.social_participation.score
         if participation.social_participation.access_level is not None:
-            info['access_level'] = participation.social_participation.access_level
+            info[
+                'access_level'] = participation.social_participation.access_level
         return info
 
     def update_from_data(self, obj, *args, **kwargs):
@@ -448,7 +467,8 @@ class APIHandler(object):
                 # Don't do this on pdf files because it breaks the native pdf
                 # reader
                 response.headers.add_header(
-                    b'Content-Disposition', b'attachment',
+                    b'Content-Disposition',
+                    b'attachment',
                     filename=args['name'])
             mimetype = mimetypes.guess_type(args['name'])[0]
             if mimetype is not None:
@@ -474,9 +494,11 @@ class APIHandler(object):
                 return NotFound()
             if filename == 'views/homepage.html':
                 if social_contest.homepage is not None:
-                    return self.dbfile_handler(environ, {
-                        'digest': social_contest.homepage,
-                        'name': 'homepage.html'})
+                    return self.dbfile_handler(
+                        environ, {
+                            'digest': social_contest.homepage,
+                            'name': 'homepage.html'
+                        })
         path = os.path.join(
             pkg_resources.resource_filename('cmsocial-web-build', ''),
             filename)
@@ -503,7 +525,8 @@ class APIHandler(object):
             # app.COMMIT_ID.js file has a new name
 
             response.headers['Last-Modified'] = datetime.now()
-            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+            response.headers[
+                'Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
             response.headers['Pragma'] = 'no-cache'
             response.headers['Expires'] = '-1'
 
@@ -536,23 +559,25 @@ class APIHandler(object):
             local.resp = self.get_institute_info(institute)
         elif local.data['action'] == 'listregions':
             out = local.session.query(Region).all()
-            local.resp['regions'] = [{'id': r.id, 'name': r.name}
-                                     for r in out]
+            local.resp['regions'] = [{'id': r.id, 'name': r.name} for r in out]
         elif local.data['action'] == 'listprovinces':
             out = local.session.query(Province)\
                 .filter(Province.region_id == local.data['id']).all()
-            local.resp['provinces'] = [{'id': r.id, 'name': r.name}
-                                       for r in out]
+            local.resp['provinces'] = [{
+                'id': r.id,
+                'name': r.name
+            } for r in out]
         elif local.data['action'] == 'listcities':
             out = local.session.query(City)\
                 .filter(City.province_id == local.data['id']).all()
-            local.resp['cities'] = [{'id': r.id, 'name': r.name}
-                                    for r in out]
+            local.resp['cities'] = [{'id': r.id, 'name': r.name} for r in out]
         elif local.data['action'] == 'listinstitutes':
             out = local.session.query(Institute)\
                 .filter(Institute.city_id == local.data['id']).all()
-            local.resp['institutes'] = [{'id': r.id, 'name': r.name}
-                                        for r in out]
+            local.resp['institutes'] = [{
+                'id': r.id,
+                'name': r.name
+            } for r in out]
 
     def sso_handler(self):
         if local.user is None:
@@ -560,8 +585,7 @@ class APIHandler(object):
         payload = local.data['payload']
         sig = local.data['sig']
         computed_sig = hmac.new(
-            config.get("core", "secret").encode(),
-            payload.encode(),
+            config.get("core", "secret").encode(), payload.encode(),
             hashlib.sha256).hexdigest()
         if computed_sig != sig:
             return 'Bad request'
@@ -578,8 +602,7 @@ class APIHandler(object):
         res_payload = urllib.urlencode(response_data)
         res_payload = b64encode(res_payload.encode())
         sig = hmac.new(
-            config.get("core", "secret").encode(),
-            res_payload,
+            config.get("core", "secret").encode(), res_payload,
             hashlib.sha256).hexdigest()
         local.resp['parameters'] = urllib.urlencode({
             'sso': res_payload,
@@ -604,8 +627,12 @@ class APIHandler(object):
             if local.contest.social_contest.is_captcha_enabled():
                 r = requests.post(
                     "https://www.google.com/recaptcha/api/siteverify",
-                    data={'secret': local.contest.social_contest.recaptcha_secret_key,
-                          'response': recaptcha_response},  # , 'remoteip': ''},
+                    data={
+                        'secret':
+                        local.contest.social_contest.recaptcha_secret_key,
+                        'response':
+                        recaptcha_response
+                    },  # , 'remoteip': ''},
                     verify=False)
                 try:
                     assert r.json()["success"] is True
@@ -630,12 +657,9 @@ class APIHandler(object):
                 last_name=lastname,
                 username=username,
                 password=token,
-                email=email
-            )
+                email=email)
             social_user = SocialUser(
-                access_level=6,
-                registration_time=make_datetime()
-            )
+                access_level=6, registration_time=make_datetime())
             social_user.user = user
 
             if 'institute' in local.data:
@@ -649,10 +673,7 @@ class APIHandler(object):
                 return 'User already exists'
 
             if local.contest is not None:
-                participation = Participation(
-                    user=user,
-                    contest=local.contest
-                )
+                participation = Participation(user=user, contest=local.contest)
                 social_participation = SocialParticipation()
                 social_participation.participation = participation
 
@@ -665,7 +686,8 @@ class APIHandler(object):
             local.user = user
             local.response = Response()
             local.response.set_cookie(
-                'token', value=self.build_token(),
+                'token',
+                value=self.build_token(),
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'newparticipation':
             if local.user is None:
@@ -676,9 +698,7 @@ class APIHandler(object):
                 return 'Unauthorized'
 
             participation = Participation(
-                user=local.user,
-                contest=local.contest
-            )
+                user=local.user, contest=local.contest)
             social_participation = SocialParticipation()
             social_participation.participation = participation
 
@@ -696,8 +716,8 @@ class APIHandler(object):
                 logger.warning('Missing parameter')
                 return 'Bad request'
 
-            participation = self.get_participation(
-                local.contest, username, password)
+            participation = self.get_participation(local.contest, username,
+                                                   password)
             if participation is None:
                 local.user = self.get_user(username, password)
                 if local.user is None:
@@ -711,8 +731,9 @@ class APIHandler(object):
             cookie_duration = 30 * 86400 if keep_signed else None
             local.response = Response()
             local.response.set_cookie(
-                'token', value=self.build_token(),
-                max_age = cookie_duration,
+                'token',
+                value=self.build_token(),
+                max_age=cookie_duration,
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'me':
             if local.user is None:
@@ -723,8 +744,8 @@ class APIHandler(object):
                 local.resp['user'] = self.get_participation_info(
                     local.participation)
         elif local.data['action'] == 'get':
-            participation = self.get_participation(
-                local.contest, local.data['username'])
+            participation = self.get_participation(local.contest,
+                                                   local.data['username'])
             if participation is None:
                 return 'Not found'
             local.resp = self.get_participation_info(participation)
@@ -749,8 +770,8 @@ class APIHandler(object):
                 query = query\
                     .filter(SocialUser.institute_id == local.data['institute'])
             participations, local.resp['num'] = self.sliced_query(query)
-            local.resp['users'] = map(
-                self.get_participation_info, participations)
+            local.resp['users'] = map(self.get_participation_info,
+                                      participations)
         elif local.data['action'] == 'update':
             if local.user is None:
                 return 'Unauthorized'
@@ -766,7 +787,8 @@ class APIHandler(object):
                 local.user.email = local.data['email']
             if 'old_password' in local.data and \
                     local.data['old_password'] != '':
-                if not self.validate_user(local.user, local.data['old_password']):
+                if not self.validate_user(local.user,
+                                          local.data['old_password']):
                     return 'Wrong password'
                 if len(local.data['password']) < 5:
                     return 'Password\'s too short'
@@ -807,8 +829,10 @@ class APIHandler(object):
                 local.resp['type'] = 2
 
                 # Check if enough time has passed
-                if datetime.utcnow() - user.social_user.last_recover < timedelta(days=1):
-                    local.resp['message'] = 'You should already have received an email, if not, try tomorrow'
+                if datetime.utcnow(
+                ) - user.social_user.last_recover < timedelta(days=1):
+                    local.resp[
+                        'message'] = 'You should already have received an email, if not, try tomorrow'
                 else:
                     # Generate new code and mail it
                     user.social_user.recover_code = self.gencode()
@@ -816,8 +840,10 @@ class APIHandler(object):
                     local.session.commit()
 
                     if self.send_mail(user.email, "Code for password reset",
-                                      "Code: %s" % user.social_user.recover_code):
-                        local.resp['message'] = 'A code was sent, check your inbox'
+                                      """Username: %s
+Recovery code: %s""" % (user.username, user.social_user.recover_code)):
+                        local.resp[
+                            'message'] = 'A code was sent, check your inbox'
                     else:
                         return 'Internal Server Error'
         else:
@@ -827,13 +853,16 @@ class APIHandler(object):
         local.response = Response()
         if local.user is None:
             local.response.set_cookie(
-                'token', expires=datetime.utcnow(), domain=local.contest.social_contest.cookie_domain)
+                'token',
+                expires=datetime.utcnow(),
+                domain=local.contest.social_contest.cookie_domain)
             return 'Unauthorized'
         else:
             new_token = self.build_token()
             if new_token != local.jwt_payload:
                 local.response.set_cookie(
-                    'token', value=new_token,
+                    'token',
+                    value=new_token,
                     domain=local.contest.social_contest.cookie_domain)
 
     def contest_handler(self):
@@ -857,10 +886,19 @@ class APIHandler(object):
                 return 'Unauthorized'
             self.update_from_data(local.contest, 'description', 'languages')
             self.update_from_data(
-                local.contest.social_contest, 'top_left_name', 'title',
-                'recaptcha_public_key', 'recaptcha_secret_key', 'mail_server',
-                'mail_username', 'mail_password', 'mail_from', 'analytics',
-                'cookie_domain', 'homepage', forum='forum_url')
+                local.contest.social_contest,
+                'top_left_name',
+                'title',
+                'recaptcha_public_key',
+                'recaptcha_secret_key',
+                'mail_server',
+                'mail_username',
+                'mail_password',
+                'mail_from',
+                'analytics',
+                'cookie_domain',
+                'homepage',
+                forum='forum_url')
             if 'menu' in local.data:
                 if local.data['menu'] is not None:
                     local.contest.social_contest.menu = \
@@ -874,9 +912,14 @@ class APIHandler(object):
             self.add_info(local.contest, local.resp, 'name', 'description',
                           'languages')
             local.resp['participates'] = local.participation is not None
-            self.add_info(local.contest.social_contest, local.resp,
-                          'top_left_name', 'title', 'analytics',
-                          'cookie_domain', forum='forum_url')
+            self.add_info(
+                local.contest.social_contest,
+                local.resp,
+                'top_left_name',
+                'title',
+                'analytics',
+                'cookie_domain',
+                forum='forum_url')
             local.resp['mail_enabled'] = local.contest.social_contest\
                 .is_mail_enabled()
             local.resp['captcha_enabled'] = local.contest.social_contest\
@@ -885,10 +928,16 @@ class APIHandler(object):
                 local.resp['recaptcha_public_key'] = local.contest\
                     .social_contest.recaptcha_public_key
             if local.access_level == 0:
-                self.add_info(local.contest.social_contest, local.resp,
-                              'recaptcha_public_key', 'recaptcha_secret_key',
-                              'mail_server', 'mail_username', 'mail_password',
-                              'mail_from', menu='menu_on_db')
+                self.add_info(
+                    local.contest.social_contest,
+                    local.resp,
+                    'recaptcha_public_key',
+                    'recaptcha_secret_key',
+                    'mail_server',
+                    'mail_username',
+                    'mail_password',
+                    'mail_from',
+                    menu='menu_on_db')
                 local.resp['all_languages'] = map(lambda x: x.name, LANGUAGES)
                 if local.resp['menu_on_db'] is not None:
                     local.resp['menu_on_db'] = \
@@ -897,69 +946,85 @@ class APIHandler(object):
             if menu is not None:
                 menu = json.loads(menu)
             else:
+
                 def display(var):
                     return 'always' if len(var) > 0 else 'admin'
+
                 task_menu = [{
-                        "title": "All tasks",
-                        "icon": "fa-list-ol",
-                        "sref": "tasklist.page",
-                        "params": {"pageNum": 1, "tag": None, "q": None}
-                    }, {
-                        "title": "Tasks by technique",
-                        "icon": "fa-rocket",
-                        "sref": "techniques"
-                    }, {
-                        "title": "Tasks by event",
-                        "icon": "fa-trophy",
-                        "sref": "events"
-                    }, {
-                        "title": "Lessons",
-                        "icon": "fa-pencil",
-                        "sref": "lessons",
-                        "display": display(local.contest.lessons)
-                    }, {
-                        "title": "Material",
-                        "icon": "fa-pencil",
-                        "sref": "material",
-                        "display": display(local.contest.materials)
-                    }, {
-                        "title": "Quizzes",
-                        "icon": "fa-pencil",
-                        "sref": "tests",
-                        "display": display(local.contest.tests)
-                    }]
+                    "title": "All tasks",
+                    "icon": "fa-list-ol",
+                    "sref": "tasklist.page",
+                    "params": {
+                        "pageNum": 1,
+                        "tag": None,
+                        "q": None
+                    }
+                }, {
+                    "title": "Tasks by technique",
+                    "icon": "fa-rocket",
+                    "sref": "techniques"
+                }, {
+                    "title": "Tasks by event",
+                    "icon": "fa-trophy",
+                    "sref": "events"
+                }, {
+                    "title": "Lessons",
+                    "icon": "fa-pencil",
+                    "sref": "lessons",
+                    "display": display(local.contest.lessons)
+                }, {
+                    "title": "Material",
+                    "icon": "fa-pencil",
+                    "sref": "material",
+                    "display": display(local.contest.materials)
+                }, {
+                    "title": "Quizzes",
+                    "icon": "fa-pencil",
+                    "sref": "tests",
+                    "display": display(local.contest.tests)
+                }]
                 menu = [{
                     "title": "Task & quiz archive",
-                    "icon":  "fa-archive",
+                    "icon": "fa-archive",
                     "entries": task_menu
                 }, {
-                    "title": "Ranking",
-                    "icon": "fa-trophy",
+                    "title":
+                    "Ranking",
+                    "icon":
+                    "fa-trophy",
                     "entries": [{
                         "title": "Ranking",
                         "icon": "fa-trophy",
                         "sref": "ranking.page",
-                        "params": {"pageNum": 1}
+                        "params": {
+                            "pageNum": 1
+                        }
                     }]
                 }]
                 if local.contest.social_contest.forum is not None:
                     menu.append({
-                        "title": "Forum",
-                        "icon": "fa-trophy",
+                        "title":
+                        "Forum",
+                        "icon":
+                        "fa-trophy",
                         "entries": [{
                             "title": "Forum",
                             "icon": "fa-comments",
                             "href": local.contest.social_contest.forum
-                        }]})
+                        }]
+                    })
                 menu.append({
-                    "title": "Sign up",
-                    "icon": "fa-pencil",
+                    "title":
+                    "Sign up",
+                    "icon":
+                    "fa-pencil",
                     "entries": [{
                         "title": "Sign up",
                         "icon": "fa-pencil",
                         "sref": "signup",
                         "display": "unlogged"
-                    }]})
+                    }]
+                })
             local.resp["menu"] = menu
         else:
             return 'Bad Request'
@@ -1041,10 +1106,10 @@ class APIHandler(object):
                     pkg_resources.resource_filename('cmsocial', 'scripts'),
                     'import_lessons_from_zip.sh')
                 try:
-                    local.resp['log'] = check_output([
-                        script_file,
-                        str(local.contest.id),
-                        temp.name], stderr=STDOUT)
+                    local.resp['log'] = check_output(
+                        [script_file,
+                         str(local.contest.id), temp.name],
+                        stderr=STDOUT)
                 except CalledProcessError as e:
                     status = e.returncode
                     local.resp['log'] = e.output
@@ -1060,11 +1125,11 @@ class APIHandler(object):
                 .filter(Material.access_level >= local.access_level)\
                 .order_by(Material.id.desc())
             local.resp['materials'] = [{
-                    'id': m.id,
-                    'title': m.title,
-                    'access_level': m.access_level,
-                    'text': m.text
-                } for m in query]
+                'id': m.id,
+                'title': m.title,
+                'access_level': m.access_level,
+                'text': m.text
+            } for m in query]
         elif local.data['action'] == 'alter':
             if local.access_level != 0:
                 return 'Unauthorized'
@@ -1072,7 +1137,8 @@ class APIHandler(object):
                 material = local.session.query(Material)\
                     .filter(Material.contest_id == local.contest.id)\
                     .filter(Material.id == local.data['id']).first()
-                self.update_from_data(material, 'text', 'title', 'access_level')
+                self.update_from_data(material, 'text', 'title',
+                                      'access_level')
                 local.session.commit()
             except KeyError, ValueError:
                 return 'Bad Request'
@@ -1128,15 +1194,21 @@ class APIHandler(object):
             query = local.session.query(Task)\
                 .join(SocialTask)\
                 .filter(Task.contest_id == local.contest.id)\
-                .filter(SocialTask.access_level >= local.access_level)\
-                .order_by(desc(SocialTask.id))
+                .filter(SocialTask.access_level >= local.access_level)
+            order = [desc(SocialTask.id)]
+            if 'order' in local.data and local.data['order'] is not None:
+                if local.data['order'] == 'hardest':
+                    order.insert(0, desc(SocialTask.score_multiplier))
+                elif local.data['order'] == 'easiest':
+                    order.insert(0, SocialTask.score_multiplier)
+            query = query.order_by(*order)
 
             if 'tag' in local.data and local.data['tag'] is not None:
                 # Ignore requests with more that 5 tags
                 tags = local.data['tag'].split(',')[:5]
                 conditions = [Tag.name == tname for tname in tags]
-                targets = local.session.query(
-                    Tag).filter(or_(*conditions)).all()
+                targets = local.session.query(Tag).filter(
+                    or_(*conditions)).all()
                 local.resp['tags'] = []
                 for tag in targets:
                     local.resp['tags'].append(tag.name)
@@ -1144,8 +1216,8 @@ class APIHandler(object):
 
             if 'search' in local.data and local.data['search'] is not None:
                 sq = '%%%s%%' % local.data['search']
-                query = query.filter(or_(Task.title.ilike(sq),
-                                         Task.name.ilike(sq)))
+                query = query.filter(
+                    or_(Task.title.ilike(sq), Task.name.ilike(sq)))
 
             tasks, local.resp['num'] = self.sliced_query(query)
             local.resp['tasks'] = []
@@ -1155,6 +1227,7 @@ class APIHandler(object):
                 task['id'] = t.id
                 task['name'] = t.name
                 task['title'] = t.title
+                task['score_multiplier'] = t.social_task.score_multiplier
 
                 if local.participation is not None:
                     taskscore = local.session.query(TaskScore)\
@@ -1178,6 +1251,7 @@ class APIHandler(object):
             local.resp['id'] = t.id
             local.resp['name'] = t.name
             local.resp['title'] = t.title
+            local.resp['score_multiplier'] = t.social_task.score_multiplier
             local.resp['help_available'] = t.social_task.help_available
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.iteritems()])
@@ -1217,17 +1291,18 @@ class APIHandler(object):
                 .filter(TaskScore.score == 100)\
                 .order_by(TaskScore.time)\
                 .slice(0, 10).all()
-            local.resp['best'] = [{'username': b.participation.user.username,
-                                   'time': b.time} for b in best]
+            local.resp['best'] = [{
+                'username': b.participation.user.username,
+                'time': b.time
+            } for b in best]
         elif local.data['action'] == 'bulk_download':
             tmp_path = tempfile.mkdtemp()
 
             for f in local.data['attachments']:
                 # Retrieve each attachment by its digest and store it with
                 # its name.
-                self.file_cacher.get_file_to_path(
-                    f[1],
-                    os.path.join(tmp_path, f[0]))
+                self.file_cacher.get_file_to_path(f[1],
+                                                  os.path.join(tmp_path, f[0]))
 
             # Create a zip archive named after task name.
             archive_name = next(tempfile._get_candidate_names()) + '.zip'
@@ -1266,9 +1341,10 @@ class APIHandler(object):
                 if len(local.data['description']) < 5:
                     return 'Description is too short'
                 else:
-                    tag = Tag(name=local.data['tag'],
-                              description=local.data['description'],
-                              hidden=False)
+                    tag = Tag(
+                        name=local.data['tag'],
+                        description=local.data['description'],
+                        hidden=False)
                     local.session.add(tag)
                     local.session.commit()
             except IntegrityError:
@@ -1301,8 +1377,10 @@ class APIHandler(object):
             else:
                 try:
                     local.session.add(
-                        TaskTag(task=task.social_task, tag=tag,
-                                user=local.user.social_user))
+                        TaskTag(
+                            task=task.social_task,
+                            tag=tag,
+                            user=local.user.social_user))
                     local.session.commit()
                 except IntegrityError:
                     return 'The task already has this tag'
@@ -1346,8 +1424,9 @@ class APIHandler(object):
                 .filter(Testcase.dataset == task.active_dataset)\
                 .all()
 
-            local.resp['testcases'] = [
-                {'codename': t.codename} for t in testcases]
+            local.resp['testcases'] = [{
+                'codename': t.codename
+            } for t in testcases]
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
@@ -1369,9 +1448,9 @@ class APIHandler(object):
                 return "Bad request"
 
             # Log this so we can kind of "keep track" of the requests...
-            logger.info("User \"%s\" requested testcase %s for task \"%s\"." % (
-                local.user.username, local.data['testcase'], local.data['task']
-            ))
+            logger.info("User \"%s\" requested testcase %s for task \"%s\"." %
+                        (local.user.username, local.data['testcase'],
+                         local.data['task']))
             socpart.last_help_time = datetime.utcnow()
             socpart.help_count += 1
             local.session.commit()
@@ -1470,8 +1549,8 @@ class APIHandler(object):
                                 local.resp[i] = [q.wrong_score, 'wrong']
                     if local.resp.get(i, None) is None:
                         local.resp[i] = [q.score, 'correct']
-            score = sum([local.resp[i][0] for i in
-                         xrange(len(test.questions))])
+            score = sum(
+                [local.resp[i][0] for i in xrange(len(test.questions))])
             testscore = local.session.query(TestScore)\
                 .filter(TestScore.test_id == test.id)\
                 .filter(TestScore.participation_id == local.participation.id).first()
@@ -1545,9 +1624,11 @@ class APIHandler(object):
                 fi['digest'] = f.digest
                 submission['files'].append(fi)
             result = s.get_result()
-            for i in ['compilation_outcome', 'evaluation_outcome',
-                      'compilation_stdout', 'compilation_stderr',
-                      'compilation_time', 'compilation_memory']:
+            for i in [
+                    'compilation_outcome', 'evaluation_outcome',
+                    'compilation_stdout', 'compilation_stderr',
+                    'compilation_time', 'compilation_memory'
+            ]:
                 submission[i] = getattr(result, i, None)
             if result is not None and result.score is not None:
                 submission['score'] = round(result.score, 2)
@@ -1589,7 +1670,8 @@ class APIHandler(object):
 
             if len(local.data['files']) == 1 and \
                'submission' in local.data['files']:
-                archive_data = self.decode_file(local.data['files']['submission'])
+                archive_data = self.decode_file(
+                    local.data['files']['submission'])
                 del local.data['files']['submission']
 
                 # Create the archive.
@@ -1602,8 +1684,8 @@ class APIHandler(object):
                 unpacked_dir = archive.unpack()
                 for name in archive.namelist():
                     filename = os.path.basename(name)
-                    body = open(os.path.join(
-                        unpacked_dir, filename), "r").read()
+                    body = open(os.path.join(unpacked_dir, filename),
+                                "r").read()
                     local.data['files'][filename] = {
                         'filename': filename,
                         'body': body
@@ -1626,7 +1708,8 @@ class APIHandler(object):
                 f = files_sent.get(sfe.filename)
                 if f is None:
                     return 'Some files are missing!'
-                if len(f['body']) > config.get("core", "max_submission_length"):
+                if len(f['body']) > config.get("core",
+                                               "max_submission_length"):
                     return 'The files you sent are too big!'
                 f['name'] = sfe.filename
                 files.append(f)
@@ -1646,26 +1729,23 @@ class APIHandler(object):
 
             # Add the submission
             timestamp = make_datetime()
-            submission = Submission(timestamp,
-                                    sub_lang.name,
-                                    participation=local.participation,
-                                    task=task)
+            submission = Submission(
+                timestamp,
+                sub_lang.name,
+                participation=local.participation,
+                task=task)
             for f in files:
                 digest = self.file_cacher.put_file_content(
-                    f['body'],
-                    'Submission file %s sent by %s at %d.' % (
-                        f['name'], local.user.username,
-                        make_timestamp(timestamp)))
-                local.session.add(File(f['name'],
-                                       digest,
-                                       submission=submission))
+                    f['body'], 'Submission file %s sent by %s at %d.' %
+                    (f['name'], local.user.username,
+                     make_timestamp(timestamp)))
+                local.session.add(
+                    File(f['name'], digest, submission=submission))
             local.session.add(submission)
             local.session.commit()
 
             # Notify ES
-            self.evaluation_service.new_submission(
-                submission_id=submission.id
-            )
+            self.evaluation_service.new_submission(submission_id=submission.id)
 
             # Answer with submission data
             local.resp['id'] = submission.id
@@ -1714,8 +1794,13 @@ def main():
         description="PracticeWebServer",
         formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument("-s", "--shard", action="store", type=int, default=0,
-                        help="Shard number (default: 0)")
+    parser.add_argument(
+        "-s",
+        "--shard",
+        action="store",
+        type=int,
+        default=0,
+        help="Shard number (default: 0)")
 
     args, unknown = parser.parse_known_args()
 

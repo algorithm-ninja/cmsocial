@@ -110,6 +110,52 @@ a.dont-underline:hover {
   margin-top: 5px;
 }
 
+.difficulty-container {
+  display: inline-block;
+  width: 90px;
+  height: 20px;
+  position: relative;
+  vertical-align: middle;
+}
+
+.difficulty-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: black;
+}
+
+.difficulty-foreground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ffbf00;
+  height: 100%;
+  display: inline-block;
+  overflow-x: hidden;
+}
+
+.difficulty-container i {
+  position: absolute;
+  font-size: 16px;
+}
+
+.difficulty-container i:nth-child(1) {
+  left: 0;
+}
+.difficulty-container i:nth-child(2) {
+  left: 18px;
+}
+.difficulty-container i:nth-child(3) {
+  left: 36px;
+}
+.difficulty-container i:nth-child(4) {
+  left: 54px;
+}
+.difficulty-container i:nth-child(5) {
+  left: 72px;
+}
+
 .search-by-tag {
   margin-bottom: 10px;
 }
@@ -517,6 +563,11 @@ table.submissions th {
 }
 
 /* Ranking page */
+.ranking span[data-field='number'] {
+    margin-right: 10px;
+    color: #444;
+}
+
 .ranking .user-thumbnail {
     margin-right: 10px;
     width: 40px;

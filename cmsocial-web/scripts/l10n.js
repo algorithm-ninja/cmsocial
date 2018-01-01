@@ -151,6 +151,9 @@ angular.module('cmsocial')
     'Task correctly untagged': {
       it: 'Tag rimosso correttamente dal problema'
     },
+    'Maximum score': {
+      it: 'Punteggio massimo'
+    },
 
     // Submissions page
     'Submit a solution': {
@@ -390,6 +393,15 @@ angular.module('cmsocial')
     },
     'Exercise': {
       it: 'Esercizio'
+    },
+    'Easiest first': {
+      it: 'Più facili'
+    },
+    'Hardest first': {
+      it: 'Più difficili'
+    },
+    'Newest first': {
+      it: 'Più recenti'
     },
 
     // Errors

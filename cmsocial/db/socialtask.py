@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Task-related database interface for SQLAlchemy.
 
 """
@@ -18,7 +17,6 @@ from sqlalchemy.orm import backref, relationship
 from sqlalchemy.ext.orderinglist import ordering_list
 
 from cms.db import Task, Participation
-from cms.db.smartmappedcollection import smart_mapped_collection
 from cms import SCORE_MODE_MAX, SCORE_MODE_MAX_TOKENED_LAST
 
 from cmsocial.db.base import Base
@@ -32,60 +30,33 @@ class SocialTask(Base):
 
     id = Column(
         Integer,
-        ForeignKey('tasks.id',
-            onupdate="CASCADE",
-            ondelete="CASCADE"
-        ),
+        ForeignKey('tasks.id', onupdate="CASCADE", ondelete="CASCADE"),
         primary_key=True,
-        unique=True
-    )
+        unique=True)
 
-    task = relationship(
-        "Task",
-        backref=backref(
-            "social_task",
-            uselist=False
-        )
+    task = relationship("Task", backref=backref("social_task", uselist=False))
+
+    score_multiplier = Column(
+        Float,
+        index=True,
+        nullable=False,
+        default=1.0,
     )
 
     # Access level required
-    access_level = Column(
-        Integer,
-        nullable=False,
-        default=7
-    )
+    access_level = Column(Integer, nullable=False, default=7)
 
     # Whether users can download full testcases
-    help_available = Column(
-        Boolean,
-        nullable=False,
-        default=False
-    )
+    help_available = Column(Boolean, nullable=False, default=False)
 
     # Stats
-    nsubs = Column(
-        Integer,
-        nullable=False,
-        default=0
-    )
+    nsubs = Column(Integer, nullable=False, default=0)
 
-    nsubscorrect = Column(
-        Integer,
-        nullable=False,
-        default=0
-    )
+    nsubscorrect = Column(Integer, nullable=False, default=0)
 
-    nusers = Column(
-        Integer,
-        nullable=False,
-        default=0
-    )
+    nusers = Column(Integer, nullable=False, default=0)
 
-    nuserscorrect = Column(
-        Integer,
-        nullable=False,
-        default=0
-    )
+    nuserscorrect = Column(Integer, nullable=False, default=0)
 
     # The list of tasktags which tag this task
     tasktags = relationship('TaskTag')
@@ -94,27 +65,13 @@ class SocialTask(Base):
 class TaskTag(Base):
     __tablename__ = 'task_tags'
 
-    task_id = Column(
-        Integer,
-        ForeignKey('social_tasks.id'),
-        primary_key=True
-    )
+    task_id = Column(Integer, ForeignKey('social_tasks.id'), primary_key=True)
 
-    tag_id = Column(
-        Integer,
-        ForeignKey('tags.id'),
-        primary_key=True
-    )
+    tag_id = Column(Integer, ForeignKey('tags.id'), primary_key=True)
 
-    user_id = Column(
-        Integer,
-        ForeignKey('social_users.id')
-    )
+    user_id = Column(Integer, ForeignKey('social_users.id'))
 
-    approved = Column(
-        Boolean,
-        default=False
-    )
+    approved = Column(Boolean, default=False)
 
     tag = relationship("Tag")
     task = relationship("SocialTask")
@@ -124,27 +81,16 @@ class TaskTag(Base):
 class Tag(Base):
     __tablename__ = 'tags'
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        unique=True
-    )
+    id = Column(Integer, primary_key=True, unique=True)
 
-    name = Column(
-        String,
-        nullable=False,
-        unique=True
-    )
+    name = Column(String, nullable=False, unique=True)
 
     hidden = Column(Boolean)
 
     is_technique = Column(Boolean, nullable=False)
     is_event = Column(Boolean, nullable=False)
 
-    description = Column(
-        String,
-        nullable=False
-    )
+    description = Column(String, nullable=False)
 
     # List of tasktags which tag tasks by using this tag
     tasktags = relationship("TaskTag")
@@ -153,67 +99,34 @@ class Tag(Base):
 class TaskScore(Base):
     __tablename__ = 'taskscores'
 
-    __table_args__ = (
-        UniqueConstraint('participation_id', 'task_id'),
-    )
+    __table_args__ = (UniqueConstraint('participation_id', 'task_id'), )
 
-    id = Column(
-        Integer,
-        primary_key=True,
-        unique=True
-    )
+    id = Column(Integer, primary_key=True, unique=True)
 
     # I do not know what happens here, but if I refer to SocialParticipation.id
     # then everything breaks down.
     participation_id = Column(
         Integer,
-        ForeignKey(
-            Participation.id,
-            onupdate="CASCADE",
-            ondelete="CASCADE"
-        ),
+        ForeignKey(Participation.id, onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
-        index=True
-    )
+        index=True)
 
     participation = relationship(
         Participation,
         backref=backref(
-            'taskscores',
-            cascade="all, delete-orphan",
-            passive_deletes=True
-        )
-    )
+            'taskscores', cascade="all, delete-orphan", passive_deletes=True))
 
     task_id = Column(
         Integer,
-        ForeignKey(
-            Task.id,
-            onupdate="CASCADE",
-            ondelete="CASCADE"
-        ),
+        ForeignKey(Task.id, onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
-        index=True
-    )
+        index=True)
 
     task = relationship(
         Task,
         backref=backref(
-            'taskscores',
-            cascade="all, delete-orphan",
-            passive_deletes=True
-        )
-    )
+            'taskscores', cascade="all, delete-orphan", passive_deletes=True))
 
-    score = Column(
-        Integer,
-        nullable=False,
-        default=0,
-        index=True
-    )
+    score = Column(Integer, nullable=False, default=0, index=True)
 
-    time = Column(
-        Float,
-        nullable=False,
-        default=0
-    )
+    time = Column(Float, nullable=False, default=0)
