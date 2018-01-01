@@ -24,7 +24,6 @@ begin;
     nuserscorrect integer;
     max_score integer;
     max_time float;
-    total_score integer;
   begin
     -- find task and user id.
     select task_id, participation_id into t_id, p_id
@@ -89,20 +88,10 @@ begin;
     from taskscores
     where task_id = t_id and score::integer = 100;
 
-    -- total score of participation
-    select sum(score*social_tasks.score_multiplier) into total_score
-    from taskscores
-    join social_tasks on task_id = social_tasks.id
-    where participation_id = p_id;
-
     update social_tasks
     set nsubs = vars.nsubs, nsubscorrect = vars.nsubscorrect, nusers = vars.nusers, nuserscorrect = vars.nuserscorrect
     where id = t_id;
     return new;
-
-    update social_participations
-    set score = total_score
-    where id = p_id; 
   end;
   $$ language plpgsql;
   drop trigger if exists submission_scored on submission_results;
@@ -166,6 +155,27 @@ begin;
   $$ language plpgsql;
   drop trigger if exists participation_insert on participations;
   create constraint trigger participation_insert after insert on participations deferrable initially deferred for each row execute procedure on_participation_insert();
+
+  create or replace function on_taskscore_update() returns trigger as $$
+    << vars >>
+  declare
+    total_score integer;
+  begin
+    -- total score of participation
+    select sum(score*social_tasks.score_multiplier) into total_score
+    from taskscores
+    join social_tasks on task_id = social_tasks.id
+    where participation_id = NEW.participation_id;
+
+    update social_participations
+    set score = total_score
+    where id = NEW.participation_id;
+    return new;
+  end;
+  $$ language plpgsql;
+  drop trigger if exists taskscore_update on taskscores;
+  create trigger taskscore_update after update or insert on taskscores for each row when (new.score is not null) execute procedure on_taskscore_update();
+
 
   create or replace function on_social_participation_update() returns trigger as $$
     << vars >>
