@@ -842,7 +842,8 @@ class APIHandler(object):
                     if self.send_mail(user.email, "Code for password reset",
                                       """Username: %s
 Recovery code: %s""" % (user.username, user.social_user.recover_code)):
-                        local.resp['message'] = 'A code was sent, check your inbox'
+                        local.resp[
+                            'message'] = 'A code was sent, check your inbox'
                     else:
                         return 'Internal Server Error'
         else:
@@ -1193,13 +1194,14 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             query = local.session.query(Task)\
                 .join(SocialTask)\
                 .filter(Task.contest_id == local.contest.id)\
-                .filter(SocialTask.access_level >= local.access_level)\
-                .order_by(desc(SocialTask.id))
-            if 'order' in local.data:
+                .filter(SocialTask.access_level >= local.access_level)
+            order = [desc(SocialTask.id)]
+            if 'order' in local.data and local.data['order'] is not None:
                 if local.data['order'] == 'hardest':
-                    query = query.order_by(desc(SocialTask.score_multiplier))
+                    order.insert(0, desc(SocialTask.score_multiplier))
                 elif local.data['order'] == 'easiest':
-                    query = query.order_by(SocialTask.score_multiplier)
+                    order.insert(0, SocialTask.score_multiplier)
+            query = query.order_by(*order)
 
             if 'tag' in local.data and local.data['tag'] is not None:
                 # Ignore requests with more that 5 tags
