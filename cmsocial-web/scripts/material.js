@@ -4,7 +4,7 @@
 
 angular.module('cmsocial')
   .controller('MaterialCtrl', function($scope, $state,
-      $http, notificationHub, userManager, l10n, API_PREFIX, $sce) {
+    $http, notificationHub, userManager, l10n, API_PREFIX, $sce) {
     $scope.userManager = userManager;
     $scope.getMaterial = function() {
       var data = {
@@ -19,13 +19,13 @@ angular.module('cmsocial')
 
           $scope.materials = [];
           for (let mat of data['materials']) {
-              $scope.materials.push(mat);
+            $scope.materials.push(mat);
 
-              var parsed = reader.parse(mat.text); // parsed is a 'Node' tree
-              // transform parsed if you like...
-              var result = writer.render(parsed); // result is a String
+            var parsed = reader.parse(mat.text); // parsed is a 'Node' tree
+            // transform parsed if you like...
+            var result = writer.render(parsed); // result is a String
 
-              $scope.materials[$scope.materials.length - 1].html = $sce.trustAsHtml(result);
+            $scope.materials[$scope.materials.length - 1].html = $sce.trustAsHtml(result);
           }
         })
         .error(function(data, status, headers, config) {
@@ -35,18 +35,17 @@ angular.module('cmsocial')
     $scope.getMaterial();
 
     $scope.downloadMaterial = function(material) {
-        var pom = document.createElement('a');
-        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(material.text));
-        pom.setAttribute('download', material.title + '.md');
+      var pom = document.createElement('a');
+      pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(material.text));
+      pom.setAttribute('download', material.title + '.md');
 
-        if (document.createEvent) {
-            var event = document.createEvent('MouseEvents');
-            event.initEvent('click', true, true);
-            pom.dispatchEvent(event);
-        }
-        else {
-            pom.click();
-        }
+      if (document.createEvent) {
+        var event = document.createEvent('MouseEvents');
+        event.initEvent('click', true, true);
+        pom.dispatchEvent(event);
+      } else {
+        pom.click();
+      }
     };
 
     $scope.togglePublic = function(material) {

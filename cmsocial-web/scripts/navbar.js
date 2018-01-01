@@ -38,7 +38,7 @@ angular.module('cmsocial')
     };
   })
   .controller('NavbarCtrl', function($scope, $location, $state, userManager,
-        contestManager, l10n) {
+    contestManager, l10n) {
     $('.signin-form input').click(function(e) {
       e.stopPropagation();
     });
@@ -46,53 +46,64 @@ angular.module('cmsocial')
     $scope.cm = contestManager;
     $scope.participate = contestManager.participate;
     $scope.rt = function(entry) {
-        if (entry.href != null) return entry.href;
-        return $state.href(entry.sref, entry.params)
+      if (entry.href != null) return entry.href;
+      return $state.href(entry.sref, entry.params)
     };
 
     _l10n = l10n;
 
-    ReactDOM.render(
-      <LanguageSelector/>,
+    ReactDOM.render( <
+      LanguageSelector / > ,
       document.getElementById("langsel")
     );
 
     // ugly hack because of react limitation
     let x = document.getElementsByTagName("something");
     for (let y of Array.from(x)) {
-        while (y.childNodes.length > 0) {
-            y.parentNode.appendChild(y.childNodes[0]);
-        }
+      while (y.childNodes.length > 0) {
+        y.parentNode.appendChild(y.childNodes[0]);
+      }
     }
   });
 
 
 class LanguageSelector extends React.Component {
-    setLang(lang) {
-        _l10n.setLanguage(lang);
-        window.location.reload();
-    }
+  setLang(lang) {
+    _l10n.setLanguage(lang);
+    window.location.reload();
+  }
 
-    render() {
-        let x = [], kk = 0;
-        for (let lang of langlist) {
-            // FIXME: put flag icon besides {lang.name}
+  render() {
+    let x = [],
+      kk = 0;
+    for (let lang of langlist) {
+      // FIXME: put flag icon besides {lang.name}
 
-            x.push(
-              <li key={kk} className={lang.code == _l10n.getLanguage() ? 'active' : ''}>
-                <a onClick={this.setLang.bind(this, lang.code)}>
-                  {lang.name}
-                </a>
-              </li>
-            );
-
-            kk += 1;
+      x.push( <
+        li key = {
+          kk
         }
+        className = {
+          lang.code == _l10n.getLanguage() ? 'active' : ''
+        } >
+        <
+        a onClick = {
+          this.setLang.bind(this, lang.code)
+        } > {
+          lang.name
+        } <
+        /a> <
+        /li>
+      );
 
-        return (
-            <something>
-                {x}
-            </something>
-        );
+      kk += 1;
     }
+
+    return ( <
+      something > {
+        x
+      } <
+      /something>
+    );
+  }
 }

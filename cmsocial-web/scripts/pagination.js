@@ -29,13 +29,15 @@ angular.module('cmsocial')
       replace: true,
       link: function(scope, elem, attrs) {
         scope.selectPage = function(newPage) {
-          scope.onSelectPage({'page': newPage});
+          scope.onSelectPage({
+            'page': newPage
+          });
         };
         var makePage = function(text, number, active, disabled) {
           return {
-            'text':     text,
-            'number':   (number === undefined) ? 0 : number,
-            'active':   (active === undefined) ? false : active,
+            'text': text,
+            'number': (number === undefined) ? 0 : number,
+            'active': (active === undefined) ? false : active,
             'disabled': (disabled === undefined) ? false : disabled
           };
         };
@@ -50,22 +52,22 @@ angular.module('cmsocial')
           scope.pages.push(makePage('‹', scope.currentPage - 1, false, (scope.currentPage == 1)));
           // Less than 5 pages
           if (scope.totalPages < 5)
-            for (var i=1; i<=scope.totalPages; i++)
+            for (var i = 1; i <= scope.totalPages; i++)
               scope.pages.push(makePage(i, +i, (i == scope.currentPage)));
           else
-          // Show first 5 pages only
-          if (scope.currentPage <= 3)
-            for (var i=1; i<=5; i++)
-              scope.pages.push(makePage(i, +i, (i == scope.currentPage)));
-          else
-          // Show last 5 pages only
-          if (scope.currentPage >= scope.totalPages - 2)
-            for (var i=scope.totalPages-4; i<=scope.totalPages; i++)
-              scope.pages.push(makePage(i, +i, (i == scope.currentPage)));
-          else
-          // Show a 5-page-window
-            for (var i=-2; i<=2; i++)
-              scope.pages.push(makePage(i + scope.currentPage, i + scope.currentPage, (i == 0)));
+            // Show first 5 pages only
+            if (scope.currentPage <= 3)
+              for (var i = 1; i <= 5; i++)
+                scope.pages.push(makePage(i, +i, (i == scope.currentPage)));
+            else
+              // Show last 5 pages only
+              if (scope.currentPage >= scope.totalPages - 2)
+                for (var i = scope.totalPages - 4; i <= scope.totalPages; i++)
+                  scope.pages.push(makePage(i, +i, (i == scope.currentPage)));
+              else
+                // Show a 5-page-window
+                for (var i = -2; i <= 2; i++)
+                  scope.pages.push(makePage(i + scope.currentPage, i + scope.currentPage, (i == 0)));
           // The ">" button
           scope.pages.push(makePage('›', scope.currentPage + 1, false, (scope.currentPage == scope.totalPages)));
           // Check for the "»" button

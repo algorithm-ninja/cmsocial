@@ -109,7 +109,7 @@ angular.module('cmsocial')
 
         // type = 1 (password resetting) or 2 (code sending)
         if (ctx.data.type === 1 && ctx.data.success === 1) {
-            $state.go('overview');
+          $state.go('overview');
         }
 
         $("#loading-indicator").hide();

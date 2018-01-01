@@ -23,10 +23,10 @@ angular
   .constant('API_PREFIX', 'api/')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
     $locationProvider.html5Mode(false); //.hashPrefix('!')
-    // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
+    // FIXME: ui-router ignores hashPrefix for href attributes, so we don't
+    // use it (for now)
 
-    $urlRouterProvider
-      .when('/tasks/', '/tasks/1')
+    $urlRouterProvider.when('/tasks/', '/tasks/1')
       .when('/task/{taskName}', '/task/{taskName}/statement')
       .when('/user/{userId}', '/user/{userId}/profile')
       .when('/ranking/', '/ranking/1')
@@ -244,53 +244,61 @@ angular
       })
 
   })
-  .controller('HomepageCtrl', function($scope, userManager, contestManager) {
-    $scope.me = userManager;
-    $scope.cm = contestManager;
-  })
-  .filter('repext', function() {
-    return function(input) {
-      return input.replace(/.%l$/, ".(cpp|c|pas)");
-    };
-  })
-  .filter('outcomeToClass', function() {
-    return function(input) {
-      if (input == "Correct")
-        return "correct";
-      if (input == "Not correct")
-        return "wrong";
-      return "partial";
-    };
-  })
-  .filter('timeFmt', function() {
-    return function(input) {
-      if (input == undefined)
-        return "N/A";
-      return input.toFixed(3) + "s";
-    };
-  })
-  .filter('memoryFmt', function() {
-    return function(input) {
-      if (input == undefined)
-        return "N/A";
-      if (input > 1024 * 1024)
-        return (input / (1024 * 1024)).toFixed(1) + " MiB";
-      else if (input > 1024)
-        return (input / 1024).toFixed(0) + " KiB";
-      return input + " B";
-    };
-  })
+  .controller('HomepageCtrl',
+    function($scope, userManager, contestManager) {
+      $scope.me = userManager;
+      $scope.cm = contestManager;
+    })
+  .filter('repext',
+    function() {
+      return function(input) {
+        return input.replace(/.%l$/, ".(cpp|c|pas)");
+      };
+    })
+  .filter('outcomeToClass',
+    function() {
+      return function(input) {
+        if (input == "Correct")
+          return "correct";
+        if (input == "Not correct")
+          return "wrong";
+        return "partial";
+      };
+    })
+  .filter('timeFmt',
+    function() {
+      return function(input) {
+        if (input == undefined)
+          return "N/A";
+        return input.toFixed(3) + "s";
+      };
+    })
+  .filter('memoryFmt',
+    function() {
+      return function(input) {
+        if (input == undefined)
+          return "N/A";
+        if (input > 1024 * 1024)
+          return (input / (1024 * 1024)).toFixed(1) + " MiB";
+        else if (input > 1024)
+          return (input / 1024).toFixed(0) + " KiB";
+        return input + " B";
+      };
+    })
   .filter('dateFmt', function() {
     return function(input) {
       var d = new Date(1000 * (+input));
       if (d.toDateString() == new Date(Date.now()).toDateString())
-        return "oggi, " + ('0' + d.getHours()).substr(-2) + ":" + ('0' + d.getMinutes()).substr(-2);
+        return "oggi, " + ('0' + d.getHours()).substr(-2) + ":" +
+          ('0' + d.getMinutes()).substr(-2);
       d.setDate(d.getDate() + 1);
       if (d.toDateString() == new Date(Date.now()).toDateString())
-        return "ieri, " + ('0' + d.getHours()).substr(-2) + ":" + ('0' + d.getMinutes()).substr(-2);
+        return "ieri, " + ('0' + d.getHours()).substr(-2) + ":" +
+          ('0' + d.getMinutes()).substr(-2);
       d.setDate(d.getDate() - 1);
-      return ('0' + d.getDate()).substr(-2) + "/" + ('0' + (d.getMonth() + 1)).substr(-2) +
-        "/" + d.getFullYear() + ", " + ('0' + d.getHours()).substr(-2) + ":" +
+      return ('0' + d.getDate()).substr(-2) + "/" +
+        ('0' + (d.getMonth() + 1)).substr(-2) + "/" + d.getFullYear() +
+        ", " + ('0' + d.getHours()).substr(-2) + ":" +
         ('0' + d.getMinutes()).substr(-2);
     };
   });

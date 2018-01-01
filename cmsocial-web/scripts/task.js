@@ -120,17 +120,17 @@ angular.module('cmsocial')
     taskbarManager.setActiveTab(2);
     $scope.bulkDownload = function() {
       $http.post(API_PREFIX + 'task', {
-        'name': $stateParams.taskName,
-        'action': 'bulk_download',
-        'attachments': $scope.task.attachments
-      })
-      .success(function(data, status, headers, config) {
-        $window.location.assign(API_PREFIX + 'files/' + data.digest +
-                                '/' + $stateParams.taskName + ".zip");
-      })
-      .error(function(data, status, headers, config) {
-        notificationHub.serverError(status);
-      });
+          'name': $stateParams.taskName,
+          'action': 'bulk_download',
+          'attachments': $scope.task.attachments
+        })
+        .success(function(data, status, headers, config) {
+          $window.location.assign(API_PREFIX + 'files/' + data.digest +
+            '/' + $stateParams.taskName + ".zip");
+        })
+        .error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+        });
     };
   })
   .controller('StatsCtrl', function($scope, $stateParams, $http,
@@ -182,35 +182,35 @@ angular.module('cmsocial')
     };
     $scope.languages = [];
     contestManager.getContestPromise().then(function(response) {
-        for (var lang in contestManager.getContest().languages) {
-          $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
+      for (var lang in contestManager.getContest().languages) {
+        $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
+      }
+
+      var preferred_language_key = "preferred_language_" + contestManager.getContest().name;
+
+      if (!localStorage.getItem(preferred_language_key) ||
+        $scope.languages.indexOf(localStorage.getItem(preferred_language_key)) == -1) {
+        localStorage.setItem(preferred_language_key, $scope.languages[0]);
+      }
+
+      $scope.language = localStorage.getItem(preferred_language_key);
+
+      $scope.aceOption = {
+        mode: aceModeMap[$scope.language],
+        showPrintMargin: false,
+        onLoad: function(_ace) {
+          $scope.aceSession = _ace.getSession();
+          $scope.languageChanged = function(newL) {
+            $scope.language = newL;
+            localStorage.setItem(preferred_language_key, newL);
+            $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
+          };
+        },
+        onChange: function(_ace) {
+          $scope.aceModel = $scope.aceSession.getDocument().getValue();
+          localStorage.setItem("source_code", $scope.aceModel);
         }
-
-        var preferred_language_key = "preferred_language_" + contestManager.getContest().name;
-
-        if (!localStorage.getItem(preferred_language_key) ||
-          $scope.languages.indexOf(localStorage.getItem(preferred_language_key)) == -1) {
-          localStorage.setItem(preferred_language_key, $scope.languages[0]);
-        }
-
-        $scope.language = localStorage.getItem(preferred_language_key);
-
-        $scope.aceOption = {
-          mode: aceModeMap[$scope.language],
-          showPrintMargin: false,
-          onLoad: function(_ace) {
-            $scope.aceSession = _ace.getSession();
-            $scope.languageChanged = function(newL) {
-              $scope.language = newL;
-              localStorage.setItem(preferred_language_key, newL);
-              $scope.aceSession.setMode("ace/mode/" + aceModeMap[newL]);
-            };
-          },
-          onChange: function(_ace) {
-            $scope.aceModel = $scope.aceSession.getDocument().getValue();
-            localStorage.setItem("source_code", $scope.aceModel);
-          }
-        };
+      };
     });
 
     if (localStorage.getItem("source_code") === null) {
@@ -227,7 +227,7 @@ angular.module('cmsocial')
       $scope.files[$rootScope.task.submission_format[0]] = {
         'filename': "ace" + langExtMap[$scope.language],
         'data': btoa(unescape(encodeURIComponent($scope.aceSession.getDocument().getValue())))
-          // HACK above: http://stackoverflow.com/a/26603875/747654
+        // HACK above: http://stackoverflow.com/a/26603875/747654
       };
       $scope.submitFiles();
     };
