@@ -20,44 +20,42 @@ angular.module('cmsocial')
     };
     var analyticsCreated = false;
     var computeMenu = function(access_level) {
-      var menu = [];
-      if (contest == null) return menu;
-      for (let category of contest.menu) {
-        var entries = [];
-        for (let entry of category.entries) {
-          if (entry["display"] == "admin") {
-            if (access_level == 0)
-              entries.push(entry);
-          } else if (entry["display"] == "logged") {
-            if (access_level < 7)
-              entries.push(entry);
-          } else if (entry["display"] == "unlogged") {
-            if (access_level == 7)
-              entries.push(entry);
-          } else {
-            entries.push(entry);
-          }
+        var menu = [];
+        if (contest == null) return menu;
+        for (let category of contest.menu) {
+            var entries = [];
+            for (let entry of category.entries) {
+                if (entry["display"] == "admin") {
+                    if (access_level == 0)
+                        entries.push(entry);
+                } else if (entry["display"] == "logged") {
+                    if (access_level < 7)
+                        entries.push(entry);
+                } else if (entry["display"] == "unlogged") {
+                    if (access_level == 7)
+                        entries.push(entry);
+                } else {
+                    entries.push(entry);
+                }
+            }
+            menu.push({
+                "title": category["title"],
+                "icon": category["icon"],
+                "entries": entries
+            });
         }
-        menu.push({
-          "title": category["title"],
-          "icon": category["icon"],
-          "entries": entries
-        });
-      }
-      return menu;
+        return menu;
     };
     var menu = [];
     var getContestData = function() {
       contestPromise = $http({
         url: API_PREFIX + "contest",
         method: "POST",
-        data: {
-          action: "get"
-        }
+        data: {action: "get"}
       }).then(function(response) {
         contest = response.data;
         menu = [];
-        for (var i = 0; i < 8; i++) menu.push(computeMenu(i));
+        for (var i=0; i<8; i++) menu.push(computeMenu(i));
         $window.document.title = contest.title;
 
         if (!analyticsCreated) {

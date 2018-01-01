@@ -25,9 +25,9 @@ angular.module('cmsocial')
 
       // Create alert model and hide it
       var alert = $('<div class="alert alert-' + type + ' hyphenate' +
-        ' alert-dismissable"><button type="button" class="close" ' +
-        'data-dismiss="alert" aria-hidden="true">&times;</button>' +
-        msg + '</div>').hide();
+          ' alert-dismissable"><button type="button" class="close" ' +
+          'data-dismiss="alert" aria-hidden="true">&times;</button>' +
+          msg + '</div>').hide();
 
       // Put it in the right place and open it
       $(".notifications").prepend(alert);
@@ -35,9 +35,7 @@ angular.module('cmsocial')
 
       // Wait for the user to read it and then destroy it
       $timeout(function() {
-        alert.animate({
-          'right': '-260px'
-        }, function() {
+        alert.animate({'right': '-260px'}, function() {
           $(this).remove();
         });
       }, Math.round(1000 * secs));
@@ -51,8 +49,8 @@ angular.module('cmsocial')
         // Create a standard error for server querying failure
         var error = '<b>ERROR ' + status + '</b><br />';
         error += l10n.get('Make sure your internet connection is ' +
-          'working and, if this error occurs again, contact an ' +
-          'administrator.');
+            'working and, if this error occurs again, contact an ' +
+            'administrator.');
         createIt('danger', error, 10);
 
       }

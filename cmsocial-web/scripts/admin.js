@@ -28,7 +28,7 @@ angular.module('cmsocial')
         'recaptcha_public_key', 'recaptcha_secret_key', 'top_left_name',
         'all_languages', 'languages'
       ];
-      for (var i = 0; i < items.length; i++) {
+      for (var i=0; i<items.length; i++) {
         $scope.contest[items[i]] = cts[items[i]];
       }
       if (cts['menu_on_db'] != null)
@@ -36,9 +36,7 @@ angular.module('cmsocial')
       else $scope.contest['menu'] = '';
     });
     $scope.submit = function() {
-      var data = {
-        'action': 'alter'
-      };
+      var data = {'action': 'alter'};
       for (var i in $scope.contest) {
         if ($scope.contest[i] == '')
           data[i] = null;

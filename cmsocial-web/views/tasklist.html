@@ -7,16 +7,11 @@
       <i class="fa fa-tag fa-lg"></i>
       {{search.tag_string}}
     </span>
-    <form class="search-by-tag form-inline" role="form" ng-submit="reloadTasks()">
+    <form class="search-by-tag form-inline pull-right" role="form" ng-submit="reloadTasks()">
       <div class="form-group">
-        <select class="form-control" ng-model="search.order">
-          <option value="default">{{'Newest first' | l10n}}</option>
-          <option value="hardest">{{'Hardest first' | l10n}}</option>
-          <option value="easiest">{{'Easiest first' | l10n}}</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <input class="form-control" maxlength="50" autocomplete="off" type="text" id="tag" name="tag" ng-model="search.q" placeholder="{{'Search by name' | l10n}}" />
+        <input class="form-control" maxlength="50" autocomplete="off"
+            type="text" id="tag" name="tag" ng-model="search.q"
+            placeholder="{{'Search by name' | l10n}}"/>
       </div>
       <button type="submit" class="btn btn-info">{{'search' | l10n}}</button>
     </form>

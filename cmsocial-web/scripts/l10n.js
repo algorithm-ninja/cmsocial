@@ -288,33 +288,24 @@ angular.module('cmsocial')
     'Stay signed in': {
       it: 'Resta connesso'
     },
-    'Forgot account?': {
-      it: 'Hai dimenticato le credenziali?'
-    },
-    'No such user': {
-      it: 'Utente inesistente'
-    },
-    'A code was sent, check your inbox': {
-      it: 'Il codice è stato spedito, controlla la casella di posta'
-    },
-    'You should already have received an email, if not, try tomorrow': {
-      it: 'Dovresti aver già ricevuto una mail, altrimenti riprova domani'
-    },
-    'Your new password was mailed to you': {
-      it: 'La nuova password ti è stata mandata per mail'
-    },
-    'Wrong code': {
-      it: 'Codice errato'
-    },
-    'Recover data': {
-      it: 'Recupera credenziali'
-    },
-    'Confirm code': {
-      it: 'Conferma codice'
-    },
-    'Code': {
-      it: 'Codice'
-    },
+    'Forgot account?':
+    {it: 'Hai dimenticato le credenziali?'},
+    'No such user':
+    {it: 'Utente inesistente'},
+    'A code was sent, check your inbox':
+    {it: 'Il codice è stato spedito, controlla la casella di posta'},
+    'You should already have received an email, if not, try tomorrow':
+    {it: 'Dovresti aver già ricevuto una mail, altrimenti riprova domani'},
+    'Your new password was mailed to you':
+    {it: 'La nuova password ti è stata mandata per mail'},
+    'Wrong code':
+    {it: 'Codice errato'},
+    'Recover data':
+    {it: 'Recupera credenziali'},
+    'Confirm code':
+    {it: 'Conferma codice'},
+    'Code':
+    {it: 'Codice'},
     'My user profile': {
       it: 'Il mio profilo utente'
     },
