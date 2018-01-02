@@ -103,6 +103,7 @@ def main():
             score = 0
             for tid, pt in problems:
                 score += values[tid] * pt
+            scores[uid] = score
 
         st = session.query(SocialTask).all()
         for t in st:
