@@ -1620,7 +1620,8 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 if s.language is None:
                     fi['name'] = name
                 else:
-                    fi['name'] = name.replace('%l', s.language)
+                    ext = get_language(s.language).source_extension[1:]
+                    fi['name'] = name.replace('%l', ext)
                 fi['digest'] = f.digest
                 submission['files'].append(fi)
             result = s.get_result()
