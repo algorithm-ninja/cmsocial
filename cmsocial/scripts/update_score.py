@@ -9,6 +9,7 @@
 # score = points/200
 
 import argparse
+import copy
 import math
 
 from cms.db import SessionGen
@@ -96,7 +97,9 @@ def main():
             user_to_task[uid] = user_to_task.get(uid, []) + [(tid, pt)]
             task_to_user[tid] = task_to_user.get(tid, []) + [(uid, pt)]
 
-        values = dict(compute_smart_score(user_to_task, task_to_user))
+        values = dict(
+            compute_smart_score(
+                copy.deepcopy(user_to_task), copy.deepcopy(task_to_user)))
 
         scores = dict()
         for uid, problems in user_to_task.iteritems():
