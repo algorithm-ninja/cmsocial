@@ -19,6 +19,7 @@ from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from shutil import copyfileobj, rmtree
+from validate_email import validate_email
 
 import bcrypt
 import gevent
@@ -328,13 +329,13 @@ class APIHandler(object):
                 return 'This username is not available'
 
     def check_email(self, email):
-        if not self.EMAIL_REG.match(email):
-            return 'Invalid e-mail'
-        else:
+        if self.EMAIL_REG.match(email) and validate_email(email, verify=True):
             user = local.session.query(User)\
                 .filter(User.email == email).first()
             if user is not None:
                 return 'E-mail already used'
+        else:
+            return 'Invalid e-mail'
 
     def hash(self, string, algo='sha256'):
         if string is None:
