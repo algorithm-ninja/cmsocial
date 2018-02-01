@@ -1648,7 +1648,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             # Add the submission
             timestamp = make_datetime()
             submission = Submission(timestamp,
-                                    sub_lang.name,
+                                    getattr(sub_lang, "name", None),
                                     participation=local.participation,
                                     task=task)
             for f in files:
