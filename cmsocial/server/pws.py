@@ -1733,7 +1733,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             timestamp = make_datetime()
             submission = Submission(
                 timestamp,
-                sub_lang.name,
+                sub_lang.name if sub_lang is not None else None, # output only
                 participation=local.participation,
                 task=task)
             for f in files:
