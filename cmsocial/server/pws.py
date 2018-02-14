@@ -1731,11 +1731,10 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
 
             # Add the submission
             timestamp = make_datetime()
-            submission = Submission(
-                timestamp,
-                sub_lang.name if sub_lang is not None else None, # output only
-                participation=local.participation,
-                task=task)
+            submission = Submission(timestamp,
+                                    getattr(sub_lang, "name", None),
+                                    participation=local.participation,
+                                    task=task)
             for f in files:
                 digest = self.file_cacher.put_file_content(
                     f['body'], 'Submission file %s sent by %s at %d.' %
