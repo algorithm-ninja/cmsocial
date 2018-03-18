@@ -345,7 +345,9 @@ class APIHandler(object):
         return sha.hexdigest()
 
     def old_hashpw(self, pw):
-        return self.hash(pw + config.get("core", "secret"))
+        # FIXME: maybe we should keep stats on how many times
+        #        this function gets called over time
+        return self.hash(pw + "8e045a51e4b102ea803c06f92841a1fb")
 
     def old_validate(self, pw, storedpw):
         return self.old_hashpw(pw) == storedpw
