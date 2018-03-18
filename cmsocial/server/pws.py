@@ -329,7 +329,7 @@ class APIHandler(object):
                 return 'This username is not available'
 
     def check_email(self, email):
-        if self.EMAIL_REG.match(email) and validate_email(email, verify=True):
+        if self.EMAIL_REG.match(email) and validate_email(email, check_mx=True):
             user = local.session.query(User)\
                 .filter(User.email == email).first()
             if user is not None:
