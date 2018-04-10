@@ -327,7 +327,7 @@ angular.module('cmsocial')
             else
               statementLanguage = Object.keys(scope.task.statements)[0];
           }
-          var pdfURL = location.pathname.replace(/[^\/]*$/, '') + API_PREFIX + 'files/' + scope.task.statements[statementLanguage] + '/testo.pdf';
+          var pdfURL = API_PREFIX + 'files/' + scope.task.statements[statementLanguage] + '/testo.pdf';
           var downloadButton = '<a href="' + pdfURL + '" class="btn btn-success" style="margin-top:5px;">Download PDF</a>';
           if (goodBrowser && hasBuiltInPdf)
             element.replaceWith('<object data="' + pdfURL + '" type="application/pdf" class="' + attrs.class +

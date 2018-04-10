@@ -17,11 +17,11 @@ endif
 ifeq ($(PROD), 1)
 STRIPDEBUG=sed '/<!-- *start  *debug *-->/,/<!-- *end  *debug *-->/d'
 UGLIFY=node_modules/.bin/uglifyjs
-BABEL=node_modules/.bin/babel --
+BABEL=babel --
 else
 STRIPDEBUG=cat
 UGLIFY=cat
-BABEL=node_modules/.bin/babel --
+BABEL=babel --
 endif
 
 WEBDIRS=$(shell find cmsocial-web -type d)

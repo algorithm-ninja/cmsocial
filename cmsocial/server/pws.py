@@ -71,7 +71,8 @@ class WSGIHandler(gevent.wsgi.WSGIHandler):
             delta = '%.6f' % (self.time_finish - self.time_start)
         else:
             delta = '-'
-        client_address = self.environ['REMOTE_ADDR']
+        #client_address = self.environ['REMOTE_ADDR']
+        client_address = None
         return '%s %s %s %s' % (client_address or '-', (
             getattr(self, 'status', None) or '000').split()[0], delta,
                                 getattr(self, 'requestline', ''))
