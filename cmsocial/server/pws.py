@@ -748,7 +748,7 @@ class APIHandler(object):
                     try:
                         if data[i] is None:
                             local.resp[i] = [0, 'empty']
-                        else if len(data[i]) > 0:
+                        elif len(data[i]) > 0:
                             local.resp[i] = [1, 'correct']
                     except IndexError:
                         pass
