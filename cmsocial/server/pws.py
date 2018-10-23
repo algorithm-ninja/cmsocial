@@ -785,7 +785,7 @@ class APIHandler(object):
                     testscore.test = test
                     local.session.add(testscore)
                 else:
-                    if score > testscore.score:
+                    if score >= testscore.score:
                         testscore.score = score
                         testscore.answers = json.dumps(data)
 
