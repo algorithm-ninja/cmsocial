@@ -127,3 +127,5 @@ class TestScore(Base):
             passive_deletes=True))
 
     score = Column(Integer, default=0)
+
+    answers = Column(Unicode, nullable=True)

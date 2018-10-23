@@ -781,6 +781,7 @@ class APIHandler(object):
                 else:
                     if score > testscore.score:
                         testscore.score = score
+                testscore.answers = json.dumps(data)
                 local.session.commit()
         else:
             return 'Bad request'
