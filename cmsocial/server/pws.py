@@ -743,6 +743,11 @@ class APIHandler(object):
                     except IndexError:
                         pass
                     continue
+                elif q.type == 'notempty':
+                    if data[i] is None:
+                        local.resp[i] = [0, 'wrong']
+                    else:
+                        local.resp[i] = [1, 'correct']
                 else:
                     for key, correct in ansdata:
                         ans = data[i].get(key, None)
@@ -773,6 +778,7 @@ class APIHandler(object):
                 testscore = local.session.query(TestScore)\
                     .filter(TestScore.test_id == test.id)\
                     .filter(TestScore.user_id == local.user.id).first()
+
                 if testscore is None:
                     testscore = TestScore(score=score)
                     testscore.user = local.user.social_user
@@ -781,7 +787,8 @@ class APIHandler(object):
                 else:
                     if score > testscore.score:
                         testscore.score = score
-                testscore.answers = json.dumps(data)
+                        testscore.answers = json.dumps(data)
+
                 local.session.commit()
         else:
             return 'Bad request'
