@@ -744,11 +744,10 @@ class APIHandler(object):
                         pass
                     continue
                 elif q.type == 'notempty':
-                    dd = data[i].values()[0][0]
-                    if dd is None:
-                        local.resp[i] = [0, 'empty']
-                    elif len(dd) > 0:
-                        local.resp[i] = [1, 'correct']
+                    local.resp[i] = [q.score, 'correct']
+                    for d in data[i].values():
+                        if not isinstance(d, list) or len(d) != 1 or d[0] is None or len(d[0]) < 1:
+                            local.resp[i] = [0, 'empty']
                     continue
                 else:
                     for key, correct in ansdata:
