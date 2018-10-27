@@ -307,7 +307,7 @@ class APIHandler(object):
             return 'Username is invalid'
         else:
             user = local.session.query(User)\
-                .filter(User.username == username).first()
+                .filter(User.username.ilike(username)).first()
             if user is not None:
                 return 'This username is not available'
 
