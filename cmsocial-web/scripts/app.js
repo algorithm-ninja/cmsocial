@@ -47,6 +47,11 @@ angular
         templateUrl: 'views/tags.html',
         controller: 'TagsPage'
       })
+      .state('tasktree', {
+        url: '/tasktree',
+        templateUrl: 'views/task_tree.html',
+        controller: 'TaskTree'
+      })
       .state('tasklist', {
         templateUrl: 'views/tasklist.html',
         controller: 'TasklistSkel'
