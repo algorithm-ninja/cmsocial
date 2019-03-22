@@ -174,6 +174,7 @@ angular.module('cmsocial')
       })
       .success(function(data, status, headers, config) {
         $scope.tasks = data['tasks'];
+        $scope.assessment = data['assessment'] || false;
         $scope.search.tag_string = (data['tags'] || []).join(' + ');
         $scope.pagination.total = Math.ceil(data['num'] / $scope.pagination.perPage);
         if (data['num'] === 0) {

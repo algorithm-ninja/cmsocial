@@ -511,6 +511,17 @@ class APIHandler(object):
 
                 local.resp['tasks'].append(task)
 
+            # Add information about assessment test!
+            if local.user is not None:
+                answer = local.session.query(TestScore)\
+                    .filter(TestScore.user_id == local.user.id)\
+                    .filter(TestScore.test_id == 10)\
+                    .first()
+            else:
+                answer = {'score':10}  # let's not bother unlogged users!
+
+            local.resp["assessment"] = (answer is not None and answer['score'] >= 10)
+
         elif local.data['action'] == 'get':
             t = local.session.query(Task)\
                 .join(SocialTask)\
@@ -542,6 +553,17 @@ class APIHandler(object):
                         tag['can_delete'] = (local.user.social_user is tasktag.user and not tasktag.approved) or \
                                 local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
+
+            # Add information about assessment test!
+            if local.user is not None:
+                answer = local.session.query(TestScore)\
+                    .filter(TestScore.user_id == local.user.id)\
+                    .filter(TestScore.test_id == 10)\
+                    .first()
+            else:
+                answer = {'score':10}  # let's not bother unlogged users!
+
+            local.resp["assessment"] = (answer is not None and answer['score'] >= 10)
 
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\

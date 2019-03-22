@@ -1,4 +1,7 @@
 <div>
+  <div ng-if="assessment === false" class="alert alert-danger" role="alert">
+    Ricordati di completare l'assessment test! Si trova cliccando sul pulsante "Quiz" nella barra di navigazione in alto e selezionando l'ultimo quiz della pagina. I primi due quiz ("selezioni scolastiche") non sono obbligatori 😉
+  </div>
   <div ng-if="tasks.length < 1" class="not-found-msg">{{'no tasks found' | l10n}}</div>
   <div class="list-group">
     <a ng-repeat="task in tasks" ng-class="{'correct': task.score == 100, 'partial': task.score > 0 && task.score < 100, 'wrong': task.score == 0}" class="list-group-item" ui-sref="task.statement({ taskName: task.name })">
