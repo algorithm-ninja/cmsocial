@@ -377,8 +377,12 @@ angular.module('cmsocial')
     		answer: "L'unico obbligo è di totalizzare durante la miniolimpiade un punteggio positivo ad almeno 3 dei 7 problemi proposti. La quantità di problemi da svolgere durante il corso va in relazione alla dimestichezza del singolo e non determina il diritto al certificato."
     	},
 		{
+			question: "Quando comincia e quando finisce la miniolimpiade?",
+			answer: "L'ottava edizione della miniolimpiade comincerà il 25 marzo alle ore 14:30 e terminerà il 3 aprile alle ore 23:59."
+		},
+		{
 			question: "Come funziona la miniolimpiade?",
-			answer: "In data da definire, saranno inseriti nella piattaforma i 7 problemi della miniolimpiade. Una volta usciti, avrete a disposizione una settimana per svolgerli. Il punteggio minimo da ottenere è un punteggio strettamente positivo su 3 dei 7 problemi."
+			answer: "Nel giorno e l'ora d'inizio della miniolimpiade, saranno inseriti nella piattaforma i 7 problemi della miniolimpiade. Una volta usciti, avrete a disposizione una settimana per svolgerli. Il punteggio minimo da ottenere è un punteggio strettamente positivo su 3 dei 7 problemi."
 		},
 		{
 			question: "Esistono delle prove intermedie?",
