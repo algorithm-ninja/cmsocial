@@ -517,10 +517,11 @@ class APIHandler(object):
                     .filter(TestScore.user_id == local.user.id)\
                     .filter(TestScore.test_id == 10)\
                     .first()
-            else:
-                answer = {'score':10}  # let's not bother unlogged users!
 
-            local.resp["assessment"] = (answer is not None and answer['score'] >= 10)
+                local.resp["assessment"] = (answer is not None and answer.score >= 10)
+            else:
+                # Let's not bother unlogged users
+                local.resp["assessment"] = True
 
         elif local.data['action'] == 'get':
             t = local.session.query(Task)\
@@ -560,10 +561,11 @@ class APIHandler(object):
                     .filter(TestScore.user_id == local.user.id)\
                     .filter(TestScore.test_id == 10)\
                     .first()
-            else:
-                answer = {'score':10}  # let's not bother unlogged users!
 
-            local.resp["assessment"] = (answer is not None and answer['score'] >= 10)
+                local.resp["assessment"] = (answer is not None and answer.score >= 10)
+            else:
+                # Let's not bother unlogged users
+                local.resp["assessment"] = True
 
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
