@@ -30,5 +30,8 @@
     "less": "^2.5.3",
     "mathjax": "github:mathjax/MathJax#master",
     "uglifyjs": "^2.4.10"
+  },
+  "scripts": {
+    "deploy": "ssh cms \"bash -c 'cd cmsocial-digit && git pull && make ONLINE=1 && /home/ioi/.virtualenvs/digit/bin/python setup.py install && sudo systemctl restart digit_pws'\""
   }
 }
