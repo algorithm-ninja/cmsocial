@@ -2,7 +2,8 @@
 <div class="container">
     <div ng-if="tasks.length < 1" class="not-found-msg">{{'no tasks found' | l10n}}</div>
     <div class="row container">
-        <a ng-repeat="task in tasks" ui-sref="task.statement({ taskName: task.name })">{{task.name}}</a> {{tasks}}
+        <a ng-repeat="task in tasks" ui-sref="task.statement({ taskName: task.name })">{{task.name}}</a>
+        {{tasks}}
     </div>
     <p> Modifica di Gemma </p>
 </div>
