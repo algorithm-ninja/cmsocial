@@ -56,7 +56,7 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             //Build the tree according to the level of the tasks
             var t = [];
-            console.log(t);
+            console.log(data.tasks);
             
             for (var i = 0; i < data.tasks.length; i++) {
                 if (data.tasks[i].name in extra_fields) {  
