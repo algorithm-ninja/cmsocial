@@ -106,6 +106,11 @@ angular.module('cmsocial')
       .then(
         function(result) {
           $rootScope.task = result.data;
+
+            if (!result.data['assessment'] && !result.data['help_available']) {
+               // redirect to the task list
+                location.replace("https://digit.cms.di.unipi.it/#/tasks/1");
+            }
         },
         function(result) {
           notificationHub.serverError(result.status);
