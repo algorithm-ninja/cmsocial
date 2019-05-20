@@ -159,7 +159,7 @@ angular.module('cmsocial').controller('TaskTree', function(
             // Normalize for fixed-depth.
             nodes.forEach(function(d) { d.y = d.depth * 100; });
             
-            // Declare the nodes…
+            // Declare the nodes
             var node = svg.selectAll("g.node")
                 .data(nodes, function(d) { return d.id || (d.id = ++i); });
             
@@ -171,7 +171,8 @@ angular.module('cmsocial').controller('TaskTree', function(
             
             nodeEnter.append("circle")
                 .attr("r", 10)
-                .style("fill", "#fff");
+                .style("fill", "#fff")
+                .style("stroke", "red");
             
             nodeEnter.append("text")
                 .attr("y", function(d) { 
