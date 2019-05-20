@@ -94,7 +94,7 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             var catList = []
             var t2 = {}
-            for (var i = 0; i < t.length; t++) {
+            for (var i = 0; i < t.length; i++) {
                 catList.push(t[i].category);
                 if (!(t[i].category in t2)) {
                     t2[t[i].category] = [];
@@ -132,7 +132,7 @@ angular.module('cmsocial').controller('TaskTree', function(
             // ************** Generate the tree diagram	 *****************
             var margin = {top: 40, right: 120, bottom: 20, left: 120},
                 width = 960 - margin.right - margin.left,
-                height = 500 - margin.top - margin.bottom;
+                height = 800 - margin.top - margin.bottom;
                 
             var i = 0;
             
