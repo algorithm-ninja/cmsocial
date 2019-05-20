@@ -132,7 +132,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                         "parent": par["name"],
                         "children": []
                     };
-                    par[children].push(cur);
+                    par["children"].push(cur);
                     par = cur;
                 }
             }
