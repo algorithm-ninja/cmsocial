@@ -169,10 +169,10 @@ angular.module('cmsocial').controller('TaskTree', function(
                 .attr("transform", function(d) { 
                     return "translate(" + d.x + "," + d.y + ")"; });
             
-            nodeEnter.append("circle")
+            /*nodeEnter.append("circle")
                 .attr("r", 10)
                 .style("fill", "#fff")
-                .style("stroke", "red");
+                .style("stroke", "red");*/
             
             nodeEnter.append("text")
                 .attr("y", function(d) { 
