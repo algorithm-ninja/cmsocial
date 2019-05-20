@@ -25,32 +25,30 @@ angular.module('cmsocial').controller('TaskTree', function(
                 }
             ]
             console.log(dynTree)
-            var treeData = [
+            var treeData = {
+                "name": "Top Level",
+                "parent": "null",
+                "children": [
                 {
-                  "name": "Top Level",
-                  "parent": "null",
-                  "children": [
+                    "name": "Level 2: A",
+                    "parent": "Top Level",
+                    "children": [
                     {
-                      "name": "Level 2: A",
-                      "parent": "Top Level",
-                      "children": [
-                        {
-                          "name": "Son of A",
-                          "parent": "Level 2: A"
-                        },
-                        {
-                          "name": "Daughter of A",
-                          "parent": "Level 2: A"
-                        }
-                      ]
+                        "name": "Son of A",
+                        "parent": "Level 2: A"
                     },
                     {
-                      "name": "Level 2: B",
-                      "parent": "Top Level"
+                        "name": "Daughter of A",
+                        "parent": "Level 2: A"
                     }
-                  ]
+                    ]
+                },
+                {
+                    "name": "Level 2: B",
+                    "parent": "Top Level"
                 }
-              ];
+                ]
+            };
               
               // ************** Generate the tree diagram	 *****************
               var margin = {top: 40, right: 120, bottom: 20, left: 120},
@@ -71,7 +69,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                 .append("g")
                   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
               
-              var root = treeData[0];
+              var root = treeData;
                 
               update(root);
               
