@@ -65,13 +65,12 @@ angular.module('cmsocial').controller('TaskTree', function(
                 'annoluce': {difficulty: 4, category: 'sortings'},
                 'terrazzamenti': {difficulty: 5, category: 'sortings'}
             };
-            var t = data.tasks;
-            console.log(t);
-            for (var i = 0; i < t.length; i++) {
-                console.log(t[i]);
-                if (t[i].name in extra_fields) {  
-                    t[i].difficulty = extra_fields[t[i].name].difficulty;
-                    t[i].category = extra_fields[t[i].name].category;
+            var t = [];
+            for (var i = 0; i < data.tasks.length; i++) {
+                if (data.tasks[i].name in extra_fields) {  
+                    t.push(data.tasks[i]);
+                    t[t.length-1].difficulty = extra_fields[data.tasks[i].name].difficulty;
+                    t[t.length-1].category = extra_fields[data.tasks[i].name].category;
                 }
             } 
 
