@@ -171,19 +171,20 @@ angular.module('cmsocial').controller('TaskTree', function(
 
                     
             var singleChart = nodeEnter.append("single-chart");
-            var svg1 = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-                .setAttribute("viewBox", "0 0 36 36")
-                .setAttribute("class", "circular-chart orange");
+            var svg1 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg1.setAttribute("viewBox", "0 0 36 36")
+            svg1.setAttribute("class", "circular-chart orange");
             singleChart.append(svg1);
-            var path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path')
-                    .setAttribute("class", "circle-bg")
-                    .setAttribute("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+
+            var path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            path1.setAttribute("class", "circle-bg");
+            path1.setAttribute("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
             svg1.append(path1);
 
-            var path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path')
-                    .setAttribute("class", "circle")
-                    .setAttribute("stroke-dasharray", "30, 100")
-                    .setAttribute("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+            var path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            path2.setAttribute("class", "circle");
+            path2.setAttribute("stroke-dasharray", "30, 100");
+            path2.setAttribute("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
             svg1.append(path2);
 
             /*<div class="single-chart">
