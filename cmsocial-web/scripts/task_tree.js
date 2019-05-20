@@ -168,7 +168,40 @@ angular.module('cmsocial').controller('TaskTree', function(
                 .attr("class", "node")
                 .attr("transform", function(d) { 
                     return "translate(" + d.x + "," + d.y + ")"; });
+
+                    
+            var singleChart = nodeEnter.append("single-chart");
+            var svg1 = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+                .attr("viewBox", "0 0 36 36")
+                .attr("class", "circular-chart orange");
+            singleChart.append(svg1);
+            var path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path')
+                    .attr("class", "circle-bg")
+                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+            svg1.append(path1);
+
+            var path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path')
+                    .attr("class", "circle")
+                    .attr("stroke-dasharray", "30, 100")
+                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+            svg1.append(path2);
             
+            /*<div class="single-chart">
+                <svg viewBox="0 0 36 36" class="circular-chart orange">
+                    <path class="circle-bg"
+                    d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path class="circle"
+                    stroke-dasharray="30, 100"
+                    d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <text x="18" y="20.35" class="percentage">30%</text>
+                </svg>
+            </div>*/
             /*nodeEnter.append("circle")
                 .attr("r", 10)
                 .style("fill", "#fff")
