@@ -17,13 +17,18 @@ angular.module('cmsocial').controller('TaskTree', function(
             $scope.tasks = data['tasks'];
 
             //Build the tree according to the level of the tasks
-            var dynTree = [
-                {
-                    "name": "my root",
-                    "parent": "null",
-                    "children": []
-                }
-            ]
+            var dynTree = {
+                "name": "my root",
+                "parent": "null",
+                "children": []
+            };
+
+            dynTree.children = {
+                "name": "bay",
+                "parent": dynTree.name,
+                "children": []
+            };
+
             console.log(dynTree)
             var treeData = {
                 "name": "Top Level",
