@@ -30,8 +30,50 @@ angular.module('cmsocial').controller('TaskTree', function(
                 "children": []
             };
 
+            extra_fields = {
+                'hello': {difficulty: 1, category: 'intro'},
+                'somma': {difficulty: 2, category: 'intro'},
+                'easy1': {difficulty: 3, category: 'intro'},
+                'trasposta': {difficulty: 1, category: 'data structures'},
+                'socks': {difficulty: 2, category: 'data structures'},
+                'parentesi': {difficulty: 3, category: 'data structures'},
+                'matrice': {difficulty: 4, category: 'data structures'},
+                'interrogazioni': {difficulty: 5, category: 'data structures'},
+                'sunny': {difficulty: 1, category: 'graphs'},
+                'ponti': {difficulty: 2, category: 'graphs'},
+                'mincammino': {difficulty: 3, category: 'graphs'},
+                'estintori': {difficulty: 4, category: 'graphs'},
+                'tecla': {difficulty: 5, category: 'graphs'},
+                'easy3': {difficulty: 1, category: 'math'},
+                'mcd': {difficulty: 2, category: 'math'},
+                'fraction': {difficulty: 3, category: 'math'},
+                'cc': {difficulty: 4, category: 'math'},
+                'baricentro': {difficulty: 5, category: 'math'},
+                'fibonacci': {difficulty: 1, category: 'dynamic programming'},
+                'poldo': {difficulty: 2, category: 'dynamic programming'},
+                'sequenceofballs': {difficulty: 3, category: 'dynamic programming'},
+                'seti': {difficulty: 4, category: 'dynamic programming'},
+                'bitcoin2': {difficulty: 5, category: 'dynamic programming'},
+                'easy2': {difficulty: 1, category: 'brute force'},
+                'contdivisori': {difficulty: 2, category: 'brute force'},
+                'parole': {difficulty: 3, category: 'brute force'},
+                'painting': {difficulty: 4, category: 'brute force'},
+                'quasipal': {difficulty: 5, category: 'brute force'},
+                'ordina': {difficulty: 1, category: 'sortings'},
+                'hamtaro': {difficulty: 2, category: 'sortings'},
+                'dreamteam': {difficulty: 3, category: 'sortings'},
+                'annoluce': {difficulty: 4, category: 'sortings'},
+                'terrazzamenti': {difficulty: 5, category: 'sortings'}
+            };
+            for (var i = 0; i < t.length; i++) {
+                console.log(t[i]); 
+                t[i].difficulty = extra_fields[t[i].name].difficulty;
+                t[i].category = extra_fields[t[i].name].category;
+            } 
+
             console.log(dynTree);
             console.log(data);
+            console.log(t);
             var treeData = {
                 "name": "Top Level",
                 "parent": "null",
