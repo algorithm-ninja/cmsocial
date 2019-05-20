@@ -65,7 +65,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                 'annoluce': {difficulty: 4, category: 'sortings'},
                 'terrazzamenti': {difficulty: 5, category: 'sortings'}
             };
-            var t = data.tasks;
+            /*var t = data.tasks;
             console.log(t);
             for (var i = 0; i < t.length; i++) {
                 console.log(t[i]);
@@ -133,7 +133,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                     par[children].push(cur);
                     par = cur;
                 }
-            }
+            }*/
 
               
             // ************** Generate the tree diagram	 *****************
