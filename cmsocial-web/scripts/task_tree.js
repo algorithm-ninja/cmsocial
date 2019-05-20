@@ -106,6 +106,9 @@ angular.module('cmsocial').controller('TaskTree', function(
             var t2 = {}
             for (var i = 0; i < t.length; t++) {
                 catList.push(t[i].category);
+                if (!(t[i].category in t2)) {
+                    t2[t[i].category] = [];
+                }
                 t2[t[i].category].push(t[i]);
             }
             catList = catList.filter(onlyUnique);
