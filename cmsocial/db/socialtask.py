@@ -93,9 +93,9 @@ class SocialTask(Base):
         nullable=True
     )
 
-    category = Column,
+    category = Column(
         String,
-        nillable=True
+        nullable=True
     )
 
     # The list of tasktags which tag this task
