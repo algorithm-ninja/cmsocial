@@ -29,7 +29,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                 "children": []
             };
 
-            console.log(dynTree)
+            console.log(dynTree);
+            console.log(scope.tasks);
             var treeData = {
                 "name": "Top Level",
                 "parent": "null",
