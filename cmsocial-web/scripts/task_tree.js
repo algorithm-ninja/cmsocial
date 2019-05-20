@@ -172,8 +172,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                     
             var singleChart = nodeEnter.append("single-chart");
             var svg1 = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-                .attr("viewBox", "0 0 36 36")
-                .attr("class", "circular-chart orange");
+                .setAttribute("viewBox", "0 0 36 36")
+                .setAttribute("class", "circular-chart orange");
             singleChart.append(svg1);
             var path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path')
                     .setAttribute("class", "circle-bg")
