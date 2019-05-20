@@ -30,7 +30,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                 "children": []
             };
 
-            /*var extra_fields = {
+            var extra_fields = {
                 'hello': {difficulty: 1, category: 'intro'},
                 'somma': {difficulty: 2, category: 'intro'},
                 'easy1': {difficulty: 3, category: 'intro'},
@@ -73,7 +73,7 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             console.log(dynTree);
             console.log(data);
-            console.log(t);*/
+            //console.log(t);
             var treeData = {
                 "name": "Top Level",
                 "parent": "null",
