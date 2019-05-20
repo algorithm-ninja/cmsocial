@@ -65,6 +65,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                 'annoluce': {difficulty: 4, category: 'sortings'},
                 'terrazzamenti': {difficulty: 5, category: 'sortings'}
             };
+            var t = data.tasks;
             for (var i = 0; i < t.length; i++) {
                 console.log(t[i]); 
                 t[i].difficulty = extra_fields[t[i].name].difficulty;
