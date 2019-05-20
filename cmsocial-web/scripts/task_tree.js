@@ -56,6 +56,8 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             //Build the tree according to the level of the tasks
             var t = [];
+            console.log(t);
+            
             for (var i = 0; i < data.tasks.length; i++) {
                 if (data.tasks[i].name in extra_fields) {  
                     t.push(data.tasks[i]);
@@ -63,7 +65,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                     t[t.length-1].category = extra_fields[data.tasks[i].name].category;
                 }
             } 
-
+            console.log(t);
+            
             var secondRoot = {
                     "name": "easy1",
                     "parent": "somma",
