@@ -30,7 +30,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                 "children": []
             };
 
-            extra_fields = {
+            var extra_fields = {
                 'hello': {difficulty: 1, category: 'intro'},
                 'somma': {difficulty: 2, category: 'intro'},
                 'easy1': {difficulty: 3, category: 'intro'},
