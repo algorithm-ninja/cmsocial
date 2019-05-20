@@ -88,6 +88,16 @@ class SocialTask(Base):
         default=0
     )
 
+    difficulty = Column(
+        Integer,
+        nullable=True
+    )
+
+    category = Column,
+        String,
+        nillable=True
+    )
+
     # The list of tasktags which tag this task
     tasktags = relationship('TaskTag')
 
