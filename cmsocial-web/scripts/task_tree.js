@@ -16,6 +16,7 @@ angular.module('cmsocial').controller('TaskTree', function(
         })
         .success(function(data, status, headers, config) {
             $scope.tasks = data['tasks'];
+            console.log(data.tasks);
 
             //Static declaration of needed fields
             var extra_fields = {
@@ -56,7 +57,6 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             //Build the tree according to the level of the tasks
             var t = [];
-            console.log(data.tasks);
             
             for (var i = 0; i < data.tasks.length; i++) {
                 if (data.tasks[i].name in extra_fields) {  
@@ -65,9 +65,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                     t[t.length-1].category = extra_fields[data.tasks[i].name].category;
                 }
             } 
-            console.log(t);
-            
-           
+                       
             function onlyUnique(value, index, self) { 
                 return self.indexOf(value) === index;
             }
@@ -95,7 +93,7 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             t2["intro"].sort(cmp);
             var treeData = {
-                "name": t2["intro"][0],
+                "name": t2["intro"][0].name,
                 "parent": "null",
                 "children": []
             };
@@ -128,8 +126,6 @@ angular.module('cmsocial').controller('TaskTree', function(
                     par = cur;
                 }
             }
-            console.log(t2);
-            console.log(t);
               
             // ************** Generate the tree diagram	 *****************
             var margin = {top: 40, right: 120, bottom: 20, left: 120},
