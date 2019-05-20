@@ -176,16 +176,16 @@ angular.module('cmsocial').controller('TaskTree', function(
                 .attr("class", "circular-chart orange");
             singleChart.append(svg1);
             var path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path')
-                    .attr("class", "circle-bg")
-                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+                    .setAttribute("class", "circle-bg")
+                    .setAttribute("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
             svg1.append(path1);
 
             var path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path')
-                    .attr("class", "circle")
-                    .attr("stroke-dasharray", "30, 100")
-                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+                    .setAttribute("class", "circle")
+                    .setAttribute("stroke-dasharray", "30, 100")
+                    .setAttribute("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
             svg1.append(path2);
-            
+
             /*<div class="single-chart">
                 <svg viewBox="0 0 36 36" class="circular-chart orange">
                     <path class="circle-bg"
