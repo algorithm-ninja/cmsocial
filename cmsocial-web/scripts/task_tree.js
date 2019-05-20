@@ -68,38 +68,73 @@ angular.module('cmsocial').controller('TaskTree', function(
             var t = data.tasks;
             console.log(t);
             for (var i = 0; i < t.length; i++) {
-                console.log(t[i]); 
-                t[i].difficulty = extra_fields[t[i].name].difficulty;
-                t[i].category = extra_fields[t[i].name].category;
+                console.log(t[i]);
+                if (t[i].name in extra_fields) {  
+                    t[i].difficulty = extra_fields[t[i].name].difficulty;
+                    t[i].category = extra_fields[t[i].name].category;
+                }
             } 
 
             console.log(dynTree);
             console.log(data);
+
+            var secondRoot = {
+                    "name": "easy1",
+                    "parent": "somma",
+                    "children": [
+                    ]
+            }
             
             var treeData = {
-                "name": "Top Level",
+                "name": "hello",
                 "parent": "null",
                 "children": [
                 {
-                    "name": "Level 2: A",
-                    "parent": "Top Level",
+                    "name": "somma",
+                    "parent": "hello",
                     "children": [
-                    {
-                        "name": "Son of A",
-                        "parent": "Level 2: A"
-                    },
-                    {
-                        "name": "Daughter of A",
-                        "parent": "Level 2: A"
-                    }
+                    secondRoot
                     ]
-                },
-                {
-                    "name": "Level 2: B",
-                    "parent": "Top Level"
                 }
                 ]
             };
+
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+
+            var catList = []
+            var t2 = {}
+            for (var i = 0; i < t.length; t++) {
+                catList.push(t[i].category);
+                t2[t[i].category].push(t[i]);
+            }
+            catList = catList.filter(onlyUnique);
+            
+            function cmp(a, b) {
+                if (a.difficulty > b.difficulty) {
+                    return 1;
+                }
+                if (a.difficulty < b.difficulty) {
+                    return -1;
+                }
+                return 0;
+            }
+
+            for (var i = 0; i < catList.length; i++) {
+                t2[catList[i]].sort(cmp);
+                var par = secondRoot;
+                for (var j = 0; j < t2[catList[i]].length; j++) {
+                    var cur = {
+                        "name": t2[catList[i]][j]["name"],
+                        "parent": par["name"],
+                        "children": []
+                    };
+                    par[children].push(cur);
+                    par = cur;
+                }
+            }
+
               
             // ************** Generate the tree diagram	 *****************
             var margin = {top: 40, right: 120, bottom: 20, left: 120},
