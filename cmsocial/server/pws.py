@@ -500,8 +500,8 @@ class APIHandler(object):
                 task['id'] = t.id
                 task['name'] = t.name
                 task['title'] = t.title
-                task['difficulty'] = t.difficulty
-                task['category'] = t.category
+                #task['difficulty'] = t.difficulty
+                #task['category'] = t.category
 
                 if local.user is not None:
                     taskscore = local.session.query(TaskScore)\
