@@ -17,19 +17,7 @@ angular.module('cmsocial').controller('TaskTree', function(
         .success(function(data, status, headers, config) {
             $scope.tasks = data['tasks'];
 
-            //Build the tree according to the level of the tasks
-            var dynTree = {
-                "name": "my root",
-                "parent": "null",
-                "children": []
-            };
-
-            dynTree.children = {
-                "name": "bay",
-                "parent": dynTree.name,
-                "children": []
-            };
-
+            //Static declaration of needed fields
             var extra_fields = {
                 'hello': {difficulty: 1, category: 'intro'},
                 'somma': {difficulty: 2, category: 'intro'},
@@ -65,6 +53,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                 'annoluce': {difficulty: 4, category: 'sortings'},
                 'terrazzamenti': {difficulty: 5, category: 'sortings'}
             };
+
+            //Build the tree according to the level of the tasks
             var t = [];
             for (var i = 0; i < data.tasks.length; i++) {
                 if (data.tasks[i].name in extra_fields) {  
@@ -73,9 +63,6 @@ angular.module('cmsocial').controller('TaskTree', function(
                     t[t.length-1].category = extra_fields[data.tasks[i].name].category;
                 }
             } 
-
-            console.log(dynTree);
-            console.log(data);
 
             var secondRoot = {
                     "name": "easy1",
@@ -136,32 +123,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                     par = cur;
                 }
             }
-
-            /*var treeData = {
-                "name": "Top Level",
-                "parent": "null",
-                "children": [
-                    {
-                        "name": "Level 2: A",
-                        "parent": "Top Level",
-                        "children": [
-                            {
-                                "name": "Son of A",
-                                "parent": "Level 2: A"
-                            },
-                            {
-                                "name": "Daughter of A",
-                                "parent": "Level 2: A"
-                            }
-                        ]
-                    },
-                    {
-                        "name": "Level 2: B",
-                        "parent": "Top Level"
-                    }
-                ]
-            };*/
-
+            console.log(t2);
+            console.log(t);
               
             // ************** Generate the tree diagram	 *****************
             var margin = {top: 40, right: 120, bottom: 20, left: 120},
