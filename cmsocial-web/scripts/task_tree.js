@@ -66,6 +66,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                 'terrazzamenti': {difficulty: 5, category: 'sortings'}
             };
             var t = data.tasks;
+            console.log(t);
             for (var i = 0; i < t.length; i++) {
                 console.log(t[i]); 
                 t[i].difficulty = extra_fields[t[i].name].difficulty;
@@ -74,7 +75,7 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             console.log(dynTree);
             console.log(data);
-            //console.log(t);
+            
             var treeData = {
                 "name": "Top Level",
                 "parent": "null",
