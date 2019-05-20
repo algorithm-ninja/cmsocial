@@ -30,7 +30,7 @@ angular.module('cmsocial').controller('TaskTree', function(
             };
 
             console.log(dynTree);
-            console.log($scope.tasks);
+            console.log($scope);
             var treeData = {
                 "name": "Top Level",
                 "parent": "null",
