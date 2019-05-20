@@ -67,27 +67,7 @@ angular.module('cmsocial').controller('TaskTree', function(
             } 
             console.log(t);
             
-            var secondRoot = {
-                    "name": "easy1",
-                    "parent": "somma",
-                    "children": [
-                    ]
-            }
-            
-            var treeData = {
-                "name": "hello",
-                "parent": "null",
-                "children": [
-                {
-                    "name": "somma",
-                    "parent": "hello",
-                    "children": [
-                    secondRoot
-                    ]
-                }
-                ]
-            };
-
+           
             function onlyUnique(value, index, self) { 
                 return self.indexOf(value) === index;
             }
@@ -113,7 +93,29 @@ angular.module('cmsocial').controller('TaskTree', function(
                 return 0;
             }
 
+            t2["intro"].sort(cmp);
+            var treeData = {
+                "name": t2["intro"][0],
+                "parent": "null",
+                "children": []
+            };
+
+            var par = treeData;
+            for (var j = 1; j < t2["intro"].length; j++) {
+                var cur = {
+                    "name": t2["intro"][j]["name"],
+                    "parent": par["name"],
+                    "children": []
+                };
+                par["children"].push(cur);
+                par = cur;
+            }
+            var secondRoot = par;
+
             for (var i = 0; i < catList.length; i++) {
+                if (catList[i] == "intro") {
+                    continue;
+                }
                 t2[catList[i]].sort(cmp);
                 var par = secondRoot;
                 for (var j = 0; j < t2[catList[i]].length; j++) {
