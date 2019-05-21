@@ -26,7 +26,7 @@ angular.module('cmsocial').controller('TaskTree', function(
             var catList = []
             var cat2Tasks = {}
             for (var i = 0; i < data.tasks.length; i++) {
-                catList.push(t[i].category);
+                catList.push(data.tasks[i].category);
                 if (!(data.tasks[i].category in cat2Tasks)) {
                     cat2Tasks[data.tasks[i].category] = [];
                 }
