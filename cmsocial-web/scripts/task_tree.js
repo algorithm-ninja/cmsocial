@@ -15,70 +15,22 @@ angular.module('cmsocial').controller('TaskTree', function(
             'action' : 'list'
         })
         .success(function(data, status, headers, config) {
-            $scope.tasks = data['tasks'];
             console.log(userManager.getUser().username);
             //console.log(data.tasks);
 
-            //Static declaration of needed fields
-            var extra_fields = {
-                'hello': {difficulty: 1, category: 'intro'},
-                'somma': {difficulty: 2, category: 'intro'},
-                'easy1': {difficulty: 3, category: 'intro'},
-                'trasposta': {difficulty: 1, category: 'data structures'},
-                'socks': {difficulty: 2, category: 'data structures'},
-                'parentesi': {difficulty: 3, category: 'data structures'},
-                'matrice': {difficulty: 4, category: 'data structures'},
-                'interrogazioni': {difficulty: 5, category: 'data structures'},
-                'sunny': {difficulty: 1, category: 'graphs'},
-                'ponti': {difficulty: 2, category: 'graphs'},
-                'mincammino': {difficulty: 3, category: 'graphs'},
-                'estintori': {difficulty: 4, category: 'graphs'},
-                'tecla': {difficulty: 5, category: 'graphs'},
-                'easy3': {difficulty: 1, category: 'math'},
-                'mcd': {difficulty: 2, category: 'math'},
-                'fraction': {difficulty: 3, category: 'math'},
-                'cc': {difficulty: 4, category: 'math'},
-                'baricentro': {difficulty: 5, category: 'math'},
-                'fibonacci': {difficulty: 1, category: 'dynamic programming'},
-                'poldo': {difficulty: 2, category: 'dynamic programming'},
-                'sequenceofballs': {difficulty: 3, category: 'dynamic programming'},
-                'seti': {difficulty: 4, category: 'dynamic programming'},
-                'bitcoin2': {difficulty: 5, category: 'dynamic programming'},
-                'easy2': {difficulty: 1, category: 'brute force'},
-                'contdivisori': {difficulty: 2, category: 'brute force'},
-                'parole': {difficulty: 3, category: 'brute force'},
-                'painting': {difficulty: 4, category: 'brute force'},
-                'quasipal': {difficulty: 5, category: 'brute force'},
-                'ordina': {difficulty: 1, category: 'sortings'},
-                'hamtaro': {difficulty: 2, category: 'sortings'},
-                'dreamteam': {difficulty: 3, category: 'sortings'},
-                'annoluce': {difficulty: 4, category: 'sortings'},
-                'terrazzamenti': {difficulty: 5, category: 'sortings'}
-            };
-
             //Build the tree according to the level of the tasks
-            var t = [];
-            
-            for (var i = 0; i < data.tasks.length; i++) {
-                if (data.tasks[i].name in extra_fields) {  
-                    t.push(data.tasks[i]);
-                    t[t.length-1].difficulty = extra_fields[data.tasks[i].name].difficulty;
-                    t[t.length-1].category = extra_fields[data.tasks[i].name].category;
-                }
-            } 
-                       
             function onlyUnique(value, index, self) { 
                 return self.indexOf(value) === index;
             }
 
             var catList = []
-            var t2 = {}
-            for (var i = 0; i < t.length; i++) {
+            var cat2Tasks = {}
+            for (var i = 0; i < data.tasks.length; i++) {
                 catList.push(t[i].category);
-                if (!(t[i].category in t2)) {
-                    t2[t[i].category] = [];
+                if (!(data.tasks[i].category in cat2Tasks)) {
+                    cat2Tasks[data.tasks[i].category] = [];
                 }
-                t2[t[i].category].push(t[i]);
+                cat2Tasks[data.tasks[i].category].push(data.tasks[i]);
             }
             catList = catList.filter(onlyUnique);
             
@@ -92,17 +44,17 @@ angular.module('cmsocial').controller('TaskTree', function(
                 return 0;
             }
 
-            t2["intro"].sort(cmp);
+            cat2Tasks["intro"].sort(cmp);
             var treeData = {
-                "name": t2["intro"][0].name,
+                "name": cat2Tasks["intro"][0].name,
                 "parent": "null",
                 "children": []
             };
 
             var par = treeData;
-            for (var j = 1; j < t2["intro"].length; j++) {
+            for (var j = 1; j < cat2Tasks["intro"].length; j++) {
                 var cur = {
-                    "name": t2["intro"][j]["name"],
+                    "name": cat2Tasks["intro"][j]["name"],
                     "parent": par["name"],
                     "children": []
                 };
@@ -115,11 +67,11 @@ angular.module('cmsocial').controller('TaskTree', function(
                 if (catList[i] == "intro") {
                     continue;
                 }
-                t2[catList[i]].sort(cmp);
+                cat2Tasks[catList[i]].sort(cmp);
                 var par = secondRoot;
-                for (var j = 0; j < t2[catList[i]].length; j++) {
+                for (var j = 0; j < cat2Tasks[catList[i]].length; j++) {
                     var cur = {
-                        "name": t2[catList[i]][j]["name"],
+                        "name": cat2Tasks[catList[i]][j]["name"],
                         "parent": par["name"],
                         "children": []
                     };
