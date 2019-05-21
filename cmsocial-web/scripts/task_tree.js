@@ -16,7 +16,8 @@ angular.module('cmsocial').controller('TaskTree', function(
         })
         .success(function(data, status, headers, config) {
             $scope.tasks = data['tasks'];
-            console.log(data.tasks);
+            console.log(username);
+            //console.log(data.tasks);
 
             //Static declaration of needed fields
             var extra_fields = {
