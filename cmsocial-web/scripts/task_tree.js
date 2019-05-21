@@ -23,8 +23,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                 return self.indexOf(value) === index;
             }
 
-            var catList = []
-            var cat2Tasks = {}
+            var catList = [];
+            var cat2Tasks = {};
             for (var i = 0; i < data.tasks.length; i++) {
                 catList.push(data.tasks[i].category);
                 if (!(data.tasks[i].category in cat2Tasks)) {
@@ -43,7 +43,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                 }
                 return 0;
             }
-
+            console.log(cat2Tasks);
             cat2Tasks["intro"].sort(cmp);
             var treeData = {
                 "name": cat2Tasks["intro"][0].name,
