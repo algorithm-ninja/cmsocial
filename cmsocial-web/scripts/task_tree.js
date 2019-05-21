@@ -16,7 +16,7 @@ angular.module('cmsocial').controller('TaskTree', function(
         })
         .success(function(data, status, headers, config) {
             $scope.tasks = data['tasks'];
-            //console.log(data.tasks);
+            console.log(data.tasks);
 
             //Static declaration of needed fields
             var extra_fields = {
@@ -152,71 +152,50 @@ angular.module('cmsocial').controller('TaskTree', function(
             
             function update(source) {
             
-            // Compute the new tree layout.
-            var nodes = tree.nodes(root).reverse(),
-                links = tree.links(nodes);
-            
-            // Normalize for fixed-depth.
-            nodes.forEach(function(d) { d.y = d.depth * 100; });
-            
-            // Declare the nodes
-            var node = svg.selectAll("g.node")
-                .data(nodes, function(d) { return d.id || (d.id = ++i); });
-            
-            // Enter the nodes.
-            var nodeEnter = node.enter().append("g")
-                .attr("class", "node")
-                .attr("transform", function(d) { 
-                    return "translate(" + d.x + "," + d.y + ")"; });
+                // Compute the new tree layout.
+                var nodes = tree.nodes(root).reverse(),
+                    links = tree.links(nodes);
+                
+                // Normalize for fixed-depth.
+                nodes.forEach(function(d) { d.y = d.depth * 100; });
+                
+                // Declare the nodes
+                var node = svg.selectAll("g.node")
+                    .data(nodes, function(d) { return d.id || (d.id = ++i); });
+                
+                // Enter the nodes.
+                var nodeEnter = node.enter().append("g")
+                    .attr("class", "node")
+                    .attr("transform", function(d) { 
+                        return "translate(" + d.x + "," + d.y + ")"; });
 
-            var path1 = svg.append('path')
-                .attr("class", "circle-bg")
-                .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+                var path1 = svg.append('path')
+                    .attr("class", "circle-bg")
+                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
 
-            var path2 = svg.append('path')
-                .attr("class", "circle")
-                .attr("stroke-dasharray", "30, 100")
-                .attr("stroke", "#ff9f00")
-                .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+                var path2 = svg.append('path')
+                    .attr("class", "circle")
+                    .attr("stroke-dasharray", "30, 100")
+                    //.attr("stroke", "#ff9f00")
+                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
 
-            /*<div class="single-chart">
-                <svg viewBox="0 0 36 36" class="circular-chart orange">
-                    <path class="circle-bg"
-                    d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <path class="circle"
-                    stroke-dasharray="30, 100"
-                    d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <text x="18" y="20.35" class="percentage">30%</text>
-                </svg>
-            </div>*/
-            /*nodeEnter.append("circle")
-                .attr("r", 10)
-                .style("fill", "#fff")
-                .style("stroke", "red");*/
-            
-            nodeEnter.append("text")
-                .attr("y", function(d) { 
-                    return d.children || d._children ? -18 : 18; })
-                .attr("dy", ".35em")
-                .attr("text-anchor", "middle")
-                .text(function(d) { return d.name; })
-                .style("fill-opacity", 1);
-            
-            // Declare the links…
-            var link = svg.selectAll("path.link")
-                .data(links, function(d) { return d.target.id; });
-            
-            // Enter the links.
-            link.enter().insert("path", "g")
-                .attr("class", "link")
-                .attr("d", diagonal);
-            
+                                
+                nodeEnter.append("text")
+                    .attr("y", function(d) { 
+                        return d.children || d._children ? -18 : 18; })
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "middle")
+                    .text(function(d) { return d.name; })
+                    .style("fill-opacity", 1);
+                
+                // Declare the links…
+                var link = svg.selectAll("path.link")
+                    .data(links, function(d) { return d.target.id; });
+                
+                // Enter the links.
+                link.enter().insert("path", "g")
+                    .attr("class", "link")
+                    .attr("d", diagonal);
             }
         })
         .error(function(data, status, headers, config) {
