@@ -56,11 +56,10 @@ class WSGIHandler(gevent.wsgi.WSGIHandler):
         else:
             delta = '-'
         client_address = self.environ['REMOTE_ADDR']
-        return '%s %s %s %s' % (
-            client_address or '-',
-            (getattr(self, 'status', None) or '000').split()[0],
-            delta,
-            getattr(self, 'requestline', ''))
+        return '%s %s %s %s' % (client_address or '-',
+                                (getattr(self, 'status', None)
+                                 or '000').split()[0], delta,
+                                getattr(self, 'requestline', ''))
 
     def log_request(self):
         logger.info(self.format_request())
@@ -86,10 +85,12 @@ class APIHandler(object):
         self.router = Map([
             Rule('/files/<digest>', methods=['GET', 'POST'],
                  endpoint='dbfile'),
-            Rule('/files/<digest>/<name>', methods=['GET', 'POST'],
+            Rule('/files/<digest>/<name>',
+                 methods=['GET', 'POST'],
                  endpoint='dbfile'),
             Rule('/<target>', methods=['POST'], endpoint='jsondata')
-        ], encoding_errors='strict')
+        ],
+                          encoding_errors='strict')
         self.file_cacher = parent.file_cacher
         self.evaluation_service = parent.evaluation_service
         self.EMAIL_REG = re.compile(r'[^@]+@[^@]+\.[^@]+')
@@ -235,7 +236,8 @@ class APIHandler(object):
         info['mail_hash'] = self.hash(user.email, 'md5')
         #info['post_count'] = len(user.posts)
         info['score'] = user.social_user.score
-        info['institute'] = self.get_institute_info(user.social_user.institute_id)
+        info['institute'] = self.get_institute_info(
+            user.social_user.institute_id)
         info['first_name'] = user.first_name
         info['last_name'] = user.last_name
         info['tasks_solved'] = -1
@@ -256,12 +258,12 @@ class APIHandler(object):
             if args["name"].endswith(".pdf"):
                 # Add header to allow the official pdf.js to work
                 response.headers.add_header(b'Access-Control-Allow-Origin',
-                        b'https://mozilla.github.io')
+                                            b'https://mozilla.github.io')
             else:
                 # Don't do this on pdf files because it breaks the native pdf reader
-                response.headers.add_header(
-                    b'Content-Disposition', b'attachment',
-                    filename=args['name'])
+                response.headers.add_header(b'Content-Disposition',
+                                            b'attachment',
+                                            filename=args['name'])
             mimetype = mimetypes.guess_type(args['name'])[0]
             if mimetype is not None:
                 response.mimetype = mimetype
@@ -299,33 +301,33 @@ class APIHandler(object):
             local.resp = self.get_institute_info(institute)
         elif local.data['action'] == 'listregions':
             out = local.session.query(Region).all()
-            local.resp['regions'] = [{'id': r.id, 'name': r.name}
-                                     for r in out]
+            local.resp['regions'] = [{'id': r.id, 'name': r.name} for r in out]
         elif local.data['action'] == 'listprovinces':
             out = local.session.query(Province)\
                 .filter(Province.region_id == local.data['id']).all()
-            local.resp['provinces'] = [{'id': r.id, 'name': r.name}
-                                       for r in out]
+            local.resp['provinces'] = [{
+                'id': r.id,
+                'name': r.name
+            } for r in out]
         elif local.data['action'] == 'listcities':
             out = local.session.query(City)\
                 .filter(City.province_id == local.data['id']).all()
-            local.resp['cities'] = [{'id': r.id, 'name': r.name}
-                                    for r in out]
+            local.resp['cities'] = [{'id': r.id, 'name': r.name} for r in out]
         elif local.data['action'] == 'listinstitutes':
             out = local.session.query(Institute)\
                 .filter(Institute.city_id == local.data['id']).all()
-            local.resp['institutes'] = [{'id': r.id, 'name': r.name}
-                                        for r in out]
+            local.resp['institutes'] = [{
+                'id': r.id,
+                'name': r.name
+            } for r in out]
 
     def sso_handler(self):
         if local.user is None:
             return 'Unauthorized'
         payload = local.data['payload']
         sig = local.data['sig']
-        computed_sig = hmac.new(
-            config.secret_key.encode(),
-            payload.encode(),
-            hashlib.sha256).hexdigest()
+        computed_sig = hmac.new(config.secret_key.encode(), payload.encode(),
+                                hashlib.sha256).hexdigest()
         if computed_sig != sig:
             return 'Bad request'
         # Get nonce.
@@ -340,10 +342,8 @@ class APIHandler(object):
         # Build final url.
         res_payload = urllib.urlencode(response_data)
         res_payload = b64encode(res_payload.encode())
-        sig = hmac.new(
-            config.secret_key.encode(),
-            res_payload,
-            hashlib.sha256).hexdigest()
+        sig = hmac.new(config.secret_key.encode(), res_payload,
+                       hashlib.sha256).hexdigest()
         local.resp['parameters'] = urllib.urlencode({
             'sso': res_payload,
             'sig': sig
@@ -371,24 +371,17 @@ class APIHandler(object):
             if err is not None:
                 return err
 
-            user = User(
-                first_name=firstname,
-                last_name=lastname,
-                username=username,
-                password=token,
-                email=email
-            )
-            social_user = SocialUser(
-                access_level=6,
-                registration_time=make_datetime()
-            )
+            user = User(first_name=firstname,
+                        last_name=lastname,
+                        username=username,
+                        password=token,
+                        email=email)
+            social_user = SocialUser(access_level=6,
+                                     registration_time=make_datetime())
             contest = local.session.query(Contest)\
                 .filter(Contest.id == self.CONTEST_ID)\
                 .first()
-            participation = Participation(
-                user=user,
-                contest=contest
-            )
+            participation = Participation(user=user, contest=contest)
             social_user.user = user
             social_user.institute_id = institute
 
@@ -479,9 +472,11 @@ class APIHandler(object):
                 .order_by(desc(SocialTask.id))
 
             if 'tag' in local.data and local.data['tag'] is not None:
-                tags = local.data['tag'].split(',')[:5]  # Ignore requests with more that 5 tags
+                tags = local.data['tag'].split(
+                    ',')[:5]  # Ignore requests with more that 5 tags
                 conditions = [Tag.name == tname for tname in tags]
-                targets = local.session.query(Tag).filter(or_(*conditions)).all()
+                targets = local.session.query(Tag).filter(
+                    or_(*conditions)).all()
                 local.resp['tags'] = []
                 for tag in targets:
                     local.resp['tags'].append(tag.name)
@@ -489,8 +484,8 @@ class APIHandler(object):
 
             if 'search' in local.data and local.data['search'] is not None:
                 sq = '%%%s%%' % local.data['search']
-                query = query.filter(or_(Task.title.ilike(sq),
-                                         Task.name.ilike(sq)))
+                query = query.filter(
+                    or_(Task.title.ilike(sq), Task.name.ilike(sq)))
 
             tasks, local.resp['num'] = self.sliced_query(query)
             local.resp['tasks'] = []
@@ -500,8 +495,8 @@ class APIHandler(object):
                 task['id'] = t.id
                 task['name'] = t.name
                 task['title'] = t.title
-                #task['difficulty'] = t.difficulty
-                #task['category'] = t.category
+                task['difficulty'] = t.difficulty
+                task['category'] = t.category
 
                 if local.user is not None:
                     taskscore = local.session.query(TaskScore)\
@@ -520,7 +515,8 @@ class APIHandler(object):
                     .filter(TestScore.test_id == 10)\
                     .first()
 
-                local.resp["assessment"] = (answer is not None and answer.score >= 10)
+                local.resp["assessment"] = (answer is not None
+                                            and answer.score >= 10)
             else:
                 # Let's not bother unlogged users
                 local.resp["assessment"] = True
@@ -564,7 +560,8 @@ class APIHandler(object):
                     .filter(TestScore.test_id == 10)\
                     .first()
 
-                local.resp["assessment"] = (answer is not None and answer.score >= 10)
+                local.resp["assessment"] = (answer is not None
+                                            and answer.score >= 10)
             else:
                 # Let's not bother unlogged users
                 local.resp["assessment"] = True
@@ -585,8 +582,10 @@ class APIHandler(object):
                 .filter(TaskScore.score == 100)\
                 .order_by(TaskScore.time)\
                 .slice(0, 10).all()
-            local.resp['best'] = [{'username': b.user.user.username,
-                                   'time': b.time} for b in best]
+            local.resp['best'] = [{
+                'username': b.user.user.username,
+                'time': b.time
+            } for b in best]
         else:
             return 'Bad request'
 
@@ -637,7 +636,10 @@ class APIHandler(object):
                 return 'Task does not exist'
             else:
                 try:
-                    local.session.add(TaskTag(task=task.social_task, tag=tag, user=local.user.social_user))
+                    local.session.add(
+                        TaskTag(task=task.social_task,
+                                tag=tag,
+                                user=local.user.social_user))
                     local.session.commit()
                 except IntegrityError:
                     return 'The task already has this tag'
@@ -679,7 +681,9 @@ class APIHandler(object):
                 .filter(Testcase.dataset == task.active_dataset)\
                 .all()
 
-            local.resp['testcases'] = [{'codename': t.codename} for t in testcases]
+            local.resp['testcases'] = [{
+                'codename': t.codename
+            } for t in testcases]
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
@@ -687,7 +691,8 @@ class APIHandler(object):
                 return 'Questo task non accetta richieste di testcase.'
 
             # Make sure that the user is allowed to request
-            if datetime.utcnow() - local.user.social_user.last_help_time < timedelta(hours=1):
+            if datetime.utcnow(
+            ) - local.user.social_user.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
@@ -699,9 +704,9 @@ class APIHandler(object):
                 return "Bad request"
 
             # Log this so we can kind of "keep track" of the requests...
-            logger.info("User \"%s\" requested testcase %s for task \"%s\"." % (
-                local.user.username, local.data['testcase'], local.data['task']
-            ))
+            logger.info("User \"%s\" requested testcase %s for task \"%s\"." %
+                        (local.user.username, local.data['testcase'],
+                         local.data['task']))
             local.user.social_user.last_help_time = datetime.utcnow()
             local.user.social_user.help_count += 1
             local.session.commit()
@@ -772,7 +777,9 @@ class APIHandler(object):
                 elif q.type == 'notempty':
                     local.resp[i] = [q.score, 'correct']
                     for d in data[i].values():
-                        if not isinstance(d, list) or len(d) != 1 or d[0] is None or len(d[0]) < 1:
+                        if not isinstance(
+                                d, list) or len(d) != 1 or d[0] is None or len(
+                                    d[0]) < 1:
                             local.resp[i] = [0, 'empty']
                     continue
                 else:
@@ -800,8 +807,8 @@ class APIHandler(object):
                     if local.resp.get(i, None) is None:
                         local.resp[i] = [q.score, 'correct']
             if local.user is not None:
-                score = sum([local.resp[i][0] for i in
-                             xrange(len(test.questions))])
+                score = sum(
+                    [local.resp[i][0] for i in xrange(len(test.questions))])
                 testscore = local.session.query(TestScore)\
                     .filter(TestScore.test_id == test.id)\
                     .filter(TestScore.user_id == local.user.id).first()
@@ -876,9 +883,11 @@ class APIHandler(object):
                 fi['digest'] = f.digest
                 submission['files'].append(fi)
             result = s.get_result()
-            for i in ['compilation_outcome', 'evaluation_outcome',
-                      'compilation_stdout', 'compilation_stderr',
-                      'compilation_time', 'compilation_memory']:
+            for i in [
+                    'compilation_outcome', 'evaluation_outcome',
+                    'compilation_stdout', 'compilation_stderr',
+                    'compilation_time', 'compilation_memory'
+            ]:
                 submission[i] = getattr(result, i, None)
             if result is not None and result.score is not None:
                 submission['score'] = round(result.score, 2)
@@ -938,7 +947,8 @@ class APIHandler(object):
                 unpacked_dir = archive.unpack()
                 for name in archive.namelist():
                     filename = os.path.basename(name)
-                    body = open(os.path.join(unpacked_dir, filename), "r").read()
+                    body = open(os.path.join(unpacked_dir, filename),
+                                "r").read()
                     local.data['files'][filename] = {
                         'filename': filename,
                         'body': body
@@ -986,20 +996,16 @@ class APIHandler(object):
                                     task=task)
             for f in files:
                 digest = self.file_cacher.put_file_content(
-                    f['body'],
-                    'Submission file %s sent by %s at %d.' % (
-                        f['name'], local.user.username,
-                        make_timestamp(timestamp)))
-                local.session.add(File(f['name'],
-                                       digest,
-                                       submission=submission))
+                    f['body'], 'Submission file %s sent by %s at %d.' %
+                    (f['name'], local.user.username,
+                     make_timestamp(timestamp)))
+                local.session.add(
+                    File(f['name'], digest, submission=submission))
             local.session.add(submission)
             local.session.commit()
 
             # Notify ES
-            self.evaluation_service.new_submission(
-                submission_id=submission.id
-            )
+            self.evaluation_service.new_submission(submission_id=submission.id)
 
             # Answer with submission data
             local.resp['id'] = submission.id
@@ -1025,6 +1031,7 @@ class PracticeWebServer(Service):
     '''Service that runs the web server for practice.
 
     '''
+
     def __init__(self, shard):
         Service.__init__(self, shard=shard)
 

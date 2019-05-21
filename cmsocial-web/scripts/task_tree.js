@@ -16,7 +16,7 @@ angular.module('cmsocial').controller('TaskTree', function(
         })
         .success(function(data, status, headers, config) {
             console.log(userManager.getUser().username);
-            //console.log(data.tasks);
+            console.log(data.tasks);
 
             //Build the tree according to the level of the tasks
             function onlyUnique(value, index, self) { 
