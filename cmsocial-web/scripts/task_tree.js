@@ -2,6 +2,33 @@
 
 /* Tasks page */
 
+//Utilities
+
+
+function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+    let angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
+    let x = centerX + (radius * Math.cos(angleInRadians)); 
+    let y = centerY + (radius * Math.sin(angleInRadians));
+    return {
+        "x": x,
+        "y": y 
+    };
+}
+
+function describeArc(x, y, radius, startAngle, endAngle){
+    let start = polarToCartesian(x, y, radius, endAngle);
+    let end = polarToCartesian(x, y, radius, startAngle);
+
+    let arcSweep = endAngle - startAngle <= 180 ? "0" : "1";
+
+    let d = [
+        "M", start.x, start.y, 
+        "A", radius, radius, 0, arcSweep, 0, end.x, end.y
+    ].join(" ");
+    return d;       
+}
+
+
 angular.module('cmsocial').controller('TaskTree', function(
     $scope, $stateParams, $state, $http, notificationHub,
     userManager, l10n, API_PREFIX) {
