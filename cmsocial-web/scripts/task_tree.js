@@ -15,9 +15,6 @@ angular.module('cmsocial').controller('TaskTree', function(
             'action' : 'list'
         })
         .success(function(data, status, headers, config) {
-            console.log(data);
-            console.log(userManager.getUser().username);
-
             //Build the tree according to the level of the tasks
             function onlyUnique(value, index, self) { 
                 return self.indexOf(value) === index;
@@ -43,112 +40,248 @@ angular.module('cmsocial').controller('TaskTree', function(
                 }
                 return 0;
             }
-            console.log(cat2Tasks);
-            cat2Tasks["intro"].sort(cmp);
-            var treeData = {
-                "name": cat2Tasks["intro"][0].name,
-                "parent": "null",
-                "children": []
-            };
 
-            var par = treeData;
-            for (var j = 1; j < cat2Tasks["intro"].length; j++) {
-                var cur = {
-                    "name": cat2Tasks["intro"][j]["name"],
-                    "parent": par["name"],
-                    "children": []
+            function createNode(node) {
+                return {
+                    "node": node,
+                    "children": [],
+                    "x": 0,
+                    "y": 0,
+                    "visible": false
                 };
+            }
+
+            cat2Tasks["intro"].sort(cmp);
+            let treeData = createNode(cat2Tasks["intro"][0]);
+
+            let par = treeData;
+            for (let j = 1; j < cat2Tasks["intro"].length; j++) {
+                let cur = createNode(cat2Tasks["intro"][j]);
                 par["children"].push(cur);
                 par = cur;
             }
-            var secondRoot = par;
+            let secondRoot = par;
 
-            for (var i = 0; i < catList.length; i++) {
+            for (let i = 0; i < catList.length; i++) {
                 if (catList[i] == "intro") {
                     continue;
                 }
                 cat2Tasks[catList[i]].sort(cmp);
-                var par = secondRoot;
-                for (var j = 0; j < cat2Tasks[catList[i]].length; j++) {
-                    var cur = {
-                        "name": cat2Tasks[catList[i]][j]["name"],
-                        "parent": par["name"],
-                        "children": []
-                    };
+                let par = secondRoot;
+                for (let j = 0; j < cat2Tasks[catList[i]].length; j++) {
+                    let cur = createNode(cat2Tasks[catList[i]][j]);
                     par["children"].push(cur);
                     par = cur;
                 }
             }
-              
-            // ************** Generate the tree diagram	 *****************
-            var margin = {top: 40, right: 120, bottom: 20, left: 120},
-                width = 960 - margin.right - margin.left,
-                height = 800 - margin.top - margin.bottom;
-                
-            var i = 0;
-            
-            var tree = d3.layout.tree()
-                .size([height, width]);
-            
-            var diagonal = d3.svg.diagonal()
-                .projection(function(d) { return [d.x, d.y]; });
-            
-            var svg = d3.select("gemmadiv").append("svg")
-                .attr("width", width + margin.right + margin.left)
-                .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-            
-            var root = treeData;
-            
-            update(root);
-            
-            function update(source) {
-            
-                // Compute the new tree layout.
-                var nodes = tree.nodes(root).reverse(),
-                    links = tree.links(nodes);
-                
-                // Normalize for fixed-depth.
-                nodes.forEach(function(d) { d.y = d.depth * 100; });
-                
-                // Declare the nodes
-                var node = svg.selectAll("g.node")
-                    .data(nodes, function(d) { return d.id || (d.id = ++i); });
-                
-                // Enter the nodes.
-                var nodeEnter = node.enter().append("g")
-                    .attr("class", "node")
-                    .attr("transform", function(d) { 
-                        return "translate(" + d.x + "," + d.y + ")"; });
 
-                var path1 = svg.append('path')
-                    .attr("class", "circle-bg")
-                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
+            ///////////////////
 
-                var path2 = svg.append('path')
-                    .attr("class", "circle")
-                    .attr("stroke-dasharray", "30, 100")
-                    //.attr("stroke", "#ff9f00")
-                    .attr("d", "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831");
 
-                                
-                nodeEnter.append("text")
-                    .attr("y", function(d) { 
-                        return d.children || d._children ? -18 : 18; })
-                    .attr("dy", ".35em")
-                    .attr("text-anchor", "middle")
-                    .text(function(d) { return d.name; })
-                    .style("fill-opacity", 1);
+            var cat_to_color = {
+                'intro': '#2b7085',
+                'data structures': '#DAF7A6',
+                'graphs': '#FFC300',
+                'math': '#FF5733',
+                'dynamic programming': '#C70039',
+                'brute force': '#900C3F',
+                'sortings': '#581845'
+            };
+
+            let width =  $("#gemmadiv").width();
+            let height = window.innerHeight * 2;
+            let paddingTop = 50;
+            let nodeRadius = 20;
+            let nodeStrokeWidth = 5;
+            let linkHeight = 80;
+            let linkStrokeWidth = 5;
+            let animationDelay = 100;
+            // For the circle filling animation
+            let numFrames = 60;
+            let frameDelay = 10;
+
+            // Perdete ogni speranza o voi che leggete sta porcata
+            let timeouts = [];
+            let _setTimeout = setTimeout;
+            function myTimeout(a, b) {
+                timeouts.push(_setTimeout(a, b));
+            }
+            setTimeout = myTimeout;
+
+            var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            var svgNS = svg.namespaceURI;
+            svg.setAttribute('height', height + "px");
+            svg.setAttribute('width', width + "px");
+            svg.setAttribute('style', 'position:absolute;top:0;left:0');
+            svg.id = "mysvg";
+            document.getElementById("gemmadiv").appendChild(svg);
+            let firstDraw = true;
+            draw();
+
+            function draw() {
+                let oldwidth = width;
+                width = $("#gemmadiv").width();
+                height = paddingTop * 2 + linkHeight * 7;
+                var svg = document.getElementById("mysvg");
+                svg.setAttribute('height', height + "px");
+                svg.setAttribute('width', width + "px");
+
+                // Clear previous animation and redraw
+                if(firstDraw || width != oldwidth) {
+                    for(let i of timeouts)
+                        clearTimeout(i);
+                    timeouts = [];
+                    drawSvg();
+                }
+                firstDraw = false;
+                //animationDelay = 0;
+                //frameDelay = 0;
+            };
+            window.onresize = draw;
+            
+            function drawSvg() {
+                $("#mysvg").empty();
                 
-                // Declare the links…
-                var link = svg.selectAll("path.link")
-                    .data(links, function(d) { return d.target.id; });
-                
-                // Enter the links.
-                link.enter().insert("path", "g")
-                    .attr("class", "link")
-                    .attr("d", diagonal);
+                // This function assumes that the tree has at most a SINGLE split point
+                function visit(u, depth, siblings, childIdx, visible) {
+                    u.visible = visible;
+                    u.y = depth * linkHeight + paddingTop;
+                    //console.log(u.y); qui va bene
+                    u.x = width / (siblings + 1) * (childIdx + 1);
+                    for(let i = 0; i < u.children.length; i++) {
+                        let v = u.children[i];
+                        if(visible && u.node.score != undefined && u.node.score >= 50) {
+                            visit(v, depth + 1, Math.max(siblings, u.children.length), childIdx + i, true);
+                        }
+                        else {
+                            visit(v, depth + 1, Math.max(siblings, u.children.length), childIdx + i, false);
+                        }
+                    }
+                }
+                visit(treeData, 0, 1, 0, true);
+
+                function drawNode(node) {
+                    if (node.node.score == undefined) {
+                        node.node.score = 0;
+                    }
+
+                    // Fake node for hidden problems
+                    if(!node.visible) {
+                        // Node background
+                        let bkg = document.createElementNS(svgNS, 'circle');
+                        bkg.setAttribute("fill", "#ddd");
+                        bkg.setAttribute("fill-opacity", 1);
+                        bkg.setAttribute("cx", node.x);
+                        bkg.setAttribute("cy", node.y);
+                        bkg.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
+                        bkg.setAttribute('stroke-width', 0);
+                        svg.appendChild(bkg);
+
+                        // Node text
+                        let text = document.createElementNS(svgNS, "text");
+                        text.setAttributeNS(null,"font-size","20px");
+                        text.setAttributeNS(null,"x", node.x);
+                        text.setAttributeNS(null,"y", node.y);
+                        text.setAttribute('text-anchor', 'middle');
+                        text.setAttribute('dominant-baseline', 'central');
+                        text.textContent = '?';
+                        svg.appendChild(text);
+
+                        return;
+                    }
+
+                    // Draw links (in white)
+                    let linkPaths = [];
+                    for(let child of node.children) {
+                        console.log("drawing link from " + node.node.name + " to " + child.node.name);
+                        var path = document.createElementNS(svgNS, 'line');
+                        path.setAttribute('x1', node.x);
+                        path.setAttribute('y1', node.y);
+                        path.setAttribute('x2', child.x);
+                        path.setAttribute('y2', child.y - nodeRadius / 2);
+                        path.setAttribute('stroke', 'none');
+                        path.setAttribute('stroke-width', linkStrokeWidth);
+                        svg.appendChild(path);
+                        linkPaths.push(path);
+                    }
+
+                    // Node background
+                    let bkg = document.createElementNS(svgNS, 'circle');
+                    bkg.setAttribute("fill", "white");
+                    bkg.setAttribute("fill-opacity", 1);
+                    bkg.setAttribute("cx", node.x);
+                    bkg.setAttribute("cy", node.y);
+                    bkg.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
+                    bkg.setAttribute('stroke-width', 0);
+                    svg.appendChild(bkg);
+
+                    // Node color
+                    let color = document.createElementNS(svgNS, 'circle');
+                    color.setAttribute("stroke", cat_to_color[node.node.category]);
+                    color.setAttribute("stroke-opacity", 0.5);
+                    color.setAttribute("fill", cat_to_color[node.node.category]);
+                    color.setAttribute("fill-opacity", 0.6);
+                    color.setAttribute("cx", node.x);
+                    color.setAttribute("cy", node.y);
+                    color.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
+                    color.setAttribute('stroke-width', 0);
+                    color.setAttribute('id', node.node.name);
+                    svg.appendChild(color);
+
+                    // Node stroke
+                    let scoreAngle = 3.59999 * node.node.score;
+                    let arc = describeArc(node.x, node.y, nodeRadius, 0, 0);
+                    let stroke = document.createElementNS(svgNS, 'path');
+                    stroke.setAttribute("stroke", cat_to_color[node.node.category]);
+                    stroke.setAttribute("fill", "none");
+                    stroke.setAttribute("d", arc);
+                    stroke.setAttribute('stroke-width', nodeStrokeWidth);
+                    stroke.setAttribute('id', node.node.name);
+                    svg.appendChild(stroke);
+
+                    // Node text
+                    let text = document.createElementNS(svgNS, "text");
+                    text.setAttributeNS(null,"font-size","15px");
+                    text.setAttributeNS(null,"x", node.x);
+                    text.setAttributeNS(null,"y", node.y);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('dominant-baseline', 'central');
+                    text.textContent = node.node.name;
+                    svg.appendChild(text);
+
+                    // Node link
+                    let anchor = document.createElementNS(svgNS, "a");
+                    let link = document.createElementNS(svgNS, 'circle');
+                    link.setAttribute("fill", "white");
+                    link.setAttribute("fill-opacity", 0);
+                    link.setAttribute("cx", node.x);
+                    link.setAttribute("cy", node.y);
+                    link.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
+                    link.setAttribute('stroke-width', 0);
+                    anchor.setAttribute('href', 'https://digit.cms.di.unipi.it/#/task/' + node.node.name);
+                    anchor.appendChild(link);
+                    svg.appendChild(anchor);
+                    
+                    // Animation
+                    function updateCircle(frame) {
+                        stroke.setAttribute("d", describeArc(node.x, node.y, nodeRadius, 0, scoreAngle / numFrames * (frame + 1)));
+                        if(frame < numFrames - 1) {
+                            setTimeout(function() {
+                                updateCircle(frame + 1);
+                            }, frameDelay);
+                        }
+                        if(frame == numFrames / 2) {
+                            // Animation finished, fill in the links and draw the next nodes
+                            for(let i = 0; i < node.children.length; i++) {
+                                linkPaths[i].setAttribute('stroke', cat_to_color[node.children[i].node.category]);
+                                setTimeout(function() {drawNode(node.children[i])}, animationDelay);
+                            }
+                        }
+                    }
+                    setTimeout(function() {updateCircle(0);}, frameDelay);
+                }
+
+                drawNode(treeData);
             }
         })
         .error(function(data, status, headers, config) {
