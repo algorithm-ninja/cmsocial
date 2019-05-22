@@ -139,7 +139,6 @@ angular.module('cmsocial').controller('TaskTree', function(
             var svgNS = svg.namespaceURI;
             svg.setAttribute('height', height + "px");
             svg.setAttribute('width', width + "px");
-            svg.setAttribute('style', 'position:absolute;top:0;left:0');
             svg.id = "mysvg";
             document.getElementById("gemmadiv").appendChild(svg);
             let firstDraw = true;
