@@ -107,7 +107,7 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             var cat_to_color = {
                 'intro': '#2b7085',
-                'data structures': '#DAF7A6',
+                'data structures': '#72ae92',
                 'graphs': '#FFC300',
                 'math': '#FF5733',
                 'dynamic programming': '#C70039',
@@ -116,16 +116,15 @@ angular.module('cmsocial').controller('TaskTree', function(
             };
 
             let width =  $("#gemmadiv").width();
-            let height = window.innerHeight * 2;
-            let paddingTop = 50;
-            let nodeRadius = 20;
-            let nodeStrokeWidth = 5;
-            let linkHeight = 80;
-            let linkStrokeWidth = 5;
-            let animationDelay = 100;
+            let textSize = 15;
+            let animationDelay = 10;
             // For the circle filling animation
             let numFrames = 60;
-            let frameDelay = 10;
+            let frameDelay = 5;
+            let nodeStrokeWidth = 5;
+            let linkStrokeWidth = 2.5;
+
+            let height, nodeRadius, paddingTop, linkHeight;
 
             // Perdete ogni speranza o voi che leggete sta porcata
             let timeouts = [];
@@ -141,19 +140,49 @@ angular.module('cmsocial').controller('TaskTree', function(
             svg.setAttribute('width', width + "px");
             svg.id = "mysvg";
             document.getElementById("gemmadiv").appendChild(svg);
+
+            // Fake svg element to calculate maximum text width
+            var _svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            _svg.setAttribute('height', "1px");
+            _svg.setAttribute('width', "200px");
+            let text = document.createElementNS(_svg.namespaceURI, "text");
+            text.setAttribute("font-size",textSize + "px");
+            text.setAttribute('stroke', 'white');
+            text.setAttribute('class', 'treeText');
+            text.setAttribute("x", 20);
+            text.setAttribute("y", 20);
+            _svg.appendChild(text);
+            document.getElementById("gemmadiv").appendChild(_svg);
+
+            function calcNodeSize() {
+                let maxW = 0;
+                for(let task of data.tasks) {
+                    text.textContent = task.name;
+                    maxW = Math.max(maxW, text.getBoundingClientRect().width);
+                    console.log(task.name, maxW);
+                }
+                nodeRadius = maxW / 2 * 1.1;
+                text.textContent = '';
+            }
+
             let firstDraw = true;
             draw();
 
             function draw() {
                 let oldwidth = width;
                 width = $("#gemmadiv").width();
-                height = paddingTop * 2 + linkHeight * 7;
-                var svg = document.getElementById("mysvg");
-                svg.setAttribute('height', height + "px");
-                svg.setAttribute('width', width + "px");
 
                 // Clear previous animation and redraw
                 if(firstDraw || width != oldwidth) {
+                    calcNodeSize();
+
+                    paddingTop = nodeRadius + nodeStrokeWidth;
+                    linkHeight = 2 * (nodeRadius + nodeStrokeWidth) + nodeRadius;
+                    height = paddingTop * 2 + linkHeight * 7;
+                    var svg = document.getElementById("mysvg");
+                    svg.setAttribute('height', height + "px");
+                    svg.setAttribute('width', width + "px");
+
                     for(let i of timeouts)
                         clearTimeout(i);
                     timeouts = [];
@@ -199,15 +228,17 @@ angular.module('cmsocial').controller('TaskTree', function(
                         bkg.setAttribute("fill-opacity", 1);
                         bkg.setAttribute("cx", node.x);
                         bkg.setAttribute("cy", node.y);
-                        bkg.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
-                        bkg.setAttribute('stroke-width', 0);
+                        bkg.setAttribute("r", nodeRadius);
+                        bkg.setAttribute('stroke-width', nodeStrokeWidth);
+                        bkg.setAttribute('stroke', 'white');
                         svg.appendChild(bkg);
 
                         // Node text
                         let text = document.createElementNS(svgNS, "text");
-                        text.setAttributeNS(null,"font-size","20px");
+                        text.setAttributeNS(null,"font-size", (textSize * 4 / 3) + "px");
                         text.setAttributeNS(null,"x", node.x);
                         text.setAttributeNS(null,"y", node.y);
+                        text.setAttribute('class', 'treeText');
                         text.setAttribute('text-anchor', 'middle');
                         text.setAttribute('dominant-baseline', 'central');
                         text.textContent = '?';
@@ -237,7 +268,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                     bkg.setAttribute("fill-opacity", 1);
                     bkg.setAttribute("cx", node.x);
                     bkg.setAttribute("cy", node.y);
-                    bkg.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
+                    bkg.setAttribute("r", nodeRadius + nodeStrokeWidth);
                     bkg.setAttribute('stroke-width', 0);
                     svg.appendChild(bkg);
 
@@ -249,7 +280,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                     color.setAttribute("fill-opacity", 0.6);
                     color.setAttribute("cx", node.x);
                     color.setAttribute("cy", node.y);
-                    color.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
+                    color.setAttribute("r", nodeRadius - nodeStrokeWidth / 2);
                     color.setAttribute('stroke-width', 0);
                     color.setAttribute('id', node.node.name);
                     svg.appendChild(color);
@@ -267,9 +298,10 @@ angular.module('cmsocial').controller('TaskTree', function(
 
                     // Node text
                     let text = document.createElementNS(svgNS, "text");
-                    text.setAttributeNS(null,"font-size","15px");
-                    text.setAttributeNS(null,"x", node.x);
-                    text.setAttributeNS(null,"y", node.y);
+                    text.setAttribute("font-size", textSize + "px");
+                    text.setAttribute("x", node.x);
+                    text.setAttribute("y", node.y);
+                    text.setAttribute('class', 'treeText');
                     text.setAttribute('text-anchor', 'middle');
                     text.setAttribute('dominant-baseline', 'central');
                     text.textContent = node.node.name;
