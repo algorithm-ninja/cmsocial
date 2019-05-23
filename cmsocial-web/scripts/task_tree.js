@@ -116,15 +116,21 @@ angular.module('cmsocial').controller('TaskTree', function(
             };
 
             let width =  $("#gemmadiv").width();
+
+            //For the choice of height overflow
+            let heightOverflow = 2;
+
             let textSize = 15;
-            let animationDelay = 10;
+            let animationDelay = 100;
             // For the circle filling animation
             let numFrames = 60;
-            let frameDelay = 5;
+            let frameDelay = 15;
             let nodeStrokeWidth = 5;
             let linkStrokeWidth = 2.5;
 
             let height, nodeRadius, paddingTop, linkHeight;
+            //This variable is used to print only the first letter
+            firstLetter = false;
 
             // Perdete ogni speranza o voi che leggete sta porcata
             let timeouts = [];
@@ -133,37 +139,40 @@ angular.module('cmsocial').controller('TaskTree', function(
                 timeouts.push(_setTimeout(a, b));
             }
             setTimeout = myTimeout;
-
-            var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            var svgNS = svg.namespaceURI;
-            svg.setAttribute('height', height + "px");
-            svg.setAttribute('width', width + "px");
-            svg.id = "mysvg";
-            document.getElementById("gemmadiv").appendChild(svg);
-
-            // Fake svg element to calculate maximum text width
-            var _svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            _svg.setAttribute('height', "1px");
-            _svg.setAttribute('width', "200px");
-            let text = document.createElementNS(_svg.namespaceURI, "text");
-            text.setAttribute("font-size",textSize + "px");
-            text.setAttribute('stroke', 'white');
-            text.setAttribute('class', 'treeText');
-            text.setAttribute("x", 20);
-            text.setAttribute("y", 20);
-            _svg.appendChild(text);
-            document.getElementById("gemmadiv").appendChild(_svg);
-
+            
+            /**
+             * This function computes the dimension of the node according to the
+             * longest name of a task in the tasktree
+             */
             function calcNodeSize() {
+                // Fake svg element to calculate maximum text width
+                var _svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                _svg.setAttribute('height', "1px");
+                _svg.setAttribute('width', "200px");
+                let text = document.createElementNS(_svg.namespaceURI, "text");
+                text.setAttribute("font-size",textSize + "px");
+                text.setAttribute('stroke', 'white');
+                text.setAttribute('class', 'treeText');
+                text.setAttribute("x", 20);
+                text.setAttribute("y", 20);
+                _svg.appendChild(text);
+                document.getElementById("gemmadiv").appendChild(_svg);
                 let maxW = 0;
                 for(let task of data.tasks) {
                     text.textContent = task.name;
+                    //console.log(task.name, task.name.length);
                     maxW = Math.max(maxW, text.getBoundingClientRect().width);
-                    console.log(task.name, maxW);
                 }
                 nodeRadius = maxW / 2 * 1.1;
                 text.textContent = '';
             }
+
+            var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            var svgNS = svg.namespaceURI;
+            //svg.setAttribute('height', height + 'px');
+            //svg.setAttribute('width', width + 'px');
+            svg.id = "mysvg";
+            document.getElementById("gemmadiv").appendChild(svg);
 
             let firstDraw = true;
             draw();
@@ -189,31 +198,53 @@ angular.module('cmsocial').controller('TaskTree', function(
                     drawSvg();
                 }
                 firstDraw = false;
-                //animationDelay = 0;
-                //frameDelay = 0;
             };
             window.onresize = draw;
             
             function drawSvg() {
                 $("#mysvg").empty();
-                
                 // This function assumes that the tree has at most a SINGLE split point
                 function visit(u, depth, siblings, childIdx, visible) {
                     u.visible = visible;
                     u.y = depth * linkHeight + paddingTop;
-                    //console.log(u.y); qui va bene
                     u.x = width / (siblings + 1) * (childIdx + 1);
+                    let d = 0;
                     for(let i = 0; i < u.children.length; i++) {
                         let v = u.children[i];
                         if(visible && u.node.score != undefined && u.node.score >= 50) {
-                            visit(v, depth + 1, Math.max(siblings, u.children.length), childIdx + i, true);
+                            d = visit(v, depth + 1, Math.max(siblings, u.children.length), childIdx + i, true);
                         }
                         else {
-                            visit(v, depth + 1, Math.max(siblings, u.children.length), childIdx + i, false);
+                            let discard = visit(v, depth + 1, Math.max(siblings, u.children.length), childIdx + i, false);
                         }
                     }
+                    return Math.max(d, depth);
                 }
-                visit(treeData, 0, 1, 0, true);
+                //The number of levels is maxDepth + 1 + 1(for the first hidden node)
+                let maxDepth = visit(treeData, 0, 1, 0, true);
+                //We are ready to compute the true height
+                let trueHeight = paddingTop * 2 + linkHeight * (maxDepth+2);
+                svg.setAttribute('height', trueHeight + "px");
+                //If the total height overflows the window height, write only first letter
+                console.log("svg height: " + height);
+                while (trueHeight > heightOverflow * window.innerHeight) {
+                    console.log("actual height: " + trueHeight);
+
+                    firstLetter = true;
+                    nodeRadius = nodeRadius/2;
+                    paddingTop = nodeRadius + nodeStrokeWidth;
+                    linkHeight = 2 * (nodeRadius + nodeStrokeWidth) + nodeRadius;
+                    //height = paddingTop * 2 + linkHeight * 7;
+                    trueHeight = paddingTop * 2 + linkHeight * (maxDepth+2);
+                }
+                if (firstLetter) {
+                    //console.log(height);
+                    svg.setAttribute('height', trueHeight + "px");
+                    //var svg = document.getElementById("mysvg");
+                    svg.setAttribute('width', width + "px");
+                    //Assign new positions
+                    maxDepth = visit(treeData, 0, 1, 0, true);
+                }
 
                 function drawNode(node) {
                     if (node.node.score == undefined) {
@@ -250,7 +281,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                     // Draw links (in white)
                     let linkPaths = [];
                     for(let child of node.children) {
-                        console.log("drawing link from " + node.node.name + " to " + child.node.name);
+                        //console.log("drawing link from " + node.node.name + " to " + child.node.name);
                         var path = document.createElementNS(svgNS, 'line');
                         path.setAttribute('x1', node.x);
                         path.setAttribute('y1', node.y);
@@ -304,7 +335,10 @@ angular.module('cmsocial').controller('TaskTree', function(
                     text.setAttribute('class', 'treeText');
                     text.setAttribute('text-anchor', 'middle');
                     text.setAttribute('dominant-baseline', 'central');
-                    text.textContent = node.node.name;
+                    if (firstLetter)
+                        text.textContent = node.node.name[0].toUpperCase();
+                    else
+                        text.textContent = node.node.name;
                     svg.appendChild(text);
 
                     // Node link
@@ -323,6 +357,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                     // Animation
                     function updateCircle(frame) {
                         stroke.setAttribute("d", describeArc(node.x, node.y, nodeRadius, 0, scoreAngle / numFrames * (frame + 1)));
+                        //scroll it into view
+                        //stroke.scrollIntoView({behavior: "smooth", block: "nearest"});
                         if(frame < numFrames - 1) {
                             setTimeout(function() {
                                 updateCircle(frame + 1);
@@ -332,7 +368,8 @@ angular.module('cmsocial').controller('TaskTree', function(
                             // Animation finished, fill in the links and draw the next nodes
                             for(let i = 0; i < node.children.length; i++) {
                                 linkPaths[i].setAttribute('stroke', cat_to_color[node.children[i].node.category]);
-                                setTimeout(function() {drawNode(node.children[i])}, animationDelay);
+                                setTimeout(function() {
+                                    drawNode(node.children[i])}, animationDelay);
                             }
                         }
                     }
