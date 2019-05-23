@@ -130,7 +130,7 @@ angular.module('cmsocial').controller('TaskTree', function(
 
             let height, nodeRadius, paddingTop, linkHeight;
             //This variable is used to print only the first letter
-            firstLetter = false;
+            let firstLetter = false;
 
             // Perdete ogni speranza o voi che leggete sta porcata
             let timeouts = [];
