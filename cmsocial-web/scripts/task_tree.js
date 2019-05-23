@@ -226,9 +226,9 @@ angular.module('cmsocial').controller('TaskTree', function(
                 let trueHeight = paddingTop * 2 + linkHeight * (maxDepth+2);
                 svg.setAttribute('height', trueHeight + "px");
                 //If the total height overflows the window height, write only first letter
-                console.log("svg height: " + height);
+                //console.log("svg height: " + height);
                 while (trueHeight > heightOverflow * window.innerHeight) {
-                    console.log("actual height: " + trueHeight);
+                    //console.log("actual height: " + trueHeight);
 
                     firstLetter = true;
                     nodeRadius = nodeRadius/2;
