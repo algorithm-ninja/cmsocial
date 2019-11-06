@@ -325,7 +325,7 @@ class APIHandler(object):
             return 'Username is invalid'
         else:
             user = local.session.query(User)\
-                .filter(User.username == username).first()
+                .filter(User.username.ilike(username)).first()
             if user is not None:
                 return 'This username is not available'
 
@@ -713,10 +713,9 @@ class APIHandler(object):
             except IntegrityError:
                 return "Participation already exists"
         elif local.data['action'] == 'login':
-            try:
-                username = local.data['username']
-                password = local.data['password']
-            except KeyError:
+            username = local.data.get('username', None)
+            password = local.data.get('password', None)
+            if username is None or password is None:
                 logger.warning('Missing parameter')
                 return 'Bad request'
 
