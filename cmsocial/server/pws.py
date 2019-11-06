@@ -691,10 +691,9 @@ class APIHandler(object):
             except IntegrityError:
                 return "Participation already exists"
         elif local.data['action'] == 'login':
-            try:
-                username = local.data['username']
-                password = local.data['password']
-            except KeyError:
+            username = local.data.get('username', None)
+            password = local.data.get('password', None)
+            if username is None or password is None:
                 logger.warning('Missing parameter')
                 return 'Bad request'
 
