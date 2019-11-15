@@ -178,7 +178,7 @@ angular.module('cmsocial')
       "C11 / gcc": "C",
       "C++11 / g++": "C++",
       "Pascal / fpc": "Pascal",
-      "Python 2 / CPython": "Python"
+      "Python 3 / CPython": "Python"
     };
     $scope.languages = [];
     contestManager.getContestPromise().then(function(response) {
