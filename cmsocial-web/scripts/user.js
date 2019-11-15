@@ -35,9 +35,15 @@ angular.module('cmsocial')
           'action': 'me'
         })
         .success(function(data, status, headers, config) {
-          if (data.success === 0)
+          if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
-          else {
+
+            // Remove cookie stuck
+            $cookies.remove('token', {
+              domain: contestManager.getContest().cookie_domain,
+              path: '/'
+            });
+          } else {
             user = data["user"];
             contestManager.refreshContest();
           }
