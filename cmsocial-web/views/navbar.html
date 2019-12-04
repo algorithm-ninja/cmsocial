@@ -25,7 +25,7 @@
         </li>
         <li ng-show="me.isLogged()" class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown">
-            <i class="fa fa-archive fa-lg"></i> Problemi di programmazione <b class="caret"></b>
+            <i class="fa fa-archive fa-lg"></i> Task <b class="caret"></b>
           </a>
           <ul class="dropdown-menu">
             <li><a ui-sref="tasklist.page({pageNum: 1})"><i class="fa fa-list-ol fa-fw"></i> Tutti i problemi</a></li>
@@ -35,6 +35,11 @@
           </ul>
         </li>
         <li ng-show="me.isLogged()">
+          <a ui-sref="tasktree">
+            <i class="fa fa-code-fork fa-lg"></i> Mappa dei task
+          </a>
+        </li>
+        <li ng-show="false && me.isLogged()">
           <a ui-sref="tests">
             <i class="fa fa-pencil fa-fw"></i> Quiz
           </a>

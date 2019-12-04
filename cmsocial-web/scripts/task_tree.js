@@ -350,7 +350,7 @@ angular.module('cmsocial').controller('TaskTree', function(
                     link.setAttribute("cy", node.y);
                     link.setAttribute("r", nodeRadius + nodeStrokeWidth / 2);
                     link.setAttribute('stroke-width', 0);
-                    anchor.setAttribute('href', 'https://digit.cms.di.unipi.it/#/task/' + node.node.name);
+                    anchor.setAttribute('href', 'https://digit.olinfo.it/#/task/' + node.node.name);
                     anchor.appendChild(link);
                     svg.appendChild(anchor);
                     

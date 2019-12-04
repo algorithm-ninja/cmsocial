@@ -109,7 +109,7 @@ angular.module('cmsocial')
 
             if (!result.data['assessment'] && !result.data['help_available']) {
                // redirect to the task list
-                location.replace("https://digit.cms.di.unipi.it/#/tasks/1");
+                location.replace("https://digit.olinfo.it/#/tasks/1");
             }
         },
         function(result) {
