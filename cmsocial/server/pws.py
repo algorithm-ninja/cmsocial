@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import ConfigParser
 import hashlib
 import hmac
 import io
@@ -16,6 +15,7 @@ import tempfile
 import traceback
 import urllib
 from base64 import b64decode, b64encode
+from configparser import ConfigParser
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from shutil import copyfileobj, rmtree
@@ -61,7 +61,7 @@ monkey.patch_all()
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
 
-config = ConfigParser.SafeConfigParser()
+config = ConfigParser()
 config.read('/usr/local/etc/cmsocial.ini')
 
 
@@ -1006,7 +1006,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     lt.task.social_task.access_level = lesson.access_level
                     local.session.add(lt.task)
                 local.session.commit()
-            except KeyError, ValueError:
+            except (KeyError, ValueError):
                 return 'Bad Request'
         elif local.data['action'] == 'delete':
             if local.access_level != 0:
@@ -1029,7 +1029,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                         .filter(Task.num > tn).all():
                         t.num -= 1
                 local.session.commit()
-            except KeyError, ValueError:
+            except (KeyError, ValueError):
                 return 'Bad Request'
         elif local.data['action'] == 'new':
             if local.access_level != 0:
@@ -1076,7 +1076,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     .filter(Material.id == local.data['id']).first()
                 self.update_from_data(material, 'text', 'title', 'access_level')
                 local.session.commit()
-            except KeyError, ValueError:
+            except (KeyError, ValueError):
                 return 'Bad Request'
         # elif local.data['action'] == 'swap':
         #     if local.access_level != 0:
@@ -1101,7 +1101,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     .filter(Material.id == local.data['id']).first()
                 local.session.delete(material)
                 local.session.commit()
-            except KeyError, ValueError:
+            except (KeyError, ValueError):
                 return 'Bad Request'
         elif local.data['action'] == 'new':
             if local.access_level != 0:
