@@ -508,7 +508,7 @@ class APIHandler(object):
                 local.resp['tasks'].append(task)
 
             # Add information about assessment test!
-            if local.user is not None:
+            if False and local.user is not None:
                 answer = local.session.query(TestScore)\
                     .filter(TestScore.user_id == local.user.id)\
                     .filter(TestScore.test_id == 10)\
