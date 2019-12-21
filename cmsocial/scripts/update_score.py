@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Thanks to Federico Glaudo <dario2994@gmail.com> for the scoring algorithm
 
 # Algorithm description:

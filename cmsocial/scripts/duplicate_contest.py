@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import argparse
 import sys
 from cms.db import SessionGen, Task, Contest, Participation, User, engine, Dataset, Testcase, \
@@ -38,7 +36,7 @@ def recursive_clone(session, cls, tree, flt, edit, backedit):
     objects = objects.order_by(cls.id).all()
 
     if verbose:
-        print "Cloning %d %s" % (len(objects), cls.__name__)
+        print("Cloning %d %s" % (len(objects), cls.__name__))
 
     backeditable_cols = []
     for k, v in backedit.iteritems():
@@ -154,8 +152,8 @@ def main():
         with session.no_autoflush:
             recursive_clone(session, Contest, clone_tree, clone_filter, clone_edit, clone_backedit)
             if dryrun:
-                print "Dry run requested, rolling back changes."
+                print("Dry run requested, rolling back changes.")
                 session.rollback()
             else:
-                print "Everything OK, committing..."
+                print("Everything OK, committing...")
                 session.commit()

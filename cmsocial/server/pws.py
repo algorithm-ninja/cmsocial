@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import argparse
 import hashlib
 import hmac
@@ -323,6 +321,7 @@ class APIHandler(object):
     def hash(self, string, algo='sha256'):
         if string is None:
             string = ''
+        string = string.encode('utf-8')
         sha = getattr(hashlib, algo)()
         sha.update(string)
         return sha.hexdigest()
@@ -750,8 +749,8 @@ class APIHandler(object):
                 query = query\
                     .filter(SocialUser.institute_id == local.data['institute'])
             participations, local.resp['num'] = self.sliced_query(query)
-            local.resp['users'] = map(
-                self.get_participation_info, participations)
+            local.resp['users'] = list(map(
+                self.get_participation_info, participations))
         elif local.data['action'] == 'update':
             if local.user is None:
                 return 'Unauthorized'
@@ -891,7 +890,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                               'recaptcha_public_key', 'recaptcha_secret_key',
                               'mail_server', 'mail_username', 'mail_password',
                               'mail_from', menu='menu_on_db')
-                local.resp['all_languages'] = map(lambda x: x.name, LANGUAGES)
+                local.resp['all_languages'] = list(map(lambda x: x.name, LANGUAGES))
                 if local.resp['menu_on_db'] is not None:
                     local.resp['menu_on_db'] = \
                         json.loads(local.resp['menu_on_db'])

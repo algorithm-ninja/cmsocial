@@ -22,6 +22,8 @@ tornado = "<5"
 jinja2 = "*"
 pyxdg = "*"
 patool = "*"
+psutil = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.6"
