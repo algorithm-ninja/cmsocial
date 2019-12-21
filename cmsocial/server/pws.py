@@ -420,14 +420,14 @@ class APIHandler(object):
         for field in args:
             if field in local.data:
                 setattr(obj, field, local.data[field])
-        for field, data_field in kwargs.iteritems():
+        for field, data_field in kwargs.items():
             if data_field in local.data:
                 setattr(obj, field, local.data[data_field])
 
     def add_info(self, obj, dct, *args, **kwargs):
         for field in args:
             dct[field] = getattr(obj, field)
-        for field, data_field in kwargs.iteritems():
+        for field, data_field in kwargs.items():
             dct[data_field] = getattr(obj, field)
 
     # Handlers that do not require JSON data
@@ -1182,13 +1182,13 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['title'] = t.title
             local.resp['help_available'] = t.social_task.help_available
             local.resp['statements'] =\
-                dict([(l, s.digest) for l, s in t.statements.iteritems()])
+                dict([(l, s.digest) for l, s in t.statements.items()])
             local.resp['submission_format'] =\
                 [sfe.filename for sfe in t.submission_format]
             for i in ['time_limit', 'memory_limit', 'task_type']:
                 local.resp[i] = getattr(t.active_dataset, i)
             att = []
-            for (name, obj) in t.attachments.iteritems():
+            for (name, obj) in t.attachments.items():
                 att.append((name, obj.digest))
             local.resp['attachments'] = att
             local.resp['tags'] = []
@@ -1509,7 +1509,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 submission['task_id'] = s.task_id
                 submission['timestamp'] = make_timestamp(s.timestamp)
                 submission['files'] = []
-                for name, f in s.files.iteritems():
+                for name, f in s.files.items():
                     fi = dict()
                     if s.language is None:
                         fi['name'] = name
@@ -1538,7 +1538,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             submission['timestamp'] = make_timestamp(s.timestamp)
             submission['language'] = s.language
             submission['files'] = []
-            for name, f in s.files.iteritems():
+            for name, f in s.files.items():
                 fi = dict()
                 if s.language is None:
                     fi['name'] = name
@@ -1617,7 +1617,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             else:
                 files_sent = \
                     dict([(k, self.decode_file(v))
-                          for k, v in local.data['files'].iteritems()])
+                          for k, v in local.data['files'].items()])
 
             # TODO: implement partial submissions (?)
 
@@ -1677,7 +1677,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['evaluation_outcome'] = None
             local.resp['score'] = None
             local.resp['files'] = []
-            for name, f in submission.files.iteritems():
+            for name, f in submission.files.items():
                 fi = dict()
                 if submission.language is None:
                     fi['name'] = name
