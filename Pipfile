@@ -8,7 +8,7 @@ verify_ssl = true
 [packages]
 alembic = "==0.8.4"
 bcrypt = "==3.1.1"
-cms = {editable = true,git = "git://github.com/cms-dev/cms.git",ref = "master"}
+cms = {editable = true,git = "git://github.com/cms-dev/cms.git",ref = "d4c9e926bd52d8022069c417b206b0882ef4d1ba"}
 SQLAlchemy = "==0.9.10"
 PyJWT = "==1.4.0"
 gevent = "<1.3"
