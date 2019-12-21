@@ -1552,18 +1552,17 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             if result is not None and result.score is not None:
                 submission['score'] = round(result.score, 2)
             if result is not None and result.score_details is not None:
-                tmp = json.loads(result.score_details)
-                if len(tmp) > 0 and 'text' in tmp[0]:
+                if len(result.score_details) > 0 and 'text' in result.score_details[0]:
                     subt = dict()
-                    subt['testcases'] = tmp
+                    subt['testcases'] = result.score_details
                     subt['score'] = submission['score']
                     subt['max_score'] = 100
                     submission['score_details'] = [subt]
                 else:
-                    submission['score_details'] = tmp
+                    submission['score_details'] = result.score_details
                 for subtask in submission['score_details']:
                     for testcase in subtask['testcases']:
-                        data = json.loads(testcase['text'])
+                        data = testcase['text']
                         testcase['text'] = data[0] % tuple(data[1:])
             else:
                 submission['score_details'] = None
@@ -1622,15 +1621,15 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             # Detect language
             files = []
             sub_lang = None
-            for sfe in task.submission_format:
-                f = files_sent.get(sfe.filename)
+            for filename in task.submission_format:
+                f = files_sent.get(filename)
                 if f is None:
                     return 'Some files are missing!'
-                if len(f['body']) > config.get("core", "max_submission_length"):
+                if len(f['body']) > int(config.get("core", "max_submission_length")):
                     return 'The files you sent are too big!'
-                f['name'] = sfe.filename
+                f['name'] = filename
                 files.append(f)
-                if sfe.filename.endswith('.%l'):
+                if filename.endswith('.%l'):
                     language = None
                     for ext in SOURCE_EXTS:
                         l = filename_to_language(ext)
