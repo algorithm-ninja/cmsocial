@@ -7,6 +7,16 @@ body {
   padding-bottom: 20px;
 }
 
+.btn-separator:after {
+  content: ' ';
+  display: block;
+  float: left;
+  background: #ADADAD;
+  margin: 0 10px;
+  height: 34px;
+  width: 1px;
+}
+
 .wider-modal {
   width: 700px;
 }
@@ -68,8 +78,19 @@ li.new {
 }
 
 .signin-form {
-  width: 250px;
+  width: 300px;
   padding: 15px;
+  padding-bottom: 8px;
+}
+
+.navbar label {
+  font-weight: 100;
+}
+
+@media only screen and (max-width : 768px) {
+  .navbar label {
+    color: #9d9d9d;
+  }
 }
 
 /* Notification alerts */
@@ -123,6 +144,19 @@ li.new {
 
 .badge-wrong {
   background-color: #FA5555;
+}
+
+h3 > .badge {
+  float: right;
+}
+
+.public-toggle, .delete-lesson {
+  float: left;
+  margin-right: 5px;
+}
+
+.log-view {
+    max-height: 300px;
 }
 
 .correct, .correct.list-group-item {
@@ -230,33 +264,6 @@ ul.nav-tabs > li > a {
   color: #414141;
 }
 
-/* PMs */
-
-.talkpage .sidebar, .talkpage .mainbar {
-  border-bottom: 1px solid #DDD;
-}
-
-.talkpage .editor-forum {
-  min-height: 120px;
-}
-
-.talklist .img-thumbnail {
-  float: left;
-}
-
-.talklist .list-group-item {
-  height: 70px;
-}
-
-.talklist .list-group-item > div {
-  padding-left: 10px;
-  float: left;
-}
-
-.talklist .list-group-item.new-message {
-  background-color: #C1E4F8;
-}
-
 /* Submissions */
 
 #submission_detail .modal-body {
@@ -278,12 +285,6 @@ ul.nav-tabs > li > a {
   position: relative;
   margin: auto;
   width: 200px;
-}
-
-.avatar {
-  width: 200px;
-  height: 200px;
-  display: block;
 }
 
 .avatar-loader {
@@ -536,6 +537,11 @@ table.submissions th {
 }
 
 /* Ranking page */
+.ranking span[data-field='number'] {
+    margin-right: 10px;
+    color: #444;
+}
+
 .ranking .user-thumbnail {
     margin-right: 10px;
     width: 40px;

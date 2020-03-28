@@ -14,19 +14,13 @@
       </span>
       <br />
       <span>
-        <i class="fa fa-trophy fa-lg"></i> {{user.score}} punti
+        <i class="fa fa-star fa-lg"></i> {{user.score}} pt
       </span>
       <br />
-<!--
-      <span ng-if="!isMe()">
-        <i class="fa fa-comment fa-lg"></i> <a ui-sref="talkRedirect({userId: myName(), recipientName: user.username})">{{'Send message' | l10n}}</a>
-        <br />
-      </span>
--->
     </div>
     <div class="col-xs-6">
-      <div ng-if="isMe()" class="pull-right well well-lg">
-        <a href="http://gravatar.com/emails/" target="_blank" class="avatar">
+      <div ng-if="isMe()" class="pull-right well">
+        <a href="http://gravatar.com/emails/" target="_blank">
           <img ng-show="user.mail_hash" class="my-tooltip avatar img-thumbnail"
                data-toggle="tooltip" data-placement="bottom"
                title="{{'Change your avatar at gravatar.com' | l10n}}"

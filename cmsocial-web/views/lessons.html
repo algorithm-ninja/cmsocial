@@ -1,0 +1,45 @@
+<div class="container">
+  <div class="row container">
+    <div>
+      <div class="well" ng-if="userManager.getUser().access_level == 0">
+        {{"Here you can upload new lessons. You should send a single .zip file, containing one or more folders with a name that starts with 'Lezione '. Each folder should contain only folders that contain an exercise. Each exercise folder must contain a certain number of files named 'input%d.txt', the same amount of files named 'output%d.txt', a file named 'testo.pdf' and a file named 'testo.tex'. This last file should contain a '\\title{task_title}' line." | l10n}}
+      </div>
+      <div class="row container" ng-if="userManager.getUser().access_level == 0">
+        <form class="col-md-4 form-horizontal" ng-submit="loadFiles()" id="zipform" class="pull-right">
+          <div class="form-group">
+            <label class="control-label" for="zipfile"><i class="fa fa-floppy-o"></i> {{'Lesson file' | l10n}}</label>
+            <input class="form-control" type="file" id="zipfile" name="submission"/>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="form-control btn btn-success"><i class="fa" ng-class="{'fa-spin': !submitCompleted, 'fa-paper-plane': submitCompleted, 'fa-circle-o-notch': !submitCompleted}"></i> {{'Submit' | l10n}}</button>
+          </div>
+        </form>
+      </div>
+      <pre class="row well log-view" ng-if="userManager.getUser().access_level == 0 && lessonLog != ''">
+        {{lessonLog}}
+      </pre>
+      <hr>
+
+      <div ng-repeat="lesson in lessons">
+        <span ng-if="userManager.getUser().access_level == 0" class="public-toggle">Public <input type="checkbox" ng-model="lesson.access_level" ng-true-value="7" ng-false-value="0" ng-change="togglePublic(lesson)"/></span>
+        <span ng-if="userManager.getUser().access_level == 0" class="delete-lesson"><input class="btn btn-danger" type="button" ng-click="deleteLesson(lesson)" value="Delete"/></span>
+        <h3 role="button" ng-click="lesson.visible = !lesson.visible">
+          <i class="fa fa-angle-right" ng-if="!lesson.visible"></i>
+          <i class="fa fa-angle-down" ng-if="lesson.visible"></i>
+          {{lesson.title}}
+          <span ng-if="lesson.score == 0" class="badge badge-wrong">0 / {{lesson.total_score}}</span>
+          <span ng-if="lesson.score > 0 && lesson.score < lesson.total_score" class="badge badge-partial">{{lesson.score}} / {{lesson.total_score}}</span>
+          <span ng-if="lesson.score == lesson.total_score" class="badge badge-correct">{{lesson.score}} / {{lesson.total_score}}</span>
+        </h3>
+        <div class="list-group" ng-if="lesson.visible">
+          <a class="list-group-item" ng-repeat="task in lesson.tasks" ng-class="{'correct': task.score == 100, 'partial': task.score > 0 && task.score < 100, 'wrong': task.score == 0}" ui-sref="task.statement({ taskName: task.name })">
+            <i class="fa fa-angle-right"></i> {{'Exercise' | l10n}} {{task.num}}: {{task.title}}
+            <span ng-if="task.score == 0" class="badge badge-wrong">0 / 100</span>
+            <span ng-if="task.score > 0 && task.score < 100" class="badge badge-partial">{{task.score}} / 100</span>
+            <span ng-if="task.score == 100" class="badge badge-correct">100 / 100</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

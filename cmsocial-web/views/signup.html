@@ -55,45 +55,14 @@
             </div>
           </div>
         </fieldset>
-        <fieldset>
-          <legend>{{'Institute data' | l10n}}</legend>
-          <div class="form-group" ng-class="{'has-error': signupform.region.$dirty && isBad['region']}">
-            <label class="col-sm-4 control-label" for="region">{{'Region' | l10n}}</label>
+
+        <div class="form-group" ng-show="cm.captcha_enabled">
+            <label class="col-sm-4 control-label" for="email2">{{'Anti-spam check' | l10n}}</label>
             <div class="col-sm-6">
-              <select id="region" name="region" ng-model="user.region" class="form-control" ng-change="resetProvince(); checkRegion()">
-                <option ng-repeat="r in regions | orderBy:'name'" value="{{r.id}}">{{r.name}}</option>
-              </select>
-              <span class="help-block" ng-show="signupform.region.$dirty && isBad['region']">{{errorMsg['region'] | l10n}}</span>
+                <div id="recaptcha-div"></div>
             </div>
-          </div>
-          <div class="form-group" ng-class="{'has-error': signupform.province.$dirty && isBad['province']}">
-            <label class="col-sm-4 control-label" for="province">{{'Province' | l10n}}</label>
-            <div class="col-sm-6">
-              <select id="province" name="province" ng-model="user.province" class="form-control" ng-change="resetCity(); checkProvince()" ng-disabled="isBad['region']">
-                <option ng-repeat="p in provinces | orderBy:'name'" value="{{p.id}}">{{p.name}}</option>
-              </select>
-              <span class="help-block" ng-show="signupform.province.$dirty && isBad['province']">{{errorMsg['province'] | l10n}}</span>
-            </div>
-          </div>
-          <div class="form-group" ng-class="{'has-error': signupform.city.$dirty && isBad['city']}">
-            <label class="col-sm-4 control-label" for="city">{{'City' | l10n}}</label>
-            <div class="col-sm-6">
-              <select id="city" name="city" ng-model="user.city" class="form-control" ng-change="resetInstitute(); checkCity()" ng-disabled="isBad['province']">
-                <option ng-repeat="c in cities | orderBy:'name'" value="{{c.id}}">{{c.name}}</option>
-              </select>
-              <span class="help-block" ng-show="signupform.city.$dirty && isBad['city']">{{errorMsg['city'] | l10n}}</span>
-            </div>
-          </div>
-          <div class="form-group" ng-class="{'has-error': signupform.institute.$dirty && isBad['institute']}">
-            <label class="col-sm-4 control-label" for="institute">{{'Institute' | l10n}}</label>
-            <div class="col-sm-6">
-              <select id="institute" name="institute" ng-model="user.institute" class="form-control" ng-change="checkInstitute()" ng-disabled="isBad['city']">
-                <option ng-repeat="i in institutes | orderBy:'name'" value="{{i.id}}">{{i.name}}</option>
-              </select>
-              <span class="help-block" ng-show="signupform.institute.$dirty && isBad['institute']">{{errorMsg['institute'] | l10n}}</span>
-            </div>
-          </div>
-        </fieldset>
+        </div>
+
         <div class="form-group">
           <div class="col-sm-offset-4 col-sm-8">
             <button type="submit" class="btn btn-default">{{'Sign up' | l10n}}</button>

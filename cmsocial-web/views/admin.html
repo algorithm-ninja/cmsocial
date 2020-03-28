@@ -1,0 +1,111 @@
+<div class="container">
+  <div class="row">
+    <h1>Edit contest settings</h1>
+  </div>
+  <div class="row">
+    <div class="col-sm-12">
+      <form class="form-horizontal" role="form" ng-submit="submit()" name="contestform">
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="description">Description</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="description" name="description" ng-model="contest.description"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="title">Title</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="title" name="title" ng-model="contest.title"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="top_left_name">Top left name</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="top_left_name" name="top_left_name" ng-model="contest.top_left_name"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="forum_url">Forum URL</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="forum_url" name="forum_url" ng-model="contest.forum_url"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="mail_from">Address to send emails from</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="email" id="mail_from" name="mail_from" ng-model="contest.mail_from"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="mail_server">Mailserver</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="mail_server" name="mail_server" ng-model="contest.mail_server"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="mail_username">Username for mailserver</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="mail_username" name="mail_username" ng-model="contest.mail_username"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="mail_password">Password for mailserver</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="password" id="mail_password" name="mail_password" ng-model="contest.mail_password"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="analytics">Google Analytics key</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="analytics" name="analytics" ng-model="contest.analytics"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="cookie_domain">Domain to use for cookies</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="cookie_domain" name="cookie_domain" ng-model="contest.cookie_domain"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="recaptcha_public_key">Recaptcha public key</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="recaptcha_public_key" name="recaptcha_public_key" ng-model="contest.recaptcha_public_key"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="recaptcha_secret_key">Recaptcha secret key</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="recaptcha_secret_key" name="recaptcha_secret_key" ng-model="contest.recaptcha_secret_key"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="menu">Menu</label>
+          <div class="col-sm-6">
+            <input class="form-control" autocomplete="off" type="text" id="menu" name="menu" ng-model="contest.menu"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-4 control-label" for="enabledLanguages[]" >Languages</label>
+          <div class="col-sm-6">
+            <div class="col-sm-12" ng-repeat="language in contest.all_languages">
+              <label>
+                <input
+                  type="checkbox"
+                  name="enabledLanguages[]"
+                  value="{{language}}"
+                  ng-checked="contest.languages.indexOf(language) > -1"
+                  ng-click="toggleLanguage(language)"
+                > {{language}}
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+            <button type="submit" class="btn btn-warning">Apply</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
