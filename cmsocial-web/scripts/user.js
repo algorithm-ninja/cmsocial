@@ -43,6 +43,10 @@ angular.module('cmsocial')
               domain: contestManager.getContest().cookie_domain,
               path: '/'
             });
+            $cookies.remove('token', {
+              domain: 'olinfo.it',
+              path: '/'
+            });
           } else {
             user = data["user"];
             contestManager.refreshContest();
@@ -82,6 +86,10 @@ angular.module('cmsocial')
       signout: function() {
         $cookies.remove('token', {
           domain: contestManager.getContest().cookie_domain,
+          path: '/'
+        });
+        $cookies.remove('token', {
+          domain: 'olinfo.it',
           path: '/'
         });
         user = {};
