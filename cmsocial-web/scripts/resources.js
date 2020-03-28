@@ -378,7 +378,7 @@ angular.module('cmsocial')
     	},
 		{
 			question: "Quando comincia e quando finisce la miniolimpiade?",
-			answer: "L'ottava edizione della miniolimpiade comincerà il 25 marzo alle ore 14:30 e terminerà il 3 aprile alle ore 23:59."
+			answer: "La miniolimpiade relativa alla nona edizione del corso competenze digitali si terrà a fine aprile. La data esatta è da definirsi entro la prima settimana di aprile."
 		},
 		{
 			question: "Come funziona la miniolimpiade?",
