@@ -39,7 +39,7 @@ angular.module('cmsocial')
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
 
             // Remove cookie stuck
-            $cookies.remove('token', {
+            $cookies.remove('token_digit', {
               domain: contestManager.getContest().cookie_domain,
               path: '/'
             });
@@ -52,7 +52,7 @@ angular.module('cmsocial')
         });
     };
     var isUserLogged = function() {
-      return $cookies.get('token') != null;
+      return $cookies.get('token_digit') != null;
     };
     //var heartbeat_timeout = undefined;
     //var heartbeat = function() {
@@ -80,7 +80,7 @@ angular.module('cmsocial')
       },
       refresh: refreshUser,
       signout: function() {
-        $cookies.remove('token', {
+        $cookies.remove('token_digit', {
           domain: contestManager.getContest().cookie_domain,
           path: '/'
         });
