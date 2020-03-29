@@ -186,20 +186,6 @@ angular.module('cmsocial')
     };
     $scope.getTasks();
   })
-  .controller('TagsPage', function($scope, $http, notificationHub, API_PREFIX) {
-    $scope.getTags = function() {
-      $http.post(API_PREFIX + 'tag', {
-          'action': 'list'
-        })
-        .success(function(data, status, headers, config) {
-          $scope.tags = data['tags'];
-        })
-        .error(function(data, status, headers, config) {
-          notificationHub.serverError(status);
-        });
-    };
-    $scope.getTags();
-  })
   .controller('HelpCtrl', function($scope, $stateParams, $http,
     notificationHub, API_PREFIX) {
     $scope.data = {

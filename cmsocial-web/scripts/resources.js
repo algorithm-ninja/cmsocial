@@ -35,11 +35,11 @@ angular.module('cmsocial')
       }
     };
   })
-  .controller('ResourcesCtrl', function($scope, navbarManager) {
-    navbarManager.setActiveTab(0);
+  .controller('ResourcesCtrl', function($scope, taskbarManager) {
+    taskbarManager.setActiveTab(0);
   })
-  .controller('VideoPas', function($scope, navbarManager, ytFixer) {
-    navbarManager.setActiveTab(0);
+  .controller('VideoPas', function($scope, taskbarManager, ytFixer) {
+    taskbarManager.setActiveTab(0);
     $scope.title = 'Videolezioni Pascal';
     $scope.videolezioni = [
       {
@@ -120,8 +120,8 @@ angular.module('cmsocial')
     ];
     $scope.videolezioni = ytFixer.fix($scope.videolezioni);
   })
-  .controller('VideoCpp', function($scope, navbarManager, ytFixer) {
-    navbarManager.setActiveTab(0);
+  .controller('VideoCpp', function($scope, taskbarManager, ytFixer) {
+    taskbarManager.setActiveTab(0);
     $scope.title = 'Videolezioni C';
     $scope.videolezioni = [
       {
@@ -202,8 +202,8 @@ angular.module('cmsocial')
     ];
     $scope.videolezioni = ytFixer.fix($scope.videolezioni);
   })
-  .controller('VideoDos', function($scope, navbarManager, ytFixer) {
-    navbarManager.setActiveTab(0);
+  .controller('VideoDos', function($scope, taskbarManager, ytFixer) {
+    taskbarManager.setActiveTab(0);
     $scope.title = 'Videolezioni prompt dei comandi';
     $scope.videolezioni = [
       {
@@ -249,8 +249,8 @@ angular.module('cmsocial')
     ];
     $scope.videolezioni = ytFixer.fix($scope.videolezioni);
   })
-  .controller('VideoAlg', function($scope, navbarManager, ytFixer) {
-    navbarManager.setActiveTab(0);
+  .controller('VideoAlg', function($scope, taskbarManager, ytFixer) {
+    taskbarManager.setActiveTab(0);
     $scope.title = 'Videolezioni Algoritmi e Strutture Dati';
     $scope.videolezioni = [
       {
@@ -336,8 +336,8 @@ angular.module('cmsocial')
     ];
     $scope.videolezioni = ytFixer.fix($scope.videolezioni);
   })
-  .controller('VideoSel', function($scope, navbarManager, ytFixer) {
-    navbarManager.setActiveTab(0);
+  .controller('VideoSel', function($scope, taskbarManager, ytFixer) {
+    taskbarManager.setActiveTab(0);
     $scope.title = 'Soluzioni commentate a esercizi di selezioni scolastiche';
     $scope.videolezioni = [
       {
@@ -368,8 +368,8 @@ angular.module('cmsocial')
     ];
     $scope.videolezioni = ytFixer.fix($scope.videolezioni);
   })
-  .controller('FAQCtrl', function($scope, navbarManager) {
-    navbarManager.setActiveTab(0);
+  .controller('FAQCtrl', function($scope, taskbarManager) {
+    taskbarManager.setActiveTab(0);
     $scope.title = "Domande frequenti";
     $scope.faqs = [
     	{
@@ -378,7 +378,7 @@ angular.module('cmsocial')
     	},
 		{
 			question: "Quando comincia e quando finisce la miniolimpiade?",
-			answer: "La miniolimpiade relativa alla nona edizione del corso competenze digitali si terrà a fine aprile. La data esatta è da definirsi entro la prima settimana di aprile."
+			answer: "La nona edizione della miniolimpiade comincerà il 27 aprile 2020 alle ore 15:00 e terminerà il 7 maggio 2020 alle ore 15:00."
 		},
 		{
 			question: "Come funziona la miniolimpiade?",

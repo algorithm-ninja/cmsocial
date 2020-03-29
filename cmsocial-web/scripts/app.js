@@ -19,6 +19,7 @@ angular
     'ui.router',
     'ui.ace',
     'angular-md5',
+    'oblador.lazytube',
   ])
   .constant('API_PREFIX', 'api/')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
@@ -45,7 +46,7 @@ angular
       })
       .state('tasktree', {
         url: '/tasktree',
-        templateUrl: 'views/task_tree.html',
+        templateUrl: 'COMMIT_ID_HERE/views/task_tree.html',
         controller: 'TaskTree'
       })
       .state('tasklist', {
@@ -110,6 +111,15 @@ angular
         url: '/signup',
         templateUrl: 'COMMIT_ID_HERE/views/signup.html',
         controller: 'SignupCtrl'
+      })
+      .state('resources', {
+        url: '/resources',
+        templateUrl: 'COMMIT_ID_HERE/views/resources.html',
+        controller: 'ResourcesCtrl'
+      })
+      .state('taskdesc', {
+        url: '/taskdesc',
+        templateUrl: 'COMMIT_ID_HERE/views/taskdesc.html'
       })
       .state('forgot-account', {
         url: '/forgot-account',
@@ -246,6 +256,36 @@ angular
     </div>
   </div>
 </div>`
+      })
+      .state('video_pas', {
+        url: '/resources/pascal',
+        templateUrl: 'COMMIT_ID_HERE/views/resources.videos.html',
+        controller: 'VideoPas'
+      })
+      .state('video_cpp', {
+        url: '/resources/cpp',
+        templateUrl: 'COMMIT_ID_HERE/views/resources.videos.html',
+        controller: 'VideoCpp'
+      })
+      .state('video_dos', {
+        url: '/resources/dos',
+        templateUrl: 'COMMIT_ID_HERE/views/resources.videos.html',
+        controller: 'VideoDos'
+      })
+      .state('video_alg', {
+        url: '/resources/algoritmi',
+        templateUrl: 'COMMIT_ID_HERE/views/resources.videos.html',
+        controller: 'VideoAlg'
+      })
+      .state('video_sel', {
+        url: '/resources/scolastiche',
+        templateUrl: 'COMMIT_ID_HERE/views/resources.videos.html',
+        controller: 'VideoSel'
+      })
+      .state('faq', {
+        url: '/faq',
+        templateUrl: 'COMMIT_ID_HERE/views/faq.html',
+        controller: 'FAQCtrl'
       })
 
   })

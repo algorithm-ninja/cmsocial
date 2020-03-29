@@ -20,6 +20,7 @@
     "angular-animate": "1.5.x",
     "angular-cookies": "1.5.x",
     "angular-md5": "^0.1.10",
+    "angular-lazytube": "^0.2.3",
     "angular-recaptcha": "^4.0.0",
     "angular-resource": "1.5.x",
     "angular-route": "1.5.x",

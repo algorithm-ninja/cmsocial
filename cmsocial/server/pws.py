@@ -172,8 +172,12 @@ class APIHandler(object):
                     .filter(SocialContest.social_enabled == True).first()
             else:
                 local.contest = None
+
             try:
-                local.jwt_payload = request.cookies.get("token")
+                local.jwt_payload = None
+                if local.contest is not None:
+                    local.jwt_payload = request.cookies.get('token_' + local.contest.name)
+
                 if local.jwt_payload is None:
                     auth_data = dict()
                 else:
@@ -668,7 +672,7 @@ class APIHandler(object):
             local.user = user
             local.response = Response()
             local.response.set_cookie(
-                'token', value=self.build_token(),
+                'token_' + local.contest.name, value=self.build_token(),
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'newparticipation':
             if local.user is None:
@@ -713,8 +717,9 @@ class APIHandler(object):
             cookie_duration = 30 * 86400 if keep_signed else None
             local.response = Response()
             local.response.set_cookie(
-                'token', value=self.build_token(),
-                max_age = cookie_duration,
+                'token_' + local.contest.name,
+                value=self.build_token(),
+                max_age=cookie_duration,
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'me':
             if local.user is None:
@@ -830,13 +835,16 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
         local.response = Response()
         if local.user is None:
             local.response.set_cookie(
-                'token', expires=datetime.utcnow(), domain=local.contest.social_contest.cookie_domain)
+                'token_' + local.contest.name,
+                expires=datetime.utcnow(),
+                domain=local.contest.social_contest.cookie_domain)
             return 'Unauthorized'
         else:
             new_token = self.build_token()
             if new_token != local.jwt_payload:
                 local.response.set_cookie(
-                    'token', value=new_token,
+                    'token_' + local.contest.name,
+                    value=new_token,
                     domain=local.contest.social_contest.cookie_domain)
 
     def contest_handler(self):
@@ -1567,7 +1575,8 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 if s.language is None:
                     fi['name'] = name
                 else:
-                    fi['name'] = name.replace('%l', s.language)
+                    ext = get_language(s.language).source_extension[1:]
+                    fi['name'] = name.replace('%l', ext)
                 fi['digest'] = f.digest
                 submission['files'].append(fi)
             result = s.get_result()
@@ -1647,7 +1656,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
 
             # TODO: implement partial submissions (?)
 
-            # Detect language
+            # Detect language (if not provided)
             files = []
             sub_lang = None
             for sfe in task.submission_format:
@@ -1658,19 +1667,23 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     return 'The files you sent are too big!'
                 f['name'] = sfe.filename
                 files.append(f)
-                if sfe.filename.endswith('.%l'):
-                    language = None
+
+                language = None
+                if 'language' in f:
+                    language = get_language(f['language'])
+                elif sfe.filename.endswith('.%l'):
                     for ext in SOURCE_EXTS:
                         l = filename_to_language(ext)
                         if f['filename'].endswith(ext):
                             language = l
-                    if language is None:
-                        return 'The language of the files you sent is not ' + \
-                               'recognized!'
-                    elif sub_lang is not None and sub_lang != language:
-                        return 'The files you sent are in different languages!'
-                    else:
-                        sub_lang = language
+
+                if language is None:
+                    return 'The language of the files you sent is not ' + \
+                           'recognized!'
+                elif sub_lang is not None and sub_lang != language:
+                    return 'The files you sent are in different languages!'
+                else:
+                    sub_lang = language
 
             # Add the submission
             timestamp = make_datetime()
@@ -1704,7 +1717,8 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 if submission.language is None:
                     fi['name'] = name
                 else:
-                    fi['name'] = name.replace('%l', submission.language)
+                    ext = get_language(submission.language).source_extension[1:]
+                    fi['name'] = name.replace('%l', ext)
                 fi['digest'] = f.digest
                 local.resp['files'].append(fi)
         else:

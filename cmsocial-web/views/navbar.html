@@ -23,6 +23,7 @@
             </li>
           </ul>
         </li>
+
         <li ng-if="me.isLogged() && !cm.hasParticipation()">
           <p class="navbar-btn">
             <a ng-click="participate()" class="btn btn-success"><i class="fa fa-sign-in"></i>{{'Enter the contest' | l10n}}</a>
