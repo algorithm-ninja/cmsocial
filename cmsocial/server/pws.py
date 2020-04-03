@@ -73,9 +73,9 @@ class WSGIHandler(gevent.wsgi.WSGIHandler):
         client_address = self.environ['REMOTE_ADDR']
         return '%s %s %s %s' % (
             client_address or '-',
-            (getattr(self, 'status', None) or '000').split()[0],
+            str((getattr(self, 'status', None) or '000').split()[0]),
             delta,
-            getattr(self, 'requestline', ''))
+            str(getattr(self, 'requestline', '')))
 
     def log_request(self):
         logger.info(self.format_request())
@@ -1183,8 +1183,13 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.items()])
             local.resp['submission_format'] = t.submission_format
+
             for i in ['time_limit', 'memory_limit', 'task_type']:
                 local.resp[i] = getattr(t.active_dataset, i)
+
+            # adapt new memory limit (expressed in bytes) to MiB
+            local.resp['memory_limit'] //= (1 << 20)
+
             att = []
             for (name, obj) in t.attachments.items():
                 att.append((name, obj.digest))
@@ -1555,12 +1560,14 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 if len(result.score_details) > 0 and 'text' in result.score_details[0]:
                     subt = dict()
                     subt['testcases'] = result.score_details
-                    subt['score'] = submission['score']
+                    subt['score_fraction'] = result.score_details['score_fraction']
                     subt['max_score'] = 100
                     submission['score_details'] = [subt]
                 else:
                     submission['score_details'] = result.score_details
+
                 for subtask in submission['score_details']:
+                    subtask['score'] = subtask['score_fraction'] * subtask['max_score']
                     for testcase in subtask['testcases']:
                         data = testcase['text']
                         testcase['text'] = data[0] % tuple(data[1:])
@@ -1621,20 +1628,21 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             # Detect language
             files = []
             sub_lang = None
+
             for filename in task.submission_format:
                 f = files_sent.get(filename)
+
                 if f is None:
                     return 'Some files are missing!'
                 if len(f['body']) > int(config.get("core", "max_submission_length")):
                     return 'The files you sent are too big!'
+
                 f['name'] = filename
                 files.append(f)
-                if filename.endswith('.%l'):
-                    language = None
-                    for ext in SOURCE_EXTS:
-                        l = filename_to_language(ext)
-                        if f['filename'].endswith(ext):
-                            language = l
+
+                if 'language' in f:
+                    language = get_language(f['language'])
+
                     if language is None:
                         return 'The language of the files you sent is not ' + \
                                'recognized!'
@@ -1642,6 +1650,22 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                         return 'The files you sent are in different languages!'
                     else:
                         sub_lang = language
+
+                else:
+
+                    if filename.endswith('.%l'):
+                        language = None
+                        for ext in SOURCE_EXTS:
+                            l = filename_to_language(ext)
+                            if f['filename'].endswith(ext):
+                                language = l
+                        if language is None:
+                            return 'The language of the files you sent is not ' + \
+                                   'recognized!'
+                        elif sub_lang is not None and sub_lang != language:
+                            return 'The files you sent are in different languages!'
+                        else:
+                            sub_lang = language
 
             # Add the submission
             timestamp = make_datetime()

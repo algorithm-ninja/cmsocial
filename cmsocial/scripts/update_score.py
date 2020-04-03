@@ -21,7 +21,7 @@ except:
 
 
 def compute_standard_score(user_to_task, task_to_user):
-    return [(uid, int(sum(map(lambda x: x[1], lst)))) for uid, lst in user_to_task.iteritems()]
+    return [(uid, int(sum(map(lambda x: x[1], lst)))) for uid, lst in user_to_task.items()]
 
 
 def get_score(s):
@@ -34,11 +34,11 @@ def compute_smart_score(user_to_task, task_to_user):
     difficulties = [1. for x in range(maxtask)]
     abilities = [1. for x in range(maxuser)]
     attempts = [len(task_to_user.get(i, [])) for i in range(maxtask)]
-    attempts_sqrt = map(math.sqrt, attempts)
+    attempts_sqrt = list(map(math.sqrt, attempts))
 
     pts_per_user = sum(map(
             lambda x: sum(map(lambda y: y[1], x)),
-            user_to_task.itervalues()))/len(user_to_task)
+            user_to_task.values()))/len(user_to_task)
 
     for uid in range(maxuser):
         if len(user_to_task.get(uid, [])) == 0:
