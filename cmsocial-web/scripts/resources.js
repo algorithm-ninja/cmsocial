@@ -485,7 +485,7 @@ angular.module('cmsocial')
     	},
 		{
 			question: "Quando comincia e quando finisce la miniolimpiade?",
-			answer: "La nona edizione della miniolimpiade comincerà il 27 aprile 2020 alle ore 15:00 e terminerà il 7 maggio 2020 alle ore 15:00."
+			answer: "La decima edizione della miniolimpiade si svolgerà presumibilmente a gennaio 2021. La data esatta verrà annunciata entro la fine del 2020."
 		},
 		{
 			question: "Come funziona la miniolimpiade?",
