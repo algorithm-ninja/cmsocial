@@ -120,6 +120,113 @@ angular.module('cmsocial')
     ];
     $scope.videolezioni = ytFixer.fix($scope.videolezioni);
   })
+  .controller('VideoDario', function($scope, taskbarManager, ytFixer) {
+    taskbarManager.setActiveTab(0);
+    $scope.title = 'Videolezioni Programmazione Competitiva';
+    $scope.videolezioni = [
+      {
+        title: '01 - Introduzione',
+        youtube: 'lU0Axxor6JU',
+        files: []
+      },
+      {
+        title: '02 - Ricorsione',
+        youtube: '4tJHJSibcv0',
+        files: []
+      },
+      {
+        title: '03 - Complessità Computazionale',
+        youtube: 'bWb18FVbtxU',
+        files: []
+      },
+      {
+        title: '04 - Programmazione Dinamica (parte 1)',
+        youtube: 'dT5wMqCzp9I',
+        files: []
+      },
+      {
+        title: '05 - Programmazione Dinamica (parte 2)',
+        youtube: 'Ubb-SwvMAq4',
+        files: []
+      },
+      {
+        title: '06 - Programmazione Dinamica (parte 3)',
+        youtube: '30joNrPY7MA',
+        files: []
+      },
+      {
+        title: '07 - Programmazione Dinamica (parte 4)',
+        youtube: 'BCxaH6B5wgg',
+        files: []
+      },
+      {
+        title: '08 - Algoritmi di ordinamento comparativi',
+        youtube: 'iG9M_lBOOew',
+        files: []
+      },
+      {
+        title: '09 - Aritmetica modulare',
+        youtube: 'eroJMT_ODQ0',
+        files: []
+      },
+      {
+        title: '10 - Ricerca binaria',
+        youtube: '8H9UC0KwTQU',
+        files: []
+      },
+      {
+        title: '11 - Strutture dati 1',
+        youtube: 'iHGCXrqnFO8',
+        files: []
+      },
+      {
+        title: '12 - Strutture dati 2',
+        youtube: 'VvgN2o8T-98',
+        files: []
+      },
+      {
+        title: '13 - Grafi 1',
+        youtube: 'mIxwWL3oQV8',
+        files: []
+      },
+      {
+        title: '14 - Grafi 2',
+        youtube: '_adGyh_FfFI',
+        files: []
+      },
+      {
+        title: '15 - DFS e BFS',
+        youtube: 'c3Xb9CztqYE',
+        files: []
+      },
+      {
+        title: '16 - Algoritmo di Dijkstra',
+        youtube: 'WQiAluRS2nw',
+        files: []
+      },
+      {
+        title: '17 - Algoritmo di Prim e Ordinamento Topologico',
+        youtube: 'Cr9y7Px9oek',
+        files: []
+      },
+      {
+        title: '18 - Esercitazione 1: Selezioni Territoriali 2019',
+        youtube: 'jjDqWKyFq5w',
+        files: []
+      },
+      {
+        title: '19 - Esercitazione 2: Selezioni Territoriali 2018',
+        youtube: 'Rlq5yRxlN3Y',
+        files: []
+      },
+      {
+        title: '20 - Esempio di gara in diretta: Quaranterry (pre-Territoriali 2020)',
+        youtube: '6CuRIHuqLLs',
+        files: []
+      },
+    ];
+    $scope.videolezioni = ytFixer.fix($scope.videolezioni);
+  })
   .controller('VideoCpp', function($scope, taskbarManager, ytFixer) {
     taskbarManager.setActiveTab(0);
     $scope.title = 'Videolezioni C';

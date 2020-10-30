@@ -257,6 +257,11 @@ angular
   </div>
 </div>`
       })
+      .state('video_cp', {
+        url: '/resources/cp',
+        templateUrl: 'COMMIT_ID_HERE/views/resources.videos.html',
+        controller: 'VideoDario'
+      })
       .state('video_pas', {
         url: '/resources/pascal',
         templateUrl: 'COMMIT_ID_HERE/views/resources.videos.html',
