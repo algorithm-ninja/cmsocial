@@ -44,7 +44,7 @@ angular.module('cmsocial')
               path: '/'
             });
             $cookies.remove('token', {
-              domain: 'olinfo.it',
+              domain: 'training.olinfo.it',
               path: '/'
             });
           } else {
@@ -89,7 +89,7 @@ angular.module('cmsocial')
           path: '/'
         });
         $cookies.remove('token', {
-          domain: 'olinfo.it',
+          domain: 'training.olinfo.it',
           path: '/'
         });
         user = {};
