@@ -485,7 +485,7 @@ angular.module('cmsocial')
     	},
 		{
 			question: "Quando comincia e quando finisce la miniolimpiade?",
-			answer: "La decima edizione della miniolimpiade si svolgerà presumibilmente a gennaio 2021. La data esatta verrà annunciata entro la fine del 2020."
+			answer: "La miniolimpiade della decima edizione si attiverà l'11 dicembre 2020 alle ore 15:00 e si concluderà lunedì 21 dicembre alle ore 15:00. Gli attestati saranno spediti a gennaio 2021."
 		},
 		{
 			question: "Come funziona la miniolimpiade?",
