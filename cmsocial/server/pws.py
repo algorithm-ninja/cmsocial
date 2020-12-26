@@ -62,7 +62,10 @@ logger = logging.getLogger(__name__)
 local = gevent.local.local()
 
 config = configparser.SafeConfigParser()
-config.read('/usr/local/etc/cmsocial.ini')
+config.read([
+    '/usr/local/etc/cmsocial.ini',
+    './config/cmsocial.ini'
+])
 
 
 class WSGIHandler(gevent.pywsgi.WSGIHandler):
