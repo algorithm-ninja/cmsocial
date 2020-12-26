@@ -17,7 +17,7 @@ def apply_edit_list(obj, edit_list):
 
 def apply_filter(query, cls, filter_fun, filter_list):
     query = filter_fun(query)
-    for col, values in filter_list.iteritems():
+    for col, values in filter_list.items():
         query = query.filter(getattr(cls, col).in_(values))
     return query
 
@@ -26,7 +26,7 @@ cls_count = dict()
 def recursive_clone(session, cls, tree, flt, edit, backedit):
     cls_count[cls] = cls_count.get(cls, 0) + 1
     indegree = 0
-    for k, v in tree.iteritems():
+    for k, v in tree.items():
         for info in v:
             if info[0] == cls:
                 indegree += 1
@@ -38,10 +38,10 @@ def recursive_clone(session, cls, tree, flt, edit, backedit):
     objects = objects.order_by(cls.id).all()
 
     if verbose:
-        print "Cloning %d %s" % (len(objects), cls.__name__)
+        print("Cloning %d %s" % (len(objects), cls.__name__))
 
     backeditable_cols = []
-    for k, v in backedit.iteritems():
+    for k, v in backedit.items():
         for bked in v:
             if bked[0] == cls:
                 backeditable_cols.append(bked[1])
@@ -74,7 +74,7 @@ def recursive_clone(session, cls, tree, flt, edit, backedit):
     for child in tree.get(cls, []):
         ccls = child[0]
         cflt_info = flt.get(ccls, (lambda x: x, dict()))
-        cflt_info[1][child[1]] = idmap.keys()
+        cflt_info[1][child[1]] = list(idmap.keys())
         flt[ccls] = cflt_info
         cedit = edit.get(ccls, [])
         cedit.append((child[1], lambda x: idmap.get(getattr(x, child[1]))))
@@ -154,8 +154,8 @@ def main():
         with session.no_autoflush:
             recursive_clone(session, Contest, clone_tree, clone_filter, clone_edit, clone_backedit)
             if dryrun:
-                print "Dry run requested, rolling back changes."
+                print("Dry run requested, rolling back changes.")
                 session.rollback()
             else:
-                print "Everything OK, committing..."
+                print("Everything OK, committing...")
                 session.commit()

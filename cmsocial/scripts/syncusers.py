@@ -7,7 +7,7 @@ def main():
     with SessionGen() as s:
         for user in s.query(User).all():
             if not s.query(SocialUser).filter(SocialUser.id == user.id).first():
-                if raw_input("User " + user.first_name + " " + user.last_name + " doesn't have metadata. Create? [Y/n]") in ["y", "Y", ""]:
+                if input("User " + user.first_name + " " + user.last_name + " doesn't have metadata. Create? [Y/n]") in ["y", "Y", ""]:
                     x = SocialUser()
                     x.id = user.id
                     s.add(x)

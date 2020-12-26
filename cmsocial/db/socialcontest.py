@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.schema import (CheckConstraint, Column, ForeignKey,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import ConfigParser
+import configparser
 import hashlib
 import hmac
 import io
@@ -14,7 +14,7 @@ import smtplib
 import socket
 import tempfile
 import traceback
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
@@ -24,7 +24,7 @@ from validate_email import validate_email
 import bcrypt
 import gevent
 import gevent.local
-import gevent.wsgi
+import gevent.pywsgi
 import pkg_resources
 import requests
 from gevent import monkey
@@ -61,11 +61,11 @@ monkey.patch_all()
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
 
-config = ConfigParser.SafeConfigParser()
+config = configparser.SafeConfigParser()
 config.read('/usr/local/etc/cmsocial.ini')
 
 
-class WSGIHandler(gevent.wsgi.WSGIHandler):
+class WSGIHandler(gevent.pywsgi.WSGIHandler):
     def format_request(self):
         if self.time_finish:
             delta = '%.6f' % (self.time_finish - self.time_start)
@@ -80,11 +80,11 @@ class WSGIHandler(gevent.wsgi.WSGIHandler):
         logger.info(self.format_request())
 
     def get_environ(self):
-        env = gevent.wsgi.WSGIHandler.get_environ(self)
+        env = gevent.pywsgi.WSGIHandler.get_environ(self)
         return env
 
 
-class Server(gevent.wsgi.WSGIServer):
+class Server(gevent.pywsgi.WSGIServer):
     handler_class = WSGIHandler
 
 
@@ -438,14 +438,14 @@ class APIHandler(object):
         for field in args:
             if field in local.data:
                 setattr(obj, field, local.data[field])
-        for field, data_field in kwargs.iteritems():
+        for field, data_field in kwargs.items():
             if data_field in local.data:
                 setattr(obj, field, local.data[data_field])
 
     def add_info(self, obj, dct, *args, **kwargs):
         for field in args:
             dct[field] = getattr(obj, field)
-        for field, data_field in kwargs.iteritems():
+        for field, data_field in kwargs.items():
             dct[data_field] = getattr(obj, field)
 
     # Handlers that do not require JSON data
@@ -600,12 +600,12 @@ class APIHandler(object):
         response_data['username'] = local.user.username
         response_data['email'] = local.user.email
         # Build final url.
-        res_payload = urllib.urlencode(response_data)
+        res_payload = urllib.parse.urlencode(response_data)
         res_payload = b64encode(res_payload.encode())
         sig = hmac.new(
             config.get("core", "secret").encode(), res_payload,
             hashlib.sha256).hexdigest()
-        local.resp['parameters'] = urllib.urlencode({
+        local.resp['parameters'] = urllib.parse.urlencode({
             'sso': res_payload,
             'sig': sig
         })
@@ -771,8 +771,8 @@ class APIHandler(object):
                 query = query\
                     .filter(SocialUser.institute_id == local.data['institute'])
             participations, local.resp['num'] = self.sliced_query(query)
-            local.resp['users'] = map(self.get_participation_info,
-                                      participations)
+            local.resp['users'] = list(map(self.get_participation_info,
+                                      participations))
         elif local.data['action'] == 'update':
             if local.user is None:
                 return 'Unauthorized'
@@ -939,7 +939,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     'mail_password',
                     'mail_from',
                     menu='menu_on_db')
-                local.resp['all_languages'] = map(lambda x: x.name, LANGUAGES)
+                local.resp['all_languages'] = [x.name for x in LANGUAGES]
                 if local.resp['menu_on_db'] is not None:
                     local.resp['menu_on_db'] = \
                         json.loads(local.resp['menu_on_db'])
@@ -1070,7 +1070,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     lt.task.social_task.access_level = lesson.access_level
                     local.session.add(lt.task)
                 local.session.commit()
-            except KeyError, ValueError:
+            except KeyError as ValueError:
                 return 'Bad Request'
         elif local.data['action'] == 'delete':
             if local.access_level != 0:
@@ -1093,7 +1093,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                         .filter(Task.num > tn).all():
                         t.num -= 1
                 local.session.commit()
-            except KeyError, ValueError:
+            except KeyError as ValueError:
                 return 'Bad Request'
         elif local.data['action'] == 'new':
             if local.access_level != 0:
@@ -1141,7 +1141,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 self.update_from_data(material, 'text', 'title',
                                       'access_level')
                 local.session.commit()
-            except KeyError, ValueError:
+            except KeyError as ValueError:
                 return 'Bad Request'
         # elif local.data['action'] == 'swap':
         #     if local.access_level != 0:
@@ -1166,7 +1166,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     .filter(Material.id == local.data['id']).first()
                 local.session.delete(material)
                 local.session.commit()
-            except KeyError, ValueError:
+            except KeyError as ValueError:
                 return 'Bad Request'
         elif local.data['action'] == 'new':
             if local.access_level != 0:
@@ -1255,13 +1255,13 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['score_multiplier'] = t.social_task.score_multiplier
             local.resp['help_available'] = t.social_task.help_available
             local.resp['statements'] =\
-                dict([(l, s.digest) for l, s in t.statements.iteritems()])
+                dict([(l, s.digest) for l, s in t.statements.items()])
             local.resp['submission_format'] =\
                 [sfe.filename for sfe in t.submission_format]
             for i in ['time_limit', 'memory_limit', 'task_type']:
                 local.resp[i] = getattr(t.active_dataset, i)
             att = []
-            for (name, obj) in t.attachments.iteritems():
+            for (name, obj) in t.attachments.items():
                 att.append((name, obj.digest))
             local.resp['attachments'] = att
             local.resp['tags'] = []
@@ -1512,7 +1512,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             if test is None:
                 return 'Not found'
             data = local.data['answers']
-            for i in xrange(len(test.questions)):
+            for i in range(len(test.questions)):
                 q = test.questions[i]
                 ansdata = json.loads(q.answers)
                 if q.type == 'choice':
@@ -1530,7 +1530,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                         ans = data[i].get(key, None)
                         if len(ans) != len(correct):
                             local.resp[i] = [q.wrong_score, 'wrong']
-                        for a in xrange(len(ans)):
+                        for a in range(len(ans)):
                             if ans[a] is None:
                                 local.resp[i] = [0, 'empty']
                                 break
@@ -1551,7 +1551,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                     if local.resp.get(i, None) is None:
                         local.resp[i] = [q.score, 'correct']
             score = sum(
-                [local.resp[i][0] for i in xrange(len(test.questions))])
+                [local.resp[i][0] for i in range(len(test.questions))])
             testscore = local.session.query(TestScore)\
                 .filter(TestScore.test_id == test.id)\
                 .filter(TestScore.participation_id == local.participation.id).first()
@@ -1587,7 +1587,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 submission['task_id'] = s.task_id
                 submission['timestamp'] = make_timestamp(s.timestamp)
                 submission['files'] = []
-                for name, f in s.files.iteritems():
+                for name, f in s.files.items():
                     fi = dict()
                     if s.language is None:
                         fi['name'] = name
@@ -1616,7 +1616,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             submission['timestamp'] = make_timestamp(s.timestamp)
             submission['language'] = s.language
             submission['files'] = []
-            for name, f in s.files.iteritems():
+            for name, f in s.files.items():
                 fi = dict()
                 if s.language is None:
                     fi['name'] = name
@@ -1699,7 +1699,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             else:
                 files_sent = \
                     dict([(k, self.decode_file(v))
-                          for k, v in local.data['files'].iteritems()])
+                          for k, v in local.data['files'].items()])
 
             # TODO: implement partial submissions (?)
 
@@ -1756,7 +1756,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['evaluation_outcome'] = None
             local.resp['score'] = None
             local.resp['files'] = []
-            for name, f in submission.files.iteritems():
+            for name, f in submission.files.items():
                 fi = dict()
                 if submission.language is None:
                     fi['name'] = name

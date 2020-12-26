@@ -7,7 +7,7 @@ def main():
     with SessionGen() as s:
         for task in s.query(Task).all():
             if not s.query(SocialTask).filter(SocialTask.id == task.id).first():
-                if raw_input("Task " + task.name + " doesn't have metadata. Create? [Y/n]") in ["y", "Y", ""]:
+                if input("Task " + task.name + " doesn't have metadata. Create? [Y/n]") in ["y", "Y", ""]:
                     x = SocialTask()
                     x.id = task.id
                     s.add(x)

@@ -17,12 +17,12 @@ import sqlalchemy as sa
 
 
 def upgrade():
-    op.create_unique_constraint(u'submission_results_submission_id_dataset_id_key', 'submission_results', ['submission_id', 'dataset_id'])
-    op.create_foreign_key(u'fk_active_dataset_id', 'tasks', 'datasets', ['id', 'active_dataset_id'], ['task_id', 'id'], onupdate=u'SET NULL', ondelete=u'SET NULL')
-    op.create_unique_constraint(u'user_test_results_user_test_id_dataset_id_key', 'user_test_results', ['user_test_id', 'dataset_id'])
+    op.create_unique_constraint('submission_results_submission_id_dataset_id_key', 'submission_results', ['submission_id', 'dataset_id'])
+    op.create_foreign_key('fk_active_dataset_id', 'tasks', 'datasets', ['id', 'active_dataset_id'], ['task_id', 'id'], onupdate='SET NULL', ondelete='SET NULL')
+    op.create_unique_constraint('user_test_results_user_test_id_dataset_id_key', 'user_test_results', ['user_test_id', 'dataset_id'])
 
 
 def downgrade():
-    op.drop_constraint(u'user_test_results_user_test_id_dataset_id_key', 'user_test_results', type_='unique')
-    op.drop_constraint(u'fk_active_dataset_id', 'tasks', type_='foreignkey')
-    op.drop_constraint(u'submission_results_submission_id_dataset_id_key', 'submission_results', type_='unique')
+    op.drop_constraint('user_test_results_user_test_id_dataset_id_key', 'user_test_results', type_='unique')
+    op.drop_constraint('fk_active_dataset_id', 'tasks', type_='foreignkey')
+    op.drop_constraint('submission_results_submission_id_dataset_id_key', 'submission_results', type_='unique')

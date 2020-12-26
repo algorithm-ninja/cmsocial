@@ -61,3 +61,6 @@ target/
 
 # VIM files
 .*.swp
+
+# JS
+package-lock.json

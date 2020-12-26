@@ -32,18 +32,18 @@ def compute_smart_score(user_to_task, task_to_user):
     difficulties = [1. for x in range(maxtask)]
     abilities = [1. for x in range(maxuser)]
     attempts = [len(task_to_user.get(i, [])) for i in range(maxtask)]
-    attempts_sqrt = map(math.sqrt, attempts)
+    attempts_sqrt = list(map(math.sqrt, attempts))
 
     for uid in range(maxuser):
         if len(user_to_task.get(uid, [])) == 0:
             continue
         user_to_task[uid] = list(
-            map(lambda x: (x[0], get_score(x[1])), user_to_task.get(uid, [])))
+            [(x[0], get_score(x[1])) for x in user_to_task.get(uid, [])])
     for tid in range(maxtask):
         if len(task_to_user.get(tid, [])) == 0:
             continue
         task_to_user[tid] = list(
-            map(lambda x: (x[0], get_score(x[1])), task_to_user.get(tid, [])))
+            [(x[0], get_score(x[1])) for x in task_to_user.get(tid, [])])
 
     for _ in range(20):  # twenty iterations
         # Ability pass
@@ -74,7 +74,7 @@ def compute_smart_score(user_to_task, task_to_user):
             if difficulties[tid] < 0.1:
                 difficulties[tid] = 0.1
 
-    return [(tid, difficulties[tid]) for tid in task_to_user.keys()]
+    return [(tid, difficulties[tid]) for tid in list(task_to_user.keys())]
 
 
 def main():
@@ -102,7 +102,7 @@ def main():
                 copy.deepcopy(user_to_task), copy.deepcopy(task_to_user)))
 
         scores = dict()
-        for uid, problems in user_to_task.iteritems():
+        for uid, problems in user_to_task.items():
             score = 0
             for tid, pt in problems:
                 score += values[tid] * pt

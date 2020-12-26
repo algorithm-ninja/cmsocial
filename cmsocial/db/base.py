@@ -13,7 +13,7 @@ class Base(CMSBase):
     #TODO: maybe add the id field here and remove it elsewhere?
 
     def fieldnames(self, *args):
-        all_fields = map(lambda c: str(c).split('.')[-1], self.__table__.columns)
-        real_fields = filter(lambda c: not c.startswith('_'), all_fields)
+        all_fields = [str(c).split('.')[-1] for c in self.__table__.columns]
+        real_fields = [c for c in all_fields if not c.startswith('_')]
 
         return real_fields
