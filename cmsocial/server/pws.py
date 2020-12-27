@@ -1718,18 +1718,24 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 f['name'] = sfe.filename
                 files.append(f)
                 if sfe.filename.endswith('.%l'):
-                    language = None
-                    for ext in SOURCE_EXTS:
-                        l = filename_to_language(ext)
-                        if f['filename'].endswith(ext):
-                            language = l
-                    if language is None:
-                        return 'The language of the files you sent is not ' + \
-                               'recognized!'
-                    elif sub_lang is not None and sub_lang != language:
-                        return 'The files you sent are in different languages!'
+                    if 'language' in f:
+                        try:
+                            sub_lang = get_language(f['language'])
+                        except KeyError:
+                            return 'Bad Request'  # The language provided by the frontend was not found
                     else:
-                        sub_lang = language
+                        language = None
+                        for ext in SOURCE_EXTS:
+                            l = filename_to_language(ext)
+                            if f['filename'].endswith(ext):
+                                language = l
+                        if language is None:
+                            return 'The language of the files you sent is not ' + \
+                                   'recognized!'
+                        elif sub_lang is not None and sub_lang != language:
+                            return 'The files you sent are in different languages!'
+                        else:
+                            sub_lang = language
 
             # Add the submission
             timestamp = make_datetime()
