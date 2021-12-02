@@ -713,11 +713,16 @@ class APIHandler(object):
             except IntegrityError:
                 return "Participation already exists"
         elif local.data['action'] == 'login':
-            username = local.data.get('username', None)
-            password = local.data.get('password', None)
+            username = local.data.get('username', '').rstrip()
+            password = local.data.get('password', '')
             if username is None or password is None:
                 logger.warning('Missing parameter')
                 return 'Bad request'
+
+            # Don't fail if there is extra space at the end
+            username = username.strip()
+
+            # TODO: also check if username matches allowed regex?
 
             participation = self.get_participation(local.contest, username,
                                                    password)
@@ -1255,7 +1260,10 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['name'] = t.name
             local.resp['title'] = t.title
             local.resp['score_multiplier'] = t.social_task.score_multiplier
-            local.resp['help_available'] = t.social_task.help_available
+            local.resp['help_available'] = (
+                t.social_task.help_available
+                or local.access_level <= 2
+            )
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.iteritems()])
             local.resp['submission_format'] =\
@@ -1433,13 +1441,13 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
-            if not task.social_task.help_available:
+            if local.access_level >= 3 and not task.social_task.help_available:
                 return 'Questo task non accetta richieste di testcase.'
 
             socpart = local.participation.social_participation
             # Make sure that the user is allowed to request
             # TODO: de-hardcode this.
-            if datetime.utcnow() - socpart.last_help_time < timedelta(hours=1):
+            if local.access_level >= 3 and datetime.utcnow() - socpart.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
