@@ -691,14 +691,19 @@ class APIHandler(object):
             except IntegrityError:
                 return "Participation already exists"
         elif local.data['action'] == 'login':
-            username = local.data.get('username', None)
-            password = local.data.get('password', None)
+            username = local.data.get('username', '').rstrip()
+            password = local.data.get('password', '')
             if username is None or password is None:
                 logger.warning('Missing parameter')
                 return 'Bad request'
 
-            participation = self.get_participation(
-                local.contest, username, password)
+            # Don't fail if there is extra space at the end
+            username = username.strip()
+
+            # TODO: also check if username matches allowed regex?
+
+            participation = self.get_participation(local.contest, username,
+                                                   password)
             if participation is None:
                 local.user = self.get_user(username, password)
                 if local.user is None:
