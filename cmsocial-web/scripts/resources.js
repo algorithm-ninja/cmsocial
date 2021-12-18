@@ -224,6 +224,11 @@ angular.module('cmsocial')
         youtube: '6CuRIHuqLLs',
         files: []
       },
+      {
+        title: '21 - Esercitazione PO2022: C++ STL e tecniche di debug',
+        youtube: 'tfpESGWEShQ',
+        files: []
+      },
     ];
     $scope.videolezioni = ytFixer.fix($scope.videolezioni);
   })
