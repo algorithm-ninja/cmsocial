@@ -118,7 +118,7 @@
               <h3 ng-show="actualCurSub.score_details.length > 1">
                 {{'Subtask' | l10n}} {{subtask.idx}}
                 <span class="pull-right">
-                  {{subtask.score}}/{{subtask.max_score}}
+                  {{subtask.score_fraction*subtask.max_score | round : 2}}/{{subtask.max_score}}
                 </span>
               </h3>
               <table class="testcase-list table table-bordered">

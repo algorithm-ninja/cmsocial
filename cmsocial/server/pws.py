@@ -344,7 +344,7 @@ class APIHandler(object):
         if string is None:
             string = ''
         sha = getattr(hashlib, algo)()
-        sha.update(string)
+        sha.update(string.encode("latin"))
         return sha.hexdigest()
 
     def old_hashpw(self, pw):
@@ -1260,7 +1260,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.items()])
             local.resp['submission_format'] =\
-                [sfe.filename for sfe in t.submission_format]
+                [sfe for sfe in t.submission_format]
             for i in ['time_limit', 'memory_limit', 'task_type']:
                 local.resp[i] = getattr(t.active_dataset, i)
             att = []
@@ -1638,19 +1638,19 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             if result is not None and result.score is not None:
                 submission['score'] = round(result.score, 2)
             if result is not None and result.score_details is not None:
-                tmp = json.loads(result.score_details)
-                if len(tmp) > 0 and 'text' in tmp[0]:
+                details = result.score_details
+                if len(details) > 0 and 'text' in details[0]:
                     subt = dict()
-                    subt['testcases'] = tmp
+                    subt['testcases'] = details
                     subt['score'] = submission['score']
                     subt['max_score'] = 100
                     submission['score_details'] = [subt]
                 else:
-                    submission['score_details'] = tmp
+                    submission['score_details'] = details
                 for subtask in submission['score_details']:
                     for testcase in subtask['testcases']:
-                        data = json.loads(testcase['text'])
-                        testcase['text'] = data[0] % tuple(data[1:])
+                        fmt, *params = testcase['text']
+                        testcase['text'] = fmt % params
             else:
                 submission['score_details'] = None
             local.resp = submission
@@ -1710,15 +1710,15 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             files = []
             sub_lang = None
             for sfe in task.submission_format:
-                f = files_sent.get(sfe.filename)
+                f = files_sent.get(sfe)
                 if f is None:
                     return 'Some files are missing!'
-                if len(f['body']) > config.get("core",
-                                               "max_submission_length"):
+                max_submission_length = int(config.get("core", "max_submission_length"))
+                if len(f['body']) > max_submission_length:
                     return 'The files you sent are too big!'
-                f['name'] = sfe.filename
+                f['name'] = sfe
                 files.append(f)
-                if sfe.filename.endswith('.%l'):
+                if sfe.endswith('.%l'):
                     language = None
                     for ext in SOURCE_EXTS:
                         l = filename_to_language(ext)

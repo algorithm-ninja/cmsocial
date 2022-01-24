@@ -262,6 +262,14 @@ angular
       return "partial";
     };
   })
+  .filter('round', function() {
+    return function(input, digits) {
+      if (input == undefined)
+        return "N/A";
+      var base = Math.pow(10, digits);
+      return Math.round(input * base) / base;
+    };
+  })
   .filter('timeFmt', function() {
     return function(input) {
       if (input == undefined)
