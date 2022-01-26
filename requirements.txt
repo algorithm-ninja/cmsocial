@@ -1,9 +1,5 @@
-sqlalchemy==0.9.10
 alembic==0.8.4
-bcrypt==3.1.1
-pyjwt==1.4.0
+pyjwt==2.3.0
 validate_email
 py3dns
 -e git://github.com/edomora97/cms.git@docker#egg=cms
-gevent>=20.12.0,<20.13  # http://www.gevent.org/changelog.html
-greenlet>=0.4.17,<0.5
