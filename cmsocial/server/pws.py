@@ -294,7 +294,7 @@ class APIHandler(object):
             if participation is None:
                 return None
             if password is None or \
-               self.validate_user(participation.user, password):
+                self.validate_user(participation.user, password):
                 return participation
         except UnicodeDecodeError:
             return None
