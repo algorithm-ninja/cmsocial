@@ -195,7 +195,8 @@ class APIHandler(object):
                     auth_data = dict()
                 else:
                     auth_data = jwt.decode(local.jwt_payload,
-                                           config.get('core', 'secret'))
+                                           config.get('core', 'secret'),
+                                           algorithms=["HS256"])
                 username = auth_data['username']
 
                 local.participation = self.get_participation(
