@@ -1,16 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-"""Build and installation routines for CMSocial.
-
-"""
-
-
-
-# setuptools doesn't seem to like this:
-# from __future__ import unicode_literals
-
-import os
 
 from setuptools import setup, find_packages
 
@@ -26,7 +15,6 @@ setup(
     include_package_data=True,
     entry_points={
         "console_scripts": [
-#            "cmsocialServer=cmsocial.server.pws:main",   # we must rename this because of CMS's ResourceService
             "cmsPracticeWebServer=cmsocial.server.pws:main",
             "cmsocialSyncTasks=cmsocial.scripts.synctasks:main",
             "cmsocialSyncUsers=cmsocial.scripts.syncusers:main",

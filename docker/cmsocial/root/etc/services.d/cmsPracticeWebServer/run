@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+
+cd /config
+
+if [ ! -f "$CMS_CONFIG" ]; then
+    echo "Missing $CMS_CONFIG" >&2
+    exit 1
+fi
+
+if [ ! -f ./config/cmsocial.ini ]; then
+    echo "Missing ./config/cmsocial.ini (at $(pwd)/config/cmsocial.ini)" >&2
+    exit 1
+fi
+
+exec cmsPracticeWebServer 0

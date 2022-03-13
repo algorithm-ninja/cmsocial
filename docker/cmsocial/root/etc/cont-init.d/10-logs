@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv bash
+
+mkdir -p /config/logs
+chown $PUID:$PGID /config/logs
+
+mkdir -p /var/local/log
+rm -rf /var/local/log/cms
+ln -s /config/logs /var/local/log/cms
