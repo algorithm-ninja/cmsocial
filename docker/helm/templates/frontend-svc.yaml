@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-cmsocial-web
+  annotations:
+    {{- include "cms.annot" .Values.cmsocial_web.service.annotations | nindent 4 }}
+  labels:
+    app: {{ .Release.Name }}-cmsocial-web
+    {{- include "cms.annot" .Values.cmsocial_web.service.annotations | nindent 4 }}
+spec:
+  type: {{ .Values.cmsocial_web.service.type }}
+  selector:
+    app: {{ .Release.Name }}-cmsocial-web
+  ports:
+  - port: {{ .Values.cmsocial_web.service.port }}
+    targetPort: 80
+    {{- if eq .Values.cmsocial_web.service.type "NodePort" }}
+    nodePort: {{ .Values.cmsocial_web.service.port }}
+    {{- end }}

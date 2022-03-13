@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-cmsocial-config
+data:
+  cmsocial.ini: |
+    [core]
+    secret = {{ .Values.cmsocial.secret_key | required "missing .cmsocial.secret_key" }}
+    max_submission_length = 1000000000
+    listen_address = 0.0.0.0
+    listen_port = 18888

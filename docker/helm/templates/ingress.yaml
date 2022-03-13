@@ -1,0 +1,100 @@
+{{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.traefik }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-cmsocial-web
+  annotations:
+    {{- include "cms.annot" .Values.ingress.annotations | nindent 4 }}
+  labels:
+    app: {{ .Release.Name }}-cmsocial-web
+    {{- include "cms.annot" .Values.ingress.labels | nindent 4 }}
+spec:
+  routes:
+    - match: Host(`{{ .Values.ingress.host }}`)
+      kind: Rule
+      services:
+        - name: {{ .Release.Name }}-cmsocial-web
+          port: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ .Release.Name }}-cmsocial
+  annotations:
+    {{- include "cms.annot" .Values.ingress.annotations | nindent 4 }}
+  labels:
+    app: {{ .Release.Name }}-cmsocial
+    {{- include "cms.annot" .Values.ingress.labels | nindent 4 }}
+spec:
+  routes:
+    - match: Host(`{{ .Values.ingress.host }}`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: {{ .Release.Name }}-cmsocial
+          port: 18888
+      middlewares:
+        - name: {{ .Release.Name }}-cmsocial-addprefix
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ .Release.Name }}-cmsocial-addprefix
+spec:
+  addPrefix:
+    prefix: /allenamenti
+
+{{- else }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-cmsocial
+  annotations:
+    {{- include "cms.annot" .Values.ingress.annotations | nindent 4 }}
+  labels:
+    app: {{ .Release.Name }}-cmsocial
+    {{- include "cms.annot" .Values.ingress.labels | nindent 4 }}
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: /api
+        backend:
+          service:
+            name: {{ .Release.Name }}-cmsocial
+            port:
+              number: 18888
+  {{- with .Values.ingress.tls }}
+  tls:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-cmsocial-web
+  annotations:
+    {{- include "cms.annot" .Values.ingress.annotations | nindent 4 }}
+  labels:
+    app: {{ .Release.Name }}-cmsocial-web
+    {{- include "cms.annot" .Values.ingress.labels | nindent 4 }}
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: {{ .Release.Name }}-cmsocial-web
+            port:
+              number: 80
+  {{- with .Values.ingress.tls }}
+  tls:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}

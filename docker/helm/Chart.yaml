@@ -1,0 +1,12 @@
+apiVersion: v2
+name: cmsocial
+description: A web application that builds a social coding platform upon CMS
+
+version: 0.0.1
+appVersion: v3
+type: application
+
+dependencies:
+  - name: cms
+    version: "0.0.4"
+    repository: https://edomora97.github.io/cms/helm/

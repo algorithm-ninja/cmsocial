@@ -1,0 +1,25 @@
+{{- define "cmsocial.backend.additionalVolumeMounts" }}
+- name: cmsocial-config
+  mountPath: /config/config
+  readOnly: true
+{{- end }}
+{{- define "cmsocial.backend.additionalVolumes" }}
+- name: cmsocial-config
+  configMap:
+    name: {{ .Release.Name }}-cmsocial-config
+    items:
+    - key: cmsocial.ini
+      path: cmsocial.ini
+{{- end }}
+{{- $data := dict "Chart" .Chart "Release" .Release "Values" .Values }}
+{{- $_ := set $data "image" .Values.cmsocial.image }}
+{{- $_ := set $data "service" "cmsocial" }}
+{{- $_ := set $data "port" 18888 }}
+{{- $_ := set $data "healthPath" "/health" }}
+{{- $_ := set $data "kind" "StatefulSet" }}
+{{- $_ := merge $data.Values .Values.cms }}
+{{- $_ := merge $data.Values .Values.cmsocial }}
+{{- $_ := merge $data .Values.cmsocial }}
+{{- $_ := set $data "additionalVolumeMounts" (include "cmsocial.backend.additionalVolumeMounts" . ) }}
+{{- $_ := set $data "additionalVolumes" (include "cmsocial.backend.additionalVolumes" . ) }}
+{{ include "cms.deployment" $data }}

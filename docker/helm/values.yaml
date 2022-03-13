@@ -1,0 +1,63 @@
+cms:
+  ranking:
+    enabled: false
+
+cmsocial:
+  image: ghcr.io/algorithm-ninja/cmsocial
+  # The secret must be an hexadecimal string
+  secret_key: ~
+
+  # annotations: {}
+  # labels: {}
+  # podAnnotations: {}
+  # podLabels: {}
+
+  # nodeSelector: {}
+  # tolerations: []
+  # affinity: {}
+  # resources: {}
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 18888
+    annotations: {}
+    labels: {}
+
+cmsocial_web:
+  image: ghcr.io/algorithm-ninja/cmsocial-web
+
+  # annotations: {}
+  # labels: {}
+  # podAnnotations: {}
+  # podLabels: {}
+
+  # nodeSelector: {}
+  # tolerations: []
+  # affinity: {}
+  # resources: {}
+  #   limits:
+  #     cpu: 100m
+  #     memory: 128Mi
+  #   requests:
+  #     cpu: 100m
+  #     memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 80
+    annotations: {}
+    labels: {}
+
+ingress:
+  enabled: false
+  annotations: {}
+  labels: {}
+  host: ~
+  tls: []
+    #  - secretName: example-tls
+    #    hosts:
+    #      - aws.example.com

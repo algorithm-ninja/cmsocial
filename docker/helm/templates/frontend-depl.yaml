@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-cmsocial-web
+  {{- include "cms.annot" .Values.cmsocial_web.annotations | nindent 4 }}
+  labels:
+    app: {{ .Release.Name }}-cmsocial-web
+    {{- include "cms.annot" .Values.cmsocial_web.annotations | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-cmsocial-web
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-cmsocial-web
+    spec:
+      imagePullSecrets: {{ .pullSecrets }}
+      nodeSelector:
+        {{- toYaml .Values.cmsocial_web.nodeSelector | nindent 8 }}
+      tolerations:
+        {{- toYaml .Values.cmsocial_web.tolerations | nindent 8 }}
+      affinity:
+        {{- toYaml .Values.cmsocial_web.affinity | nindent 8 }}
+      containers:
+        - name: cmsocial-web
+          image: {{ .Values.cmsocial_web.image }}:{{ default $.Chart.AppVersion .tag }}
+          imagePullPolicy: {{ .pullPolicy }}
+          resources:
+            {{- toYaml .Values.cmsocial_web.resources | nindent 12 }}
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 15

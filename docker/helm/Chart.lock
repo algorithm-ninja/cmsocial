@@ -1,0 +1,6 @@
+dependencies:
+- name: cms
+  repository: https://edomora97.github.io/cms/helm/
+  version: 0.0.4
+digest: sha256:eb1aaf791fc45c1cf42ab2c52c693d59378b24474200fca94ca4db7381996466
+generated: "2022-03-15T18:19:42.932435547+01:00"
