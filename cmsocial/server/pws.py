@@ -1271,10 +1271,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['name'] = t.name
             local.resp['title'] = t.title
             local.resp['score_multiplier'] = t.social_task.score_multiplier
-            local.resp['help_available'] = (
-                t.social_task.help_available
-                or local.access_level <= 2
-            )
+            local.resp['help_available'] = t.social_task.help_available
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.items()])
             local.resp['submission_format'] =\
@@ -1452,13 +1449,13 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
-            if local.access_level >= 3 and not task.social_task.help_available:
+            if not task.social_task.help_available:
                 return 'Questo task non accetta richieste di testcase.'
 
             socpart = local.participation.social_participation
             # Make sure that the user is allowed to request
             # TODO: de-hardcode this.
-            if local.access_level >= 3 and datetime.utcnow() - socpart.last_help_time < timedelta(hours=1):
+            if datetime.utcnow() - socpart.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
