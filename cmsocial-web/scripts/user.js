@@ -35,9 +35,19 @@ angular.module('cmsocial')
           'action': 'me'
         })
         .success(function(data, status, headers, config) {
-          if (data.success === 0)
+          if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
-          else {
+
+            // Remove cookie stuck
+            $cookies.remove('token', {
+              domain: contestManager.getContest().cookie_domain,
+              path: '/'
+            });
+            $cookies.remove('token', {
+              domain: 'training.olinfo.it',
+              path: '/'
+            });
+          } else {
             user = data["user"];
             contestManager.refreshContest();
           }
@@ -76,6 +86,10 @@ angular.module('cmsocial')
       signout: function() {
         $cookies.remove('token', {
           domain: contestManager.getContest().cookie_domain,
+          path: '/'
+        });
+        $cookies.remove('token', {
+          domain: 'training.olinfo.it',
           path: '/'
         });
         user = {};

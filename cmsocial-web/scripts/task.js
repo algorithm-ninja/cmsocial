@@ -163,27 +163,21 @@ angular.module('cmsocial')
         $rootScope.submissions[name].length > 0;
     };
     var aceModeMap = {
-      "C": "c_cpp",
-      "C++": "c_cpp",
-      "Pascal": "pascal",
-      "Python": "python"
+      "C11 / gcc": "c_cpp",
+      "C++11 / g++": "c_cpp",
+      "Pascal / fpc": "pascal",
+      "Python 3 / CPython": "python"
     };
     var langExtMap = {
-      "C": ".c",
-      "C++": ".cpp",
-      "Pascal": ".pas",
-      "Python": ".py"
-    };
-    var cmsLanguageMap = {
-      "C11 / gcc": "C",
-      "C++11 / g++": "C++",
-      "Pascal / fpc": "Pascal",
-      "Python 2 / CPython": "Python"
+      "C11 / gcc": ".c",
+      "C++11 / g++": ".cpp",
+      "Pascal / fpc": ".pas",
+      "Python 3 / CPython": ".py"
     };
     $scope.languages = [];
     contestManager.getContestPromise().then(function(response) {
         for (var lang in contestManager.getContest().languages) {
-          $scope.languages.push(cmsLanguageMap[contestManager.getContest().languages[lang]]);
+          $scope.languages.push(contestManager.getContest().languages[lang]);
         }
 
         var preferred_language_key = "preferred_language_" + contestManager.getContest().name;
@@ -226,6 +220,7 @@ angular.module('cmsocial')
       $scope.files = {};
       $scope.files[$rootScope.task.submission_format[0]] = {
         'filename': "ace" + langExtMap[$scope.language],
+        'language': $scope.language,
         'data': btoa(unescape(encodeURIComponent($scope.aceSession.getDocument().getValue())))
           // HACK above: http://stackoverflow.com/a/26603875/747654
       };

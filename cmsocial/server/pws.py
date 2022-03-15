@@ -337,7 +337,7 @@ class APIHandler(object):
             return 'Username is invalid'
         else:
             user = local.session.query(User)\
-                .filter(User.username == username).first()
+                .filter(User.username.ilike(username)).first()
             if user is not None:
                 return 'This username is not available'
 
@@ -358,7 +358,9 @@ class APIHandler(object):
         return sha.hexdigest()
 
     def old_hashpw(self, pw):
-        return self.hash(pw + config.get("core", "secret"))
+        # FIXME: maybe we should keep stats on how many times
+        #        this function gets called over time
+        return self.hash(pw + "8e045a51e4b102ea803c06f92841a1fb")
 
     def old_validate(self, pw, storedpw):
         return self.old_hashpw(pw) == storedpw
@@ -723,12 +725,15 @@ class APIHandler(object):
             except IntegrityError:
                 return "Participation already exists"
         elif local.data['action'] == 'login':
-            try:
-                username = local.data['username']
-                password = local.data['password']
-            except KeyError:
+            username = local.data.get('username', '').rstrip()
+            password = local.data.get('password', '')
+            if username is None or password is None:
                 logger.warning('Missing parameter')
                 return 'Bad request'
+
+            # Don't fail if there is extra space at the end
+            username = username.strip()
+            # TODO: also check if username matches allowed regex?
 
             participation = self.get_participation(local.contest, username,
                                                    password)
@@ -1266,7 +1271,10 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['name'] = t.name
             local.resp['title'] = t.title
             local.resp['score_multiplier'] = t.social_task.score_multiplier
-            local.resp['help_available'] = t.social_task.help_available
+            local.resp['help_available'] = (
+                t.social_task.help_available
+                or local.access_level <= 2
+            )
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.items()])
             local.resp['submission_format'] =\
@@ -1444,13 +1452,13 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
 
         elif local.data['action'] == 'get':
             # Make sure that this task allows requests
-            if not task.social_task.help_available:
+            if local.access_level >= 3 and not task.social_task.help_available:
                 return 'Questo task non accetta richieste di testcase.'
 
             socpart = local.participation.social_participation
             # Make sure that the user is allowed to request
             # TODO: de-hardcode this.
-            if datetime.utcnow() - socpart.last_help_time < timedelta(hours=1):
+            if local.access_level >= 3 and datetime.utcnow() - socpart.last_help_time < timedelta(hours=1):
                 return "Hai già fatto una richiesta nell'ultima ora."
 
             testcase = local.session.query(Testcase)\
@@ -1729,18 +1737,24 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 f['name'] = sfe
                 files.append(f)
                 if sfe.endswith('.%l'):
-                    language = None
-                    for ext in SOURCE_EXTS:
-                        l = filename_to_language(ext)
-                        if f['filename'].endswith(ext):
-                            language = l
-                    if language is None:
-                        return 'The language of the files you sent is not ' + \
-                               'recognized!'
-                    elif sub_lang is not None and sub_lang != language:
-                        return 'The files you sent are in different languages!'
+                    if 'language' in f:
+                        try:
+                            sub_lang = get_language(f['language'])
+                        except KeyError:
+                            return 'Bad Request'  # The language provided by the frontend was not found
                     else:
-                        sub_lang = language
+                        language = None
+                        for ext in SOURCE_EXTS:
+                            l = filename_to_language(ext)
+                            if f['filename'].endswith(ext):
+                                language = l
+                        if language is None:
+                            return 'The language of the files you sent is not ' + \
+                                   'recognized!'
+                        elif sub_lang is not None and sub_lang != language:
+                            return 'The files you sent are in different languages!'
+                        else:
+                            sub_lang = language
 
             # Add the submission
             timestamp = make_datetime()
