@@ -95,6 +95,7 @@ class APIHandler(object):
     def __init__(self, parent):
         self.router = Map(
             [
+                Rule('/health', methods=["GET"], endpoint='health'),
                 Rule(
                     '/api/<target>',
                     methods=['POST'],
@@ -121,7 +122,7 @@ class APIHandler(object):
                     endpoint='staticfile'),
                 Rule('/<contest>/', methods=['GET'], endpoint='index'),
                 Rule('/<contest>', redirect_to='/<contest>/'),
-                Rule('/', methods=['GET'], endpoint='globalindex')
+                Rule('/', methods=['GET'], endpoint='globalindex'),
             ],
             encoding_errors='strict')
         self.file_cacher = parent.file_cacher
@@ -146,6 +147,12 @@ class APIHandler(object):
             return e
         except HTTPException:
             return NotFound()
+
+        if endpoint == 'health':
+            response = Response()
+            response.status_code = 200
+            response.data = "ok"
+            return response
 
         try:
             if endpoint == 'dbfile':
