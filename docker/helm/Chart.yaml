@@ -2,8 +2,10 @@ apiVersion: v2
 name: cmsocial
 description: A web application that builds a social coding platform upon CMS
 
-version: 0.0.1
-appVersion: v3
+# Update this every time the appVersion is updated
+version: 0.0.4
+# This should match the tag of the images
+appVersion: v4
 type: application
 
 dependencies:
