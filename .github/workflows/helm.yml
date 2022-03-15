@@ -12,6 +12,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Update helm dependencies
+      working-directory: docker/helm
+      run: helm dependency update
+
     - name: Package helm chart
       working-directory: docker/helm
       run: helm package . --destination /tmp/output
