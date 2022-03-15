@@ -1,5 +1,5 @@
 \timing
--- BEGIN;
+BEGIN;
 
 -- disable all the triggers
 SET session_replication_role = replica;
@@ -200,4 +200,4 @@ ALTER TYPE public.score_mode
     ADD VALUE 'max_subtask' AFTER 'max';
 
 -- ROLLBACK;
--- COMMIT;
+COMMIT;
