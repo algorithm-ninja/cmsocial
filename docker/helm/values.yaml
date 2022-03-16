@@ -31,6 +31,11 @@ cmsocial:
   cronjob:
     schedule: "0 2 * * *"
 
+workerSharedCache:
+  enabled: true
+  size: 20Gi
+  storageClassName: ~
+
 cmsocial_web:
   image: ghcr.io/algorithm-ninja/cmsocial-web
 

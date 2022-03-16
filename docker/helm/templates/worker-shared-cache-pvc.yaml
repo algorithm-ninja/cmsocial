@@ -1,0 +1,14 @@
+{{- if .Values.workerSharedCache.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-worker-shared-cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.workerSharedCache.size }}
+  storageClassName: {{ .Values.workerSharedCache.storageClassName }}
+{{- end }}
