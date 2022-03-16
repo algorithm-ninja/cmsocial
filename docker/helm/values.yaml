@@ -28,6 +28,9 @@ cmsocial:
     annotations: {}
     labels: {}
 
+  cronjob:
+    schedule: "0 2 * * *"
+
 cmsocial_web:
   image: ghcr.io/algorithm-ninja/cmsocial-web
 

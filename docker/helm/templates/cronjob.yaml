@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-updatescore
+  annotations:
+    {{- include "cms.annot" .Values.cmsocial.annotations | nindent 4 }}
+  labels:
+    app: {{ .Release.Name }}-updatescore
+    {{- include "cms.annot" .Values.cmsocial.labels | nindent 4 }}
+spec:
+  schedule: {{ .Values.cmsocial.cronjob.schedule }}
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          imagePullSecrets: {{ .Values.cmsocial.pullSecrets }}
+          nodeSelector:
+            {{- toYaml .Values.cmsocial.nodeSelector | nindent 12 }}
+          tolerations:
+            {{- toYaml .Values.cmsocial.tolerations | nindent 12 }}
+          affinity:
+            {{- toYaml .Values.cmsocial.affinity | nindent 12 }}
+          containers:
+          - name: updatescore
+            image: {{ .Values.cmsocial.image }}:{{ default $.Chart.AppVersion .tag }}
+            imagePullPolicy: {{ .Values.cmsocial.pullPolicy }}
+            command:
+            - /usr/local/bin/cmsocialUpdateScore
+            env:
+            - name: PUID
+              value: {{ .Values.cms.uid | quote }}
+            - name: PGID
+              value: {{ .Values.cms.gid | quote }}
+            - name: TZ
+              value: {{ .Values.cms.timeZone | quote }}
+            - name: CMS_SECRET_KEY_FILE
+              value: /config/secretKey/secretKey.txt
+            {{- if .Values.cms.db.fromSecret }}
+            - name: CMS_DATABASE_FILE
+              value: /config/db/db.txt
+            {{- end }}
+            volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: secret-key
+              mountPath: /config/secretKey
+              readOnly: true
+            {{- if .Values.cms.db.fromSecret }}
+            - name: database-url
+              mountPath: /config/db
+              readOnly: true
+            {{- end }}
+          volumes:
+          - name: config
+            configMap:
+              name: {{ .Release.Name }}-cms-config
+              items:
+              - key: cms.conf
+                path: cms.conf
+              - key: cms.ranking.conf
+                path: cms.ranking.conf
+          - name: secret-key
+            secret:
+              secretName: {{ default (printf "%s-secretkey" .Release.Name) .Values.cms.cms.secretKey.secretName }}
+              items:
+              - key: {{ default "secretKey" .Values.cms.cms.secretKey.secretKey }}
+                path: secretKey.txt
+          {{- if .Values.cms.db.fromSecret }}
+          - name: database-url
+            secret:
+              secretName: {{ .Values.cms.db.fromSecret.secretName }}
+              items:
+              - key: {{ .Values.cms.db.fromSecret.secretKey }}
+                path: db.txt
+          {{- end }}
+          restartPolicy: OnFailure
