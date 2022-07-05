@@ -6,7 +6,8 @@
 # ability = sum (difficulty*score), normalized to have average 1
 # total_score = sum(points)/num_users*ability
 # score = 1 if the number of points received in that task is at least 99, else
-# score = points/200
+# 0.1 if the score is at least 85, else 0.
+# User abilities are weighted as a function of their number of solved problems.
 
 import argparse
 import copy
@@ -23,7 +24,7 @@ except:
 
 
 def get_score(s):
-    return 1 if s >= 99 else s / 200.
+    return 1 if s >= 99 else 0.1 if s >= 85 else 0
 
 
 def compute_smart_score(user_to_task, task_to_user):
@@ -48,11 +49,15 @@ def compute_smart_score(user_to_task, task_to_user):
     for _ in range(20):  # twenty iterations
         # Ability pass
         total_ability = 0.
+        user_weight = dict()
         for uid in range(maxuser):
             abilities[uid] = 0
+            num_problems = 0
             for tid, score in user_to_task.get(uid, []):
                 abilities[uid] += difficulties[tid] * score
+                num_problems += 1
             total_ability += abilities[uid]
+            user_weight[uid] = math.log(2 + 2 * num_problems) / math.log(2)
         for uid in range(maxuser):
             abilities[uid] /= total_ability / len(user_to_task)
             if abilities[uid] < 0.01:
@@ -63,11 +68,17 @@ def compute_smart_score(user_to_task, task_to_user):
             if len(task_to_user.get(tid, [])) == 0:
                 continue
             sum_score_over_ability = 0
+            total_weight = 0
+            num_users = 0
             for uid, score in task_to_user.get(tid, []):
-                sum_score_over_ability += score / abilities[uid]
+                w = user_weight[uid]
+                total_weight += w
+                num_users += 1
+                sum_score_over_ability += score / abilities[uid] * w
             if sum_score_over_ability == 0:
                 difficulties[tid] = 10.0
             else:
+                sum_score_over_ability /= total_weight / num_users
                 difficulties[tid] = attempts_sqrt[tid] / sum_score_over_ability
             if difficulties[tid] > 10.0:
                 difficulties[tid] = 10.0
@@ -119,3 +130,7 @@ def main():
                 v.score = scores[v.id]
 
         session.commit()
+
+
+if __name__ == '__main__':
+    main()
