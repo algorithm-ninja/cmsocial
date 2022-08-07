@@ -65,28 +65,20 @@ angular.module('cmsocial')
           notificationHub.serverError(status);
         });
     };
+
     var isUserLogged = function() {
-      return $cookies.get('token') != null;
+      const tokenName = (
+        contestManager.getContest().title === 'MIUR — Corso Competenze Digitali'
+      ) ? 'token_digit' : 'token';
+
+      return $cookies.get(tokenName) != null;
     };
-    //var heartbeat_timeout = undefined;
-    //var heartbeat = function() {
-    //  heartbeat_timeout = $timeout(heartbeat, 60000);
-    //  if (isUserLogged()) {
-    //    $http.post(API_PREFIX + 'heartbeat', {})
-    //      .success(function(data, status, headers, config) {
-    //        if (data.success === 0) {
-    //          notificationHub.createAlert('danger', l10n.get('Login error'), 3);
-    //        }
-    //      }).error(function(data, status, headers, config) {
-    //        notificationHub.serverError(status);
-    //      });
-    //  }
-    //};
+
     if (isUserLogged()) refreshUser();
+
     return {
       getUser: getIt,
       isLogged: function() {
-        //if (heartbeat_timeout === undefined) heartbeat();
         return isUserLogged();
       },
       getGravatar: function(user, size) {
