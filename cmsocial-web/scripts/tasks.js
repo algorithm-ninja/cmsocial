@@ -149,17 +149,26 @@ angular.module('cmsocial')
       if (new_q != null && new_q.length < 1) {
         new_q = null;
       }
+      var new_order = $scope.search.order;
+      if (new_order === 'default') {
+        new_order = null;
+      }
       $state.go('^.page', {
         'pageNum': 1,
         'tag': $scope.search.tag,
-        'q': new_q
+        'q': new_q,
+        'order': new_order
       });
     };
   })
   .controller('TasklistPage', function($scope, $stateParams, $state, $http,
-    notificationHub, l10n, API_PREFIX) {
+    notificationHub, multiplierToStyleFilter, multiplierToScoreFilter, l10n, API_PREFIX) {
     $scope.pagination.current = +$stateParams.pageNum;
     $scope.search.q = $stateParams.q;
+    $scope.search.order = $stateParams.order;
+    if (!$scope.search.order) {
+      $scope.search.order = "default";
+    }
     $scope.search.tag_string = "";
     if ($scope.search.tag != null) {
       $scope.search.tags = $scope.search.tag.split(",");
@@ -168,6 +177,7 @@ angular.module('cmsocial')
       $http.post(API_PREFIX + 'task', {
           'search': $stateParams.q, // can be null
           'tag': $stateParams.tag, // can be null
+          'order': $stateParams.order, // can be null
           'first': $scope.pagination.perPage * ($scope.pagination.current - 1),
           'last': $scope.pagination.perPage * $scope.pagination.current,
           'action': 'list'
@@ -266,7 +276,7 @@ angular.module('cmsocial')
   })
   .controller('EventsPage', function($scope, $http, notificationHub) {
     $scope.ioi = [];
-    for (var i=2017; i>=2004; i--) {
+    for (var i=2018; i>=2004; i--) {
       $scope.ioi.push(i);
     }
   })

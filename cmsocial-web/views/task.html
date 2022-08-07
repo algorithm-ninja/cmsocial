@@ -1,5 +1,26 @@
 <div class="container">
-  <legend>{{task.title}}</legend>
+  <legend>
+    <div class="difficulty-container">
+      <div class="difficulty-background">
+        <i class="fa fa-star-o" aria-hidden="true"></i>
+        <i class="fa fa-star-o" aria-hidden="true"></i>
+        <i class="fa fa-star-o" aria-hidden="true"></i>
+        <i class="fa fa-star-o" aria-hidden="true"></i>
+        <i class="fa fa-star-o" aria-hidden="true"></i>
+      </div>
+      <div class="difficulty-foreground" style="{{task.score_multiplier | multiplierToStyle}}">
+        <i class="fa fa-star" aria-hidden="true"></i>
+        <i class="fa fa-star" aria-hidden="true"></i>
+        <i class="fa fa-star" aria-hidden="true"></i>
+        <i class="fa fa-star" aria-hidden="true"></i>
+        <i class="fa fa-star" aria-hidden="true"></i>
+      </div>
+    </div>
+    {{task.title}}
+    <div class="pull-right">
+      {{'Maximum score' | l10n }}: {{task.score_multiplier | multiplierToScore}}
+    </div>
+  </legend>
   <ul class="nav nav-tabs">
     <li ng-class="{active: isActiveTab(1)}">
       <a ui-sref=".statement"><i class="fa fa-file-text fa-lg"></i> {{'Statement' | l10n}}</a>

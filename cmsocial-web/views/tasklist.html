@@ -9,6 +9,13 @@
     </span>
     <form class="search-by-tag form-inline pull-right" role="form" ng-submit="reloadTasks()">
       <div class="form-group">
+        <select class="form-control" ng-model="search.order" ng-change="reloadTasks()">
+          <option name='default' value='default'>{{'Newest first' | l10n}}</option>
+          <option name='hardest' value='hardest'>{{'Hardest first' | l10n}}</option>
+          <option name='easiest' value='easiest'>{{'Easiest first' | l10n}}</option>
+        </select>
+      </div>
+      <div class="form-group">
         <input class="form-control" maxlength="50" autocomplete="off"
             type="text" id="tag" name="tag" ng-model="search.q"
             placeholder="{{'Search by name' | l10n}}"/>

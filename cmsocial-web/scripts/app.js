@@ -20,7 +20,7 @@ angular
     'ui.ace',
     'angular-md5',
   ])
-  .constant('API_PREFIX', 'api/')
+  .constant('API_PREFIX', '/api/')
   .config(function($locationProvider, $stateProvider, $urlRouterProvider) {
     $locationProvider.html5Mode(false); //.hashPrefix('!')
     // FIXME: ui-router ignores hashPrefix for href attributes, so we don't use it (for now)
@@ -48,7 +48,7 @@ angular
         controller: 'TasklistSkel'
       })
       .state('tasklist.page', {
-        url: '/tasks/{pageNum}?tag&q',
+        url: '/tasks/{pageNum}?tag&q&order',
         templateUrl: 'COMMIT_ID_HERE/views/tasks.html',
         controller: 'TasklistPage'
       })
@@ -278,6 +278,16 @@ angular
       else if (input > 1024)
         return (input / 1024).toFixed(0) + " KiB";
       return input + " B";
+    };
+  })
+  .filter('multiplierToStyle', function() {
+    return function(input) {
+      return "width: " + ((Math.log10(input)+1)*45+10) + "%;";
+    };
+  })
+  .filter('multiplierToScore', function() {
+    return function(input) {
+      return Math.round(input*100);
     };
   })
   .filter('dateFmt', function() {
