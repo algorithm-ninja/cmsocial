@@ -1236,6 +1236,8 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 task['name'] = t.name
                 task['title'] = t.title
                 task['score_multiplier'] = t.social_task.score_multiplier
+                task['difficulty'] = t.social_task.difficulty
+                task['category'] = t.social_task.category
 
                 if local.participation is not None:
                     taskscore = local.session.query(TaskScore)\

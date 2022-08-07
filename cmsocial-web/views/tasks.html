@@ -2,7 +2,7 @@
   <div ng-if="tasks.length < 1" class="not-found-msg">{{'no tasks found' | l10n}}</div>
   <div class="list-group">
     <a ng-repeat="task in tasks" ng-class="{'correct': task.score == 100, 'partial': task.score > 0 && task.score < 100, 'wrong': task.score == 0}" class="list-group-item" ui-sref="task.statement({ taskName: task.name })">
-      <div class="difficulty-container">
+      <div class="difficulty-container" ng-if="cm.getContest().title != 'MIUR — Corso Competenze Digitali'">
         <div class="difficulty-background">
           <i class="fa fa-star-o" aria-hidden="true"></i>
           <i class="fa fa-star-o" aria-hidden="true"></i>

@@ -8,7 +8,7 @@
       {{search.tag_string}}
     </span>
     <form class="search-by-tag form-inline pull-right" role="form" ng-submit="reloadTasks()">
-      <div class="form-group">
+      <div class="form-group" ng-if="cm.getContest().title != 'MIUR — Corso Competenze Digitali'">
         <select class="form-control" ng-model="search.order" ng-change="reloadTasks()">
           <option name='default' value='default'>{{'Newest first' | l10n}}</option>
           <option name='hardest' value='hardest'>{{'Hardest first' | l10n}}</option>

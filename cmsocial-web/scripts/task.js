@@ -27,6 +27,7 @@ angular.module('cmsocial')
     $scope.tag = {};
     $scope.isActiveTab = taskbarManager.isActiveTab;
     $scope.isLogged = contestManager.hasParticipation;
+    $scope.cm = contestManager;
     $scope.taskName = $stateParams.taskName;
 
     $scope.tagClicked = function(tag) {

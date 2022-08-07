@@ -38,9 +38,19 @@ angular.module('cmsocial')
           if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
 
-            // Remove cookie stuck
+            // Remove cookies
+            $cookies.remove('token_digit', {
+              domain: contestManager.getContest().cookie_domain,
+              path: '/'
+            });
             $cookies.remove('token', {
               domain: contestManager.getContest().cookie_domain,
+              path: '/'
+            });
+
+            // Remove old cookies that could be stuck
+            $cookies.remove('token_digit', {
+              domain: 'digit.olinfo.it',
               path: '/'
             });
             $cookies.remove('token', {

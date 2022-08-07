@@ -58,6 +58,10 @@ class SocialTask(Base):
 
     nuserscorrect = Column(Integer, nullable=False, default=0)
 
+    difficulty = Column(Integer, nullable=True)
+
+    category = Column(String, nullable=True)
+
     # The list of tasktags which tag this task
     tasktags = relationship('TaskTag')
 

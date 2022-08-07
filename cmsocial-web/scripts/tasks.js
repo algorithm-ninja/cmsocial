@@ -138,7 +138,8 @@ angular.module('cmsocial')
 
     return self;
   })
-  .controller('TasklistSkel', function($scope, $state, $stateParams) {
+  .controller('TasklistSkel', function($scope, $state, $stateParams, contestManager) {
+    $scope.cm = contestManager;
     $scope.search = {};
     $scope.pagination = {
       perPage: 15
