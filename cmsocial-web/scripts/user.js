@@ -67,9 +67,8 @@ angular.module('cmsocial')
     };
 
     var isUserLogged = function() {
-      const tokenName = (
-        contestManager.getContest().title === 'MIUR — Corso Competenze Digitali'
-      ) ? 'token_digit' : 'token';
+      // TODO: use more robust way to find which contest we're in
+      const tokenName = location.host.startsWith("digit.") ? 'token_digit' : 'token';
 
       return $cookies.get(tokenName) != null;
     };
