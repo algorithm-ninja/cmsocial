@@ -188,7 +188,7 @@ class APIHandler(object):
             else:
                 local.contest = None
             try:
-                local.jwt_payload = request.cookies.get('token' if local.contest.social_contest.title != 'MIUR — Corso Competenze Digitali' else 'token_digit')
+                local.jwt_payload = request.cookies.get('token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit')
                 if local.jwt_payload is None:
                     auth_data = dict()
                 else:
@@ -690,7 +690,7 @@ class APIHandler(object):
             local.user = user
             local.response = Response()
             local.response.set_cookie(
-                'token' if local.contest.social_contest.title != 'MIUR — Corso Competenze Digitali' else 'token_digit',
+                'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                 value=self.build_token(),
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'newparticipation':
@@ -739,7 +739,7 @@ class APIHandler(object):
             cookie_duration = 30 * 86400 if keep_signed else None
             local.response = Response()
             local.response.set_cookie(
-                'token' if local.contest.social_contest.title != 'MIUR — Corso Competenze Digitali' else 'token_digit',
+                'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                 value=self.build_token(),
                 max_age=cookie_duration,
                 domain=local.contest.social_contest.cookie_domain)
@@ -861,7 +861,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
         local.response = Response()
         if local.user is None:
             local.response.set_cookie(
-                'token' if local.contest.social_contest.title != 'MIUR — Corso Competenze Digitali' else 'token_digit',
+                'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                 expires=datetime.utcnow(),
                 domain=local.contest.social_contest.cookie_domain)
             return 'Unauthorized'
@@ -869,7 +869,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             new_token = self.build_token()
             if new_token != local.jwt_payload:
                 local.response.set_cookie(
-                    'token' if local.contest.social_contest.title != 'MIUR — Corso Competenze Digitali' else 'token_digit',
+                    'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                     value=new_token,
                     domain=local.contest.social_contest.cookie_domain)
 
