@@ -26,7 +26,7 @@ angular.module('cmsocial')
     };
   })
   .factory('userManager', function($http, $timeout, $sce, $cookies, notificationHub, contestManager, l10n, API_PREFIX) {
-    const user = {};
+    let user = {};
 
     const getIt = function() {
       return user;
