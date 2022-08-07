@@ -34,10 +34,12 @@ angular
       .when('/tecniques', '/techniques')
       .otherwise('/overview');
 
+    const version = location.host.startsWith("digit.") ? "digit" : "training";
+
     $stateProvider
       .state('overview', {
         url: '/overview',
-        templateUrl: 'COMMIT_ID_HERE/views/homepage.html',
+        templateUrl: `COMMIT_ID_HERE/views/homepage-${version}.html`,
         controller: 'HomepageCtrl'
       })
       .state('sso', {

@@ -489,20 +489,6 @@ class APIHandler(object):
         if contest_name is None:
             return NotFound()
 
-        with SessionGen() as session:
-            social_contest = session.query(SocialContest)\
-                .join(Contest)\
-                .filter(SocialContest.social_enabled == True)\
-                .filter(Contest.name == contest_name).first()
-            if social_contest is None:
-                return NotFound()
-            if filename == 'views/homepage.html':
-                if social_contest.homepage is not None:
-                    return self.dbfile_handler(
-                        environ, {
-                            'digest': social_contest.homepage,
-                            'name': 'homepage.html'
-                        })
         path = os.path.join(
             pkg_resources.resource_filename('cmsocial-web-build', ''),
             filename)
