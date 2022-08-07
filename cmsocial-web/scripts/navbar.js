@@ -52,21 +52,23 @@ angular.module('cmsocial')
 
     _l10n = l10n;
 
-    const languageSelectorElement = document.getElementById("langsel");
-    if (languageSelectorElement) {
-      ReactDOM.render(
-        <LanguageSelector/>,
-        languageSelectorElement
-      );
+    setTimeout(function() {
+      const languageSelectorElement = document.getElementById("langsel");
+      if (languageSelectorElement) {
+        ReactDOM.render(
+          <LanguageSelector/>,
+          languageSelectorElement
+        );
 
-      // ugly hack because of react limitation
-      let x = document.getElementsByTagName("something");
-      for (let y of Array.from(x)) {
-          while (y.childNodes.length > 0) {
-              y.parentNode.appendChild(y.childNodes[0]);
-          }
+        // ugly hack because of react limitation
+        let x = document.getElementsByTagName("something");
+        for (let y of Array.from(x)) {
+            while (y.childNodes.length > 0) {
+                y.parentNode.appendChild(y.childNodes[0]);
+            }
+        }
       }
-    }
+    }, 1);
   });
 
 
