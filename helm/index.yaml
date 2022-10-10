@@ -3,13 +3,13 @@ entries:
   cmsocial:
   - apiVersion: v2
     appVersion: v4
-    created: "2022-10-10T19:47:52.430894386Z"
+    created: "2022-10-10T21:55:12.433207092Z"
     dependencies:
     - name: cms
       repository: https://edomora97.github.io/cms/helm/
       version: 0.0.4
     description: A web application that builds a social coding platform upon CMS
-    digest: 665f616f2eec07b35f505759620856593f811249417a5b68de93d3e2ac0d92e5
+    digest: 92c32e3212b7d87642dc67a31c2b3196cbd477357cde71a084e9f8cb687627ff
     name: cmsocial
     type: application
     urls:
@@ -17,7 +17,7 @@ entries:
     version: 0.0.4
   - apiVersion: v2
     appVersion: v3
-    created: "2022-10-10T19:47:52.429865779Z"
+    created: "2022-10-10T21:55:12.432014463Z"
     dependencies:
     - name: cms
       repository: https://edomora97.github.io/cms/helm/
@@ -29,4 +29,4 @@ entries:
     urls:
     - cmsocial-0.0.1.tgz
     version: 0.0.1
-generated: "2022-10-10T19:47:52.428570469Z"
+generated: "2022-10-10T21:55:12.430632028Z"
