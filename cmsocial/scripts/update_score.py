@@ -113,7 +113,7 @@ def main():
                 copy.deepcopy(user_to_task), copy.deepcopy(task_to_user)))
 
         scores = dict()
-        for uid, problems in user_to_task.iteritems():
+        for uid, problems in user_to_task.items():
             score = 0
             for tid, pt in problems:
                 score += values[tid] * pt
