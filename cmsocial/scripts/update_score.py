@@ -33,7 +33,7 @@ def compute_smart_score(user_to_task, task_to_user):
     difficulties = [1. for x in range(maxtask)]
     abilities = [1. for x in range(maxuser)]
     attempts = [len(task_to_user.get(i, [])) for i in range(maxtask)]
-    attempts_sqrt = map(math.sqrt, attempts)
+    attempts_sqrt = list(map(math.sqrt, attempts))
 
     for uid in range(maxuser):
         if len(user_to_task.get(uid, [])) == 0:
