@@ -1,0 +1,15 @@
+<div class="container">
+  <h2><i class="fa fa-question-circle fa-lg"></i> {{title}}</h2><br>
+  <div class="panel panel-default" ng-repeat="q in faqs">
+    <div class="panel-heading" onclick="$(this).next().slideToggle('fast')" style="cursor:pointer">
+      <h3 class="panel-title">{{q.question}}</h3>
+    </div>
+    <div class="panel-body" style="display:none">
+      <div class="col-lg-12">
+        <div class="video-cont">
+        	{{q.answer}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

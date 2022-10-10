@@ -26,11 +26,35 @@ angular.module('cmsocial')
     };
   })
   .factory('userManager', function($http, $timeout, $sce, $cookies, notificationHub, contestManager, l10n, API_PREFIX) {
-    var user = {};
-    var getIt = function() {
+    let user = {};
+
+    const getIt = function() {
       return user;
     };
-    var refreshUser = function() {
+
+    const clearCookies = function() {
+      // Remove cookies
+      $cookies.remove('token_digit', {
+        domain: contestManager.getContest().cookie_domain,
+        path: '/'
+      });
+      $cookies.remove('token', {
+        domain: contestManager.getContest().cookie_domain,
+        path: '/'
+      });
+
+      // Remove old cookies that could be stuck
+      $cookies.remove('token_digit', {
+        domain: 'digit.olinfo.it',
+        path: '/'
+      });
+      $cookies.remove('token', {
+        domain: 'training.olinfo.it',
+        path: '/'
+      });
+    };
+
+    const refreshUser = function() {
       $http.post(API_PREFIX + "user", {
           'action': 'me'
         })
@@ -38,15 +62,7 @@ angular.module('cmsocial')
           if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
 
-            // Remove cookie stuck
-            $cookies.remove('token', {
-              domain: contestManager.getContest().cookie_domain,
-              path: '/'
-            });
-            $cookies.remove('token', {
-              domain: 'training.olinfo.it',
-              path: '/'
-            });
+            clearCookies();
           } else {
             user = data["user"];
             contestManager.refreshContest();
@@ -55,28 +71,19 @@ angular.module('cmsocial')
           notificationHub.serverError(status);
         });
     };
-    var isUserLogged = function() {
-      return $cookies.get('token') != null;
+
+    const isUserLogged = function() {
+      // TODO: use more robust way to find which contest we're in
+      const tokenName = location.host.startsWith("digit.") ? 'token_digit' : 'token';
+
+      return $cookies.get(tokenName) != null;
     };
-    //var heartbeat_timeout = undefined;
-    //var heartbeat = function() {
-    //  heartbeat_timeout = $timeout(heartbeat, 60000);
-    //  if (isUserLogged()) {
-    //    $http.post(API_PREFIX + 'heartbeat', {})
-    //      .success(function(data, status, headers, config) {
-    //        if (data.success === 0) {
-    //          notificationHub.createAlert('danger', l10n.get('Login error'), 3);
-    //        }
-    //      }).error(function(data, status, headers, config) {
-    //        notificationHub.serverError(status);
-    //      });
-    //  }
-    //};
+
     if (isUserLogged()) refreshUser();
+
     return {
       getUser: getIt,
       isLogged: function() {
-        //if (heartbeat_timeout === undefined) heartbeat();
         return isUserLogged();
       },
       getGravatar: function(user, size) {
@@ -84,14 +91,7 @@ angular.module('cmsocial')
       },
       refresh: refreshUser,
       signout: function() {
-        $cookies.remove('token', {
-          domain: contestManager.getContest().cookie_domain,
-          path: '/'
-        });
-        $cookies.remove('token', {
-          domain: 'training.olinfo.it',
-          path: '/'
-        });
+        clearCookies();
         user = {};
       }
     };

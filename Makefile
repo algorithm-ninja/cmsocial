@@ -17,11 +17,11 @@ endif
 ifeq ($(PROD), 1)
 STRIPDEBUG=sed '/<!-- *start  *debug *-->/,/<!-- *end  *debug *-->/d'
 UGLIFY=node_modules/.bin/uglifyjs
-BABEL=node_modules/.bin/babel --
+BABEL=babel --
 else
 STRIPDEBUG=cat
 UGLIFY=cat
-BABEL=node_modules/.bin/babel --
+BABEL=babel --
 endif
 
 WEBDIRS=$(shell find cmsocial-web -type d)
@@ -41,7 +41,7 @@ all: $(DESTHTML) $(ROOT)/index.html $(DEST)/styles/main.css $(DEST)/scripts/app.
 
 other-files: $(DEST)/robots.txt $(DEST)/images/loader.gif $(ROOT)/__init__.py
 
-config-files: $(ROOT)/custom_images $(ROOT)/favicon.ico $(DEST)/views/footer.html $(DEST)/views/homepage.html
+config-files: $(ROOT)/custom_images $(ROOT)/favicon.ico $(DEST)/views/footer.html $(DEST)/views/homepage-training.html $(DEST)/views/homepage-digit.html
 
 ifeq ($(ONLINE), 1)
 js-deps:
@@ -79,7 +79,10 @@ $(ROOT)/favicon.ico: config/favicon.ico | $(DEST)
 $(DEST)/views/footer.html: config/footer.html | $(DEST)
 	cp $< $@
 
-$(DEST)/views/homepage.html: config/homepage.html | $(DEST)
+$(DEST)/views/homepage-training.html: config/homepage-training.html | $(DEST)
+	cp $< $@
+
+$(DEST)/views/homepage-digit.html: config/homepage-digit.html | $(DEST)
 	cp $< $@
 
 $(DEST)/%.html: cmsocial-web/%.html | $(DEST)

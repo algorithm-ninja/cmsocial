@@ -63,7 +63,7 @@ local = gevent.local.local()
 
 config = configparser.SafeConfigParser()
 config.read([
-    '/usr/local/etc/cmsocial.ini',
+    os.environ.get("CMSOCIAL_CONFIG", '/usr/local/etc/cmsocial.ini'),
     './config/cmsocial.ini'
 ])
 
@@ -74,7 +74,7 @@ class WSGIHandler(gevent.pywsgi.WSGIHandler):
             delta = '%.6f' % (self.time_finish - self.time_start)
         else:
             delta = '-'
-        client_address = self.environ['REMOTE_ADDR']
+        client_address = self.environ.get('REMOTE_ADDR', None)
         return '%s %s %s %s' % (client_address or '-', (
             getattr(self, 'status', None) or '000').split()[0], delta,
                                 getattr(self, 'requestline', ''))
@@ -197,7 +197,7 @@ class APIHandler(object):
             else:
                 local.contest = None
             try:
-                local.jwt_payload = request.cookies.get("token")
+                local.jwt_payload = request.cookies.get('token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit')
                 if local.jwt_payload is None:
                     auth_data = dict()
                 else:
@@ -342,7 +342,7 @@ class APIHandler(object):
                 return 'This username is not available'
 
     def check_email(self, email):
-        if self.EMAIL_REG.match(email) and validate_email(email, verify=True):
+        if self.EMAIL_REG.match(email) and validate_email(email, check_mx=True):
             user = local.session.query(User)\
                 .filter(User.email == email).first()
             if user is not None:
@@ -501,20 +501,6 @@ class APIHandler(object):
         if contest_name is None:
             return NotFound()
 
-        with SessionGen() as session:
-            social_contest = session.query(SocialContest)\
-                .join(Contest)\
-                .filter(SocialContest.social_enabled == True)\
-                .filter(Contest.name == contest_name).first()
-            if social_contest is None:
-                return NotFound()
-            if filename == 'views/homepage.html':
-                if social_contest.homepage is not None:
-                    return self.dbfile_handler(
-                        environ, {
-                            'digest': social_contest.homepage,
-                            'name': 'homepage.html'
-                        })
         path = os.path.join(
             pkg_resources.resource_filename('cmsocial-web-build', ''),
             filename)
@@ -702,7 +688,7 @@ class APIHandler(object):
             local.user = user
             local.response = Response()
             local.response.set_cookie(
-                'token',
+                'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                 value=self.build_token(),
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'newparticipation':
@@ -750,7 +736,7 @@ class APIHandler(object):
             cookie_duration = 30 * 86400 if keep_signed else None
             local.response = Response()
             local.response.set_cookie(
-                'token',
+                'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                 value=self.build_token(),
                 max_age=cookie_duration,
                 domain=local.contest.social_contest.cookie_domain)
@@ -872,7 +858,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
         local.response = Response()
         if local.user is None:
             local.response.set_cookie(
-                'token',
+                'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                 expires=datetime.utcnow(),
                 domain=local.contest.social_contest.cookie_domain)
             return 'Unauthorized'
@@ -880,7 +866,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             new_token = self.build_token()
             if new_token != local.jwt_payload:
                 local.response.set_cookie(
-                    'token',
+                    'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                     value=new_token,
                     domain=local.contest.social_contest.cookie_domain)
 
@@ -1247,6 +1233,8 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 task['name'] = t.name
                 task['title'] = t.title
                 task['score_multiplier'] = t.social_task.score_multiplier
+                task['difficulty'] = t.social_task.difficulty
+                task['category'] = t.social_task.category
 
                 if local.participation is not None:
                     taskscore = local.session.query(TaskScore)\
@@ -1271,7 +1259,10 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             local.resp['name'] = t.name
             local.resp['title'] = t.title
             local.resp['score_multiplier'] = t.social_task.score_multiplier
-            local.resp['help_available'] = t.social_task.help_available
+            local.resp['help_available'] = (
+                t.social_task.help_available
+                or local.access_level <= 2
+            )
             local.resp['statements'] =\
                 dict([(l, s.digest) for l, s in t.statements.items()])
             local.resp['submission_format'] =\

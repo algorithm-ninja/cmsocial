@@ -138,7 +138,8 @@ angular.module('cmsocial')
 
     return self;
   })
-  .controller('TasklistSkel', function($scope, $state, $stateParams) {
+  .controller('TasklistSkel', function($scope, $state, $stateParams, contestManager) {
+    $scope.cm = contestManager;
     $scope.search = {};
     $scope.pagination = {
       perPage: 15
@@ -276,7 +277,7 @@ angular.module('cmsocial')
   })
   .controller('EventsPage', function($scope, $http, notificationHub) {
     $scope.ioi = [];
-    for (var i=2017; i>=2004; i--) {
+    for (var i=2022; i>=2004; i--) {
       $scope.ioi.push(i);
     }
   })

@@ -27,6 +27,7 @@ angular.module('cmsocial')
     $scope.tag = {};
     $scope.isActiveTab = taskbarManager.isActiveTab;
     $scope.isLogged = contestManager.hasParticipation;
+    $scope.cm = contestManager;
     $scope.taskName = $stateParams.taskName;
 
     $scope.tagClicked = function(tag) {
@@ -214,7 +215,7 @@ angular.module('cmsocial')
 
     $scope.loadAce = function() {
       if (!subsDatabase.submitCompleted) {
-        return notificationHub.createAlert('warning', 'You have a pending submission', 2);
+        return notificationHub.createAlert('warning', l10n.get('You have a pending submission'), 2);
       }
 
       $scope.files = {};
@@ -322,7 +323,7 @@ angular.module('cmsocial')
             else
               statementLanguage = Object.keys(scope.task.statements)[0];
           }
-          var pdfURL = location.pathname.replace(/[^\/]*$/, '') + API_PREFIX + 'files/' + scope.task.statements[statementLanguage] + '/testo.pdf';
+          var pdfURL = API_PREFIX + 'files/' + scope.task.statements[statementLanguage] + '/testo.pdf';
           var downloadButton = '<a href="' + pdfURL + '" class="btn btn-success" style="margin-top:5px;">Download PDF</a>';
           if (goodBrowser && hasBuiltInPdf)
             element.replaceWith('<object data="' + pdfURL + '" type="application/pdf" class="' + attrs.class +
