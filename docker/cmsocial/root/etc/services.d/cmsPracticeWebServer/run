@@ -7,9 +7,10 @@ if [ ! -f "$CMS_CONFIG" ]; then
     exit 1
 fi
 
-if [ ! -f ./config/cmsocial.ini ]; then
-    echo "Missing ./config/cmsocial.ini (at $(pwd)/config/cmsocial.ini)" >&2
+if [ ! -f "$CMSOCIAL_CONFIG" ]; then
+    echo "Missing $CMSOCIAL_CONFIG" >&2
     exit 1
 fi
+
 
 exec cmsPracticeWebServer 0

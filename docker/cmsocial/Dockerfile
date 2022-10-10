@@ -50,6 +50,7 @@ COPY --from=initial / /
 WORKDIR /cmsocial
 
 ENV CMS_CONFIG=/config/cms.conf
+ENV CMSOCIAL_CONFIG=/config/cmsocial.ini
 VOLUME ["/config"]
 ENTRYPOINT ["/init"]
 EXPOSE 18888

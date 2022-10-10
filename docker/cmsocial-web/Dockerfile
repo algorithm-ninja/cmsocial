@@ -7,7 +7,8 @@ RUN apt update && \
 
 COPY . /build
 WORKDIR /build
-RUN make ONLINE=1
+RUN npm install
+RUN make ONLINE=1 PROD=1
 
 FROM nginx:stable
 LABEL org.opencontainers.image.source https://github.com/algorithm-ninja/cmsocial
