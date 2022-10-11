@@ -32,29 +32,6 @@ angular.module('cmsocial')
       return user;
     };
 
-    const clearCookies = function() {
-      // Remove cookies: reading the cookie_domain from DB is the right way, but it's currently
-      // unreliable because the call to /api/contest might not have finished yet and
-      // contestManager.getContest() will be null. For now we fallback to mapping:
-      //   'token' -> 'olinfo.it'
-      //   'token_digit' -> 'digit.olinfo.it'
-      // but we should fix this by using promises and properly 'await'-ing this call.
-      const cookieDomain = contestManager.getContest()?.cookie_domain;
-      const tokenName = location.host.startsWith("digit.") ? 'token_digit' : 'token';
-
-      if (cookieDomain !== null) {
-        $cookies.remove(tokenName, {
-          domain: cookieDomain,
-          path: '/'
-        });
-      } else {
-        $cookies.remove(tokenName, {
-          domain: tokenName === 'token' ? 'olinfo.it' : 'digit.olinfo.it',
-          path: '/'
-        });
-      }
-    };
-
     const refreshUser = function() {
       $http.post(API_PREFIX + "user", {
           'action': 'me'
@@ -62,10 +39,25 @@ angular.module('cmsocial')
         .success(function(data, status, headers, config) {
           if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
-
-            clearCookies();
           } else {
             user = data["user"];
+            contestManager.refreshContest();
+          }
+        }).error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+        });
+    };
+
+    const logoutUser = function() {
+      $http.post(API_PREFIX + 'user', {
+          'action': 'logout'
+        })
+        .success(function(data, status, headers, config) {
+          if (data.success === 0) {
+            // TODO: report this error somewhere (almost surely the backend is offline)
+            notificationHub.createAlert('danger', 'Try again in a few minutes', 3);
+          } else {
+            user = {};
             contestManager.refreshContest();
           }
         }).error(function(data, status, headers, config) {
@@ -91,10 +83,7 @@ angular.module('cmsocial')
         return $sce.trustAsUrl('//gravatar.com/avatar/' + user.mail_hash + '?d=identicon&s=' + size);
       },
       refresh: refreshUser,
-      signout: function() {
-        clearCookies();
-        user = {};
-      }
+      signout: logoutUser,
     };
   })
   .controller('ForgotAccountCtrl', function($scope, $http, $state, notificationHub,
