@@ -34,6 +34,10 @@ ALTER TABLE public.contests
 ALTER TABLE public.datasets
     ALTER COLUMN memory_limit TYPE bigint;
 
+UPDATE public.datasets
+    SET memory_limit = memory_limit * 1024 * 1024
+    WHERE memory_limit IS NOT NULL;
+
 ALTER TABLE public.datasets
     ALTER COLUMN task_type_parameters TYPE jsonb USING task_type_parameters::jsonb;
 

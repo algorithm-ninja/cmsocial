@@ -28,10 +28,11 @@ with con.cursor() as cur:
     max_id = cur.fetchone()[0]
     print("Max id is", max_id)
     num_updates = 0
-    for batch in range(100):
-        lb = max_id * batch // 100
-        ub = max_id * (batch + 1) // 100
-        print("Batch %d / 100: [%d, %d)" % (batch, lb, ub))
+    num_batches = 100
+    for batch in range(num_batches):
+        lb = max_id * batch // num_batches
+        ub = max_id * (batch + 1) // num_batches
+        print("Batch %d / %d: [%d, %d)" % (batch, num_batches, lb, ub))
         start = monotonic()
         cur.execute(
             "SELECT submission_id, dataset_id, score_details "
@@ -87,7 +88,7 @@ with con.cursor() as cur:
         duration = monotonic() - start
         print(
             "Took %.3fs, ETA: %.3f (%d updates)"
-            % (duration, duration * (100 - batch - 1), num_updates)
+            % (duration, duration * (num_batches - batch - 1), num_updates)
         )
 
     print("Updating actual data")
@@ -96,6 +97,7 @@ with con.cursor() as cur:
         "SET score_details = (SELECT score_details FROM update_submission_results U WHERE U.id = S.submission_id AND U.dataset_id = S.dataset_id) "
         "WHERE EXISTS (SELECT score_details FROM update_submission_results U WHERE U.id = S.submission_id AND U.dataset_id = S.dataset_id)"
     )
+    cur.execute("UPDATE submission_results SET public_score_details = score_details")
     cur.execute("SET session_replication_role = DEFAULT")
     cur.execute("COMMIT")
 con.close()
