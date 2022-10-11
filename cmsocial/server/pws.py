@@ -367,7 +367,7 @@ class APIHandler(object):
 
     def hashpw(self, pw):
         pw = pw.encode('utf-8')
-        payload = bcrypt.hashpw(pw, bcrypt.gensalt())
+        payload = bcrypt.hashpw(pw, bcrypt.gensalt()).decode()
         return "bcrypt:%s" % payload
 
     def validate(self, pw, storedpw):
