@@ -32,6 +32,7 @@ from gevent.subprocess import check_output, CalledProcessError, STDOUT
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import and_, or_
+from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.exceptions import (BadRequest, HTTPException,
                                  InternalServerError, NotFound)
 from werkzeug.routing import Map, Rule, RequestRedirect
@@ -1798,6 +1799,10 @@ class PracticeWebServer(Service):
             ServiceCoord('EvaluationService', 0))
 
         self.wsgi_app = APIHandler(self)
+
+        num_proxies_used = int(config.get("core", "num_proxies_used", fallback=0))
+        if num_proxies_used > 0:
+            self.wsgi_app = ProxyFix(self.wsgi_app, num_proxies_used)
 
     def run(self):
         server = Server((self.address, self.port), self.wsgi_app)
