@@ -33,25 +33,26 @@ angular.module('cmsocial')
     };
 
     const clearCookies = function() {
-      // Remove cookies
-      $cookies.remove('token_digit', {
-        domain: contestManager.getContest().cookie_domain,
-        path: '/'
-      });
-      $cookies.remove('token', {
-        domain: contestManager.getContest().cookie_domain,
-        path: '/'
-      });
+      // Remove cookies: reading the cookie_domain from DB is the right way, but it's currently
+      // unreliable because the call to /api/contest might not have finished yet and
+      // contestManager.getContest() will be null. For now we fallback to mapping:
+      //   'token' -> 'olinfo.it'
+      //   'token_digit' -> 'digit.olinfo.it'
+      // but we should fix this by using promises and properly 'await'-ing this call.
+      const cookieDomain = contestManager.getContest()?.cookie_domain;
+      const tokenName = location.host.startsWith("digit.") ? 'token_digit' : 'token';
 
-      // Remove old cookies that could be stuck
-      $cookies.remove('token_digit', {
-        domain: 'digit.olinfo.it',
-        path: '/'
-      });
-      $cookies.remove('token', {
-        domain: 'training.olinfo.it',
-        path: '/'
-      });
+      if (cookieDomain !== null) {
+        $cookies.remove(tokenName, {
+          domain: cookieDomain,
+          path: '/'
+        });
+      } else {
+        $cookies.remove(tokenName, {
+          domain: tokenName === 'token' ? 'olinfo.it' : 'digit.olinfo.it',
+          path: '/'
+        });
+      }
     };
 
     const refreshUser = function() {
