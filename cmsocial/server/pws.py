@@ -477,14 +477,14 @@ class APIHandler(object):
         if 'name' in args:
             if args["name"].endswith(".pdf"):
                 # Add header to allow the official pdf.js to work
-                response.headers.add_header(b'Access-Control-Allow-Origin',
-                                            b'https://mozilla.github.io')
+                response.headers.add_header('Access-Control-Allow-Origin',
+                                            'https://mozilla.github.io')
             else:
                 # Don't do this on pdf files because it breaks the native pdf
                 # reader
                 response.headers.add_header(
-                    b'Content-Disposition',
-                    b'attachment',
+                    'Content-Disposition',
+                    'attachment',
                     filename=args['name'])
             mimetype = mimetypes.guess_type(args['name'])[0]
             if mimetype is not None:
