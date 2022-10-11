@@ -43,7 +43,7 @@
       <a ui-sref=".submissions"><i class="fa fa-code fa-lg"></i> {{'Submissions' | l10n}}</a>
     </li>
     <li class="my-popover pull-right" data-trigger="hover" data-placement="bottom" data-title="{{'Memory limit' | l10n}}" data-content="{{'Memory available for the execution of one testcase, measured in MiB.' | l10n}}" ng-show="task.memory_limit != undefined">
-      <a><i class="fa fa-stack-overflow fa-lg"></i> {{task.memory_limit}} {{'MiB' | l10n}}</a>
+      <a><i class="fa fa-stack-overflow fa-lg"></i> {{task.memory_limit // 1024 // 1024}} {{'MiB' | l10n}}</a>
     </li>
     <li class="my-popover pull-right" data-trigger="hover" data-placement="bottom" data-title="{{'Time limit' | l10n}}" data-content="{{'Time available for the execution of one testcase, measured in seconds.' | l10n}}" ng-show="task.time_limit != undefined">
       <a><i class="fa fa-clock-o fa-lg"></i> {{task.time_limit}} {{'sec' | l10n}}</a>
