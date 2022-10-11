@@ -165,13 +165,13 @@ angular.module('cmsocial')
     };
     var aceModeMap = {
       "C11 / gcc": "c_cpp",
-      "C++11 / g++": "c_cpp",
+      "C++17 / g++": "c_cpp",
       "Pascal / fpc": "pascal",
       "Python 3 / CPython": "python"
     };
     var langExtMap = {
       "C11 / gcc": ".c",
-      "C++11 / g++": ".cpp",
+      "C++17 / g++": ".cpp",
       "Pascal / fpc": ".pas",
       "Python 3 / CPython": ".py"
     };
