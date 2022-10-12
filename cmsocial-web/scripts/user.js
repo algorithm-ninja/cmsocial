@@ -32,28 +32,6 @@ angular.module('cmsocial')
       return user;
     };
 
-    const clearCookies = function() {
-      // Remove cookies
-      $cookies.remove('token_digit', {
-        domain: contestManager.getContest().cookie_domain,
-        path: '/'
-      });
-      $cookies.remove('token', {
-        domain: contestManager.getContest().cookie_domain,
-        path: '/'
-      });
-
-      // Remove old cookies that could be stuck
-      $cookies.remove('token_digit', {
-        domain: 'digit.olinfo.it',
-        path: '/'
-      });
-      $cookies.remove('token', {
-        domain: 'training.olinfo.it',
-        path: '/'
-      });
-    };
-
     const refreshUser = function() {
       $http.post(API_PREFIX + "user", {
           'action': 'me'
@@ -61,10 +39,25 @@ angular.module('cmsocial')
         .success(function(data, status, headers, config) {
           if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
-
-            clearCookies();
           } else {
             user = data["user"];
+            contestManager.refreshContest();
+          }
+        }).error(function(data, status, headers, config) {
+          notificationHub.serverError(status);
+        });
+    };
+
+    const logoutUser = function() {
+      $http.post(API_PREFIX + 'user', {
+          'action': 'logout'
+        })
+        .success(function(data, status, headers, config) {
+          if (data.success === 0) {
+            // TODO: report this error somewhere (almost surely the backend is offline)
+            notificationHub.createAlert('danger', 'Try again in a few minutes', 3);
+          } else {
+            user = {};
             contestManager.refreshContest();
           }
         }).error(function(data, status, headers, config) {
@@ -90,10 +83,7 @@ angular.module('cmsocial')
         return $sce.trustAsUrl('//gravatar.com/avatar/' + user.mail_hash + '?d=identicon&s=' + size);
       },
       refresh: refreshUser,
-      signout: function() {
-        clearCookies();
-        user = {};
-      }
+      signout: logoutUser,
     };
   })
   .controller('ForgotAccountCtrl', function($scope, $http, $state, notificationHub,
