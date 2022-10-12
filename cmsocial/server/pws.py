@@ -742,11 +742,13 @@ class APIHandler(object):
                 max_age=cookie_duration,
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'logout':
+            local.response = Response()
             local.response.delete_cookie(
                 'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                 domain=local.contest.social_contest.cookie_domain)
         elif local.data['action'] == 'me':
             if local.user is None:
+                local.response = Response()
                 local.response.delete_cookie(
                     'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit',
                     domain=local.contest.social_contest.cookie_domain)

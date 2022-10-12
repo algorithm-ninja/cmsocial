@@ -58,6 +58,7 @@ angular.module('cmsocial')
             notificationHub.createAlert('danger', 'Try again in a few minutes', 3);
           } else {
             user = {};
+            notificationHub.createAlert('success', l10n.get('Goodbye'), 1);
             contestManager.refreshContest();
           }
         }).error(function(data, status, headers, config) {
@@ -156,7 +157,6 @@ angular.module('cmsocial')
     };
     $scope.signout = function() {
       userManager.signout();
-      notificationHub.createAlert('success', l10n.get('Goodbye'), 1);
     };
   })
   .controller('SSOCtrl', function($scope, $http, notificationHub, $location, l10n, $state, contestManager, API_PREFIX) {
