@@ -80,8 +80,8 @@ angular.module('cmsocial')
     'Tasks from regionals': {
       it: 'Problemi delle territoriali'
     },
-    'Get to know other coders': {
-      it: 'Partecipa alla community'
+    'Get to know others': {
+      it: 'Entra nella community'
     },
     'Go to the forum': {
       it: 'Visita il forum'
