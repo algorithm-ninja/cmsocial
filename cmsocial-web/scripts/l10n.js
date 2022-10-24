@@ -65,17 +65,20 @@ angular.module('cmsocial')
     'Welcome to the official training website for OII! here you will be able to try and solve programming tasks by coding a solution in either C, C++ or Pascal.': {
       it: 'Benvenuto nella piattaforma ufficiale di allenamento per le OII! Qui avrai accesso a numerosi problemi ai quali potrai inviare delle soluzioni scritte in C, C++ o Pascal.'
     },
-    'Learn to code': {
-      it: 'Impara a programmare'
+    'Learn progressively': {
+      it: 'Impara gradualmente'
     },
     'Tasks archive': {
       it: 'Archivio dei problemi'
     },
-    'Advance your ranking': {
-      it: 'Scala la classifica'
+    'Challenge yourself': {
+      it: 'Mettiti alla prova'
     },
-    'See the rankings': {
-      it: 'Guarda la classifica'
+    'Solve more problems': {
+      it: 'Risolvi tutti i problemi'
+    },
+    'Tasks from regionals': {
+      it: 'Problemi delle territoriali'
     },
     'Get to know other coders': {
       it: 'Partecipa alla community'
@@ -83,11 +86,26 @@ angular.module('cmsocial')
     'Go to the forum': {
       it: 'Visita il forum'
     },
+    'Browse the wiki': {
+      it: 'Leggi la wiki'
+    },
+    'Read the stats': {
+      it: 'Accedi alle statistiche'
+    },
+    'With algobadge you will be guided through a curated selection of tasks to solve, ordered by increasing difficulty, while being able to explore new algorithmic techniques in a gradual and effective way.': {
+      it: 'Con algobadge ti guideremo attraverso una selezione accurata di task da risolvere, ordinati per difficoltà crescente, che ti permetteranno di esplorare nuove tecniche algoritmiche in modo graduale ed efficace.'
+    },
     'The wide range of tasks available on this website will allow you to start from the easiest going to the toughest one: in this way you\'ll improve your programming abilities and your attitude to analyze and deal with hard computational problems!': {
       it: 'La vasta scelta di problemi presenti nel sito ti permette di partire da quelli più facili fino ad arrivare a quelli più difficili: in questo modo migliorerai sempre più le tue abilità di programmazione e la tua capacità di analizzare ed affrontare problemi computazionali!'
     },
-    'By solving tasks on this website you\'ll earn points that will sum up to your total ranking. Compete with other italian students for the first place of the rankings page!': {
-      it: 'Man mano che risolverai i problemi presenti sulla piattaforma guadagnerai dei punti che si sommeranno al tuo punteggio totale. Competi con tutti gli altri studenti e studentesse italiani per il traguardo del primo posto della classifica!'
+    'Challenge yourself by solving problems that appeared at the regional stage of the Italian Olympiads in Informatics. This is a good way to test your knowledge!': {
+      it: 'Sfidati a risolvere i problemi che sono stati dati alle selezioni territoriali delle Olimpiadi Italiane di Informatica. Questo è un ottimo modo per testare le tue conoscenze!'
+    },
+    'In the official wiki you will find detailed explanations and solutions of past problems, as well as thorough writeups of algorithmic techniques.': {
+      it: 'Nella wiki ufficiale troverai spiegazioni dettagliate e soluzioni di problemi passati, oltre che a tutorial approfonditi su tecniche algoritmiche avanzate.'
+    },
+    'In the stats portal you will find information about past editions, like the ranking of students that participated before you, as well as which of them went on to compete at the international level.': {
+      it: 'Nel portale delle statistiche troverai informazioni sulle edizioni passate, tra cui come gli studenti che hanno partecipato prima di te si sono classificati, e quali di loro hanno gareggiato a livello internazionale.'
     },
     'Introduce yourself to other students, discuss the tasks, clear up your doubts on: basic constructs of you programming language, algorithms and data structures, libraries, algorithm techniques, and much more!': {
       it: 'Presentati agli altri aspiranti olimpici nel forum della piattaforma, discuti dei problemi, risolvi tutti i tuoi dubbi su: costrutti di base del tuo linguaggio di programmazione, algoritmi e strutture dati di libreria, tecniche algoritmiche, e tanto altro!'
