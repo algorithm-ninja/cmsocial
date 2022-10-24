@@ -62,8 +62,8 @@ angular.module('cmsocial')
     'Italian Olympiads in Informatics training website': {
       it: 'Portale di allenamento delle Olimpiadi Italiane di Informatica'
     },
-    'Welcome to the official training website for OII! here you will be able to try and solve programming tasks by coding a solution in either C, C++ or Pascal.': {
-      it: 'Benvenuto nella piattaforma ufficiale di allenamento per le OII! Qui avrai accesso a numerosi problemi ai quali potrai inviare delle soluzioni scritte in C, C++ o Pascal.'
+    'Welcome to the official training website for OII! Here you will be able to try and solve programming tasks by coding a solution in a programming language of your choice.': {
+      it: 'Benvenuto nella piattaforma ufficiale di allenamento per le OII! Qui avrai accesso a numerosi problemi ai quali potrai inviare delle soluzioni scritte in un linguaggio di programmazione a tua scelta.'
     },
     'Learn progressively': {
       it: 'Impara gradualmente'
