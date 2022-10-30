@@ -14,7 +14,9 @@ import smtplib
 import socket
 import tempfile
 import traceback
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 from base64 import b64decode, b64encode
 from datetime import datetime, timedelta
 from email.mime.text import MIMEText
@@ -78,7 +80,7 @@ class WSGIHandler(gevent.pywsgi.WSGIHandler):
         client_address = self.environ.get('REMOTE_ADDR', None)
         return '%s %s %s %s' % (client_address or '-', (
             getattr(self, 'status', None) or '000').split()[0], delta,
-                                getattr(self, 'requestline', ''))
+            getattr(self, 'requestline', ''))
 
     def log_request(self):
         logger.info(self.format_request())
@@ -198,7 +200,8 @@ class APIHandler(object):
             else:
                 local.contest = None
             try:
-                local.jwt_payload = request.cookies.get('token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit')
+                local.jwt_payload = request.cookies.get(
+                    'token' if local.contest.social_contest.title != u'MIUR \u2014 Corso Competenze Digitali' else 'token_digit')
                 if local.jwt_payload is None:
                     auth_data = dict()
                 else:
@@ -300,7 +303,7 @@ class APIHandler(object):
             if participation is None:
                 return None
             if password is None or \
-                self.validate_user(participation.user, password):
+                    self.validate_user(participation.user, password):
                 return participation
         except UnicodeDecodeError:
             return None
@@ -784,7 +787,7 @@ class APIHandler(object):
                     .filter(SocialUser.institute_id == local.data['institute'])
             participations, local.resp['num'] = self.sliced_query(query)
             local.resp['users'] = list(map(self.get_participation_info,
-                                      participations))
+                                           participations))
         elif local.data['action'] == 'update':
             if local.user is None:
                 return 'Unauthorized'
@@ -1102,7 +1105,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 for tn in sorted(deleted_tasks, reverse=True):
                     for t in local.session.query(Task)\
                         .filter(Task.contest_id == local.contest.id)\
-                        .filter(Task.num > tn).all():
+                            .filter(Task.num > tn).all():
                         t.num -= 1
                 local.session.commit()
             except KeyError as ValueError:
@@ -1289,8 +1292,8 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                         tag['can_delete'] = False
                     else:
                         tag['can_delete'] = \
-                                (local.user.social_user is tasktag.user and
-                                 not tasktag.approved) or \
+                            (local.user.social_user is tasktag.user and
+                             not tasktag.approved) or \
                             local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
         elif local.data['action'] == 'stats':
@@ -1727,7 +1730,8 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 f = files_sent.get(sfe)
                 if f is None:
                     return 'Some files are missing!'
-                max_submission_length = int(config.get("core", "max_submission_length"))
+                max_submission_length = int(
+                    config.get("core", "max_submission_length"))
                 if len(f['body']) > max_submission_length:
                     return 'The files you sent are too big!'
                 f['name'] = sfe
@@ -1807,7 +1811,8 @@ class PracticeWebServer(Service):
 
         self.wsgi_app = APIHandler(self)
 
-        num_proxies_used = int(config.get("core", "num_proxies_used", fallback=0))
+        num_proxies_used = int(config.get(
+            "core", "num_proxies_used", fallback=0))
         if num_proxies_used > 0:
             self.wsgi_app = ProxyFix(self.wsgi_app, num_proxies_used)
 
