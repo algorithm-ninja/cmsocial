@@ -278,8 +278,6 @@ class APIHandler(object):
     def validate_user(self, user, password):
         if self.validate(password, user.password):
             return True
-        if user.password.startswith("plaintext:"):
-            return password == user.password.partition("plaintext:")[2]
         elif self.old_validate(password, user.password):
             try:
                 with SessionGen() as session:
