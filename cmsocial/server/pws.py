@@ -813,11 +813,12 @@ class APIHandler(object):
                 local.resp['token'] = new_token
             local.session.commit()
         elif local.data['action'] == 'recover':
-            if len(local.data['email'].strip()) == 0:
+            recovery_email = local.data.get('email','').strip()
+            if len(recovery_email) == 0:
                 return 'No email address provided'
 
             user = local.session.query(User)\
-                .filter(User.email == local.data['email'])\
+                .filter(User.email == recovery_email)\
                 .first()
 
             if user is None:
