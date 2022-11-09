@@ -1671,7 +1671,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 for subtask in submission['score_details']:
                     for testcase in subtask['testcases']:
                         fmt, *params = testcase['text']
-                        testcase['text'] = fmt % params
+                        testcase['text'] = fmt % tuple(params)
             else:
                 submission['score_details'] = None
             local.resp = submission
