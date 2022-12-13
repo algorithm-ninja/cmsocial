@@ -353,6 +353,9 @@ angular.module('cmsocial')
     'Confirm e-mail': {
       it: 'Ripeti e-mail'
     },
+    'Anti-spam check': {
+      it: 'Controllo anti-spam'
+    },
     'Institute data': {
       it: 'Dati della scuola di provenienza'
     },
