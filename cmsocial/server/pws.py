@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from gevent import monkey
+monkey.patch_all()
+
 import argparse
 import configparser
 import hashlib
@@ -29,7 +32,6 @@ import gevent.local
 import gevent.pywsgi
 import pkg_resources
 import requests
-from gevent import monkey
 from gevent.subprocess import check_output, CalledProcessError, STDOUT
 from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError
@@ -58,8 +60,6 @@ from cmsocial.db.socialcontest import SocialContest
 from cmsocial.db.socialtask import SocialTask, Tag, TaskScore, TaskTag
 from cmsocial.db.socialuser import SocialParticipation, SocialUser
 from cmsocial.db.test import Test, TestScore
-
-monkey.patch_all()
 
 logger = logging.getLogger(__name__)
 local = gevent.local.local()
