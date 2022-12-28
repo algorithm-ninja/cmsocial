@@ -1768,9 +1768,12 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                                     task=task)
             for f in files:
                 digest = self.file_cacher.put_file_content(
-                    f['body'], 'Submission file %s sent by %s at %d.' %
-                    (f['name'], local.user.username,
-                     make_timestamp(timestamp)))
+                    f['body'].encode(),
+                    'Submission file %s sent by %s at %d.' % (
+                        f['name'], local.user.username,
+                        make_timestamp(timestamp)
+                    )
+                )
                 local.session.add(
                     File(f['name'], digest, submission=submission))
             local.session.add(submission)
