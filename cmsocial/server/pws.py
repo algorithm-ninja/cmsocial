@@ -1711,7 +1711,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                 for name in archive.namelist():
                     filename = os.path.basename(name)
                     body = open(os.path.join(unpacked_dir, filename),
-                                "r").read()
+                                "rb").read()
                     local.data['files'][filename] = {
                         'filename': filename,
                         'body': body
@@ -1768,7 +1768,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                                     task=task)
             for f in files:
                 digest = self.file_cacher.put_file_content(
-                    f['body'].encode(),
+                    f['body'],
                     'Submission file %s sent by %s at %d.' % (
                         f['name'], local.user.username,
                         make_timestamp(timestamp)
