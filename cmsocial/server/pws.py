@@ -186,8 +186,11 @@ class APIHandler(object):
                 logger.warning('JSON parse error')
                 data = dict()
             if 'first' in data and 'last' in data:
-                data['first'] = int(data['first'])
-                data['last'] = int(data['last'])
+                try:
+                    data['first'] = int(data['first'])
+                    data['last'] = int(data['last'])
+                except (ValueError, TypeError):
+                    return BadRequest()
                 if data['first'] < 0 or data['first'] > data['last']:
                     return BadRequest()
 
