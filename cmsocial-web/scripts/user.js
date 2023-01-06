@@ -39,9 +39,11 @@ angular.module('cmsocial')
         .success(function(data, status, headers, config) {
           if (data.success === 0) {
             notificationHub.createAlert('danger', l10n.get('Login error'), 3);
+            sessionStorage.removeItem("user");
           } else {
             user = data["user"];
             contestManager.refreshContest();
+            sessionStorage.setItem("user", JSON.stringify(user));
           }
         }).error(function(data, status, headers, config) {
           notificationHub.serverError(status);
@@ -67,13 +69,10 @@ angular.module('cmsocial')
     };
 
     const isUserLogged = function() {
-      // TODO: use more robust way to find which contest we're in
-      const tokenName = location.host.startsWith("digit.") ? 'token_digit' : 'token';
-
-      return $cookies.get(tokenName) != null;
+      return sessionStorage.getItem("user") !== null;
     };
 
-    if (isUserLogged()) refreshUser();
+    refreshUser();
 
     return {
       getUser: getIt,
