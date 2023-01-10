@@ -120,7 +120,7 @@ class APIHandler(object):
                     methods=['POST'],
                     endpoint='jsondata'),
                 Rule(
-                    '/<contest>/<path:path>',
+                    '/<contest>/static/<path:path>',
                     methods=['GET'],
                     endpoint='staticfile'),
                 Rule('/<contest>/', methods=['GET'], endpoint='index'),
