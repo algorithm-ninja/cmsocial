@@ -32,18 +32,24 @@ angular.module('cmsocial')
       return user;
     };
 
+    const isUserLogged = function() {
+      return sessionStorage.getItem("user") !== null;
+    };
+
     const refreshUser = function() {
       $http.post(API_PREFIX + "user", {
           'action': 'me'
         })
         .success(function(data, status, headers, config) {
           if (data.success === 0) {
-            notificationHub.createAlert('danger', l10n.get('Login error'), 3);
+            if (isUserLogged()) {
+              notificationHub.createAlert('danger', l10n.get('Login error'), 3);
+            }
             sessionStorage.removeItem("user");
           } else {
             user = data["user"];
-            contestManager.refreshContest();
             sessionStorage.setItem("user", JSON.stringify(user));
+            contestManager.refreshContest();
           }
         }).error(function(data, status, headers, config) {
           notificationHub.serverError(status);
@@ -60,16 +66,13 @@ angular.module('cmsocial')
             notificationHub.createAlert('danger', 'Try again in a few minutes', 3);
           } else {
             user = {};
+            sessionStorage.removeItem("user");
             notificationHub.createAlert('success', l10n.get('Goodbye'), 1);
             contestManager.refreshContest();
           }
         }).error(function(data, status, headers, config) {
           notificationHub.serverError(status);
         });
-    };
-
-    const isUserLogged = function() {
-      return sessionStorage.getItem("user") !== null;
     };
 
     refreshUser();
