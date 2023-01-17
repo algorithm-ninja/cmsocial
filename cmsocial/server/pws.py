@@ -467,6 +467,20 @@ class APIHandler(object):
         for field, data_field in kwargs.items():
             dct[data_field] = getattr(obj, field)
 
+    def filename_to_contest_languages(self, contest, filename):
+        """
+        Like filename_to_language, but only considers languages enabled
+        in `contest` and returns all candidates
+        """
+        contest_languages = [get_language(name) for name in contest.languages]
+
+        ext_index = filename.rfind(".")
+        if ext_index == -1:
+            return None
+        ext = filename[ext_index:]
+        languages = [lang for lang in contest_languages if ext in lang.source_extension]
+        return languages
+
     # Handlers that do not require JSON data
     def dbfile_handler(self, environ, args):
         try:
@@ -1302,6 +1316,19 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                              not tasktag.approved) or \
                             local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
+
+            supported_languages = set()
+            for manager in t.active_dataset.managers:
+                if 'grader.' in manager or 'stub.' in manager:
+                    for lang in self.filename_to_contest_languages(local.contest, manager):
+                        supported_languages.add(lang.name)
+
+            # Allow all languages if there's no graders or stubs
+            if len(supported_languages) == 0:
+                local.resp['supported_languages'] = local.contest.languages
+            else:
+                local.resp['supported_languages'] = sorted(list(supported_languages))
+
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
                 .join(SocialTask)\

@@ -176,9 +176,9 @@ angular.module('cmsocial')
       "Python 3 / CPython": ".py"
     };
     $scope.languages = [];
-    contestManager.getContestPromise().then(function(response) {
-        for (var lang in contestManager.getContest().languages) {
-          $scope.languages.push(contestManager.getContest().languages[lang]);
+    Promise.all([contestManager.getContestPromise(), $scope.loadTaskPromise]).then(function(response) {
+        for (var lang of $rootScope.task.supported_languages) {
+          $scope.languages.push(lang);
         }
 
         var preferred_language_key = "preferred_language_" + contestManager.getContest().name;
