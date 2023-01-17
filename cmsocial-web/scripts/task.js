@@ -167,13 +167,15 @@ angular.module('cmsocial')
       "C11 / gcc": "c_cpp",
       "C++17 / g++": "c_cpp",
       "Pascal / fpc": "pascal",
-      "Python 3 / CPython": "python"
+      "Python 3 / CPython": "python",
+      "Java / JDK": "java"
     };
     var langExtMap = {
       "C11 / gcc": ".c",
       "C++17 / g++": ".cpp",
       "Pascal / fpc": ".pas",
-      "Python 3 / CPython": ".py"
+      "Python 3 / CPython": ".py",
+      "Java / JDK": ".java"
     };
     $scope.languages = [];
     Promise.all([contestManager.getContestPromise(), $scope.loadTaskPromise]).then(function(response) {

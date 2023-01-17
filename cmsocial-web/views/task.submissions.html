@@ -40,6 +40,7 @@
           <button type="submit" class="btn btn-success"><i class="fa" ng-class="{'fa-spin': !submitCompleted(), 'fa-paper-plane': submitCompleted(), 'fa-circle-o-notch': !submitCompleted()}"></i> {{'Submit' | l10n}}</button>
         </div>
       </div>
+      <div class="well well-sm submission_class_name_warning" role="alert" ng-if="language == 'Java / JDK'">{{ 'Make sure to name your class ' | l10n}}<b>{{ task.name }}</b>{{', otherwise compilation will fail.' | l10n}}</div>
       <div ui-ace="aceOption" ng-model="aceModel"></div>
     </form>
 

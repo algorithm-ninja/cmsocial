@@ -183,6 +183,12 @@ angular.module('cmsocial')
     'Language:': {
       it: 'Linguaggio:'
     },
+    'Make sure to name your class ': { // Message split in two to allow formatting the task name in bold
+      it: 'Assicurati di chiamare la tua classe '
+    },
+    ', otherwise compilation will fail.': {
+      it: ', altrimenti la compilazione non andrà a buon fine.'
+    },
     'Write your code here': {
       it: 'Scrivi qui il tuo codice'
     },
