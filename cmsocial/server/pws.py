@@ -481,6 +481,18 @@ class APIHandler(object):
         languages = [lang for lang in contest_languages if ext in lang.source_extension]
         return languages
 
+    def task_supported_languages(self, contest, t: Task):
+        supported_languages = set()
+        for manager in t.active_dataset.managers:
+            if 'grader.' in manager or 'stub.' in manager:
+                for lang in self.filename_to_contest_languages(contest, manager):
+                    supported_languages.add(lang.name)
+
+        # Allow all languages if there's no graders or stubs
+        if len(supported_languages) == 0:
+            return contest.languages
+        return list(supported_languages)
+
     # Handlers that do not require JSON data
     def dbfile_handler(self, environ, args):
         try:
@@ -1317,17 +1329,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                             local.user.social_user.access_level == 0
                     local.resp['tags'].append(tag)
 
-            supported_languages = set()
-            for manager in t.active_dataset.managers:
-                if 'grader.' in manager or 'stub.' in manager:
-                    for lang in self.filename_to_contest_languages(local.contest, manager):
-                        supported_languages.add(lang.name)
-
-            # Allow all languages if there's no graders or stubs
-            if len(supported_languages) == 0:
-                local.resp['supported_languages'] = local.contest.languages
-            else:
-                local.resp['supported_languages'] = sorted(list(supported_languages))
+            local.resp['supported_languages'] = sorted(self.task_supported_languages(local.contest, t))
 
         elif local.data['action'] == 'stats':
             t = local.session.query(Task)\
@@ -1788,6 +1790,9 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
                             return 'The files you sent are in different languages!'
                         else:
                             sub_lang = language
+
+            if sub_lang and sub_lang.name not in self.task_supported_languages(local.contest, task):
+                return 'Unsupported language for this task!'
 
             # Add the submission
             timestamp = make_datetime()
