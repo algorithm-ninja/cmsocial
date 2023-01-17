@@ -127,6 +127,9 @@ angular.module('cmsocial')
     'Submissions': {
       it: 'Sottoposizioni'
     },
+    'Supported languages': {
+      it: 'Linguaggi supportati'
+    },
     'Memory limit': {
       it: 'Limite di memoria'
     },
