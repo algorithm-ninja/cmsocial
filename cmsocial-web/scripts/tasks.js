@@ -275,9 +275,24 @@ angular.module('cmsocial')
       notificationHub.serverError(status);
     });
   })
-  .controller('EventsPage', function($scope, $http, notificationHub) {
+  .controller('EventsPage', function($scope, $http, notificationHub, API_PREFIX) {
     $scope.ioi = [];
-    for (var i=2022; i>=2004; i--) {
-      $scope.ioi.push(i);
-    }
+    $http.post(API_PREFIX + 'tag', {
+      'action': 'list',
+      'filter': 'events'
+    })
+    .success(function(data, status, headers, config) {
+      let latest = 2004;
+      for (const tag of data['tags']) {
+        if(/^ioi2[0-9]{3}$/.test(tag)) {
+          latest = Math.max(parseInt(tag.substring(3)) || 0);
+        }
+      }
+      for (let i=latest; i>=2004; i--) {
+        $scope.ioi.push(i);
+      }
+    })
+    .error(function(data, status, headers, config) {
+      notificationHub.serverError(status);
+    });
   })
