@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from shutil import copyfileobj, rmtree
 from validate_email import validate_email
+import DNS
 
 import bcrypt
 import gevent
@@ -354,7 +355,7 @@ class APIHandler(object):
                 return None
             else:
                 return 'Invalid e-mail'
-        except TimeoutError:
+        except DNS.Base.TimeoutError:
             logger.warning(f'Timeout when validating email address')
             return 'Invalid e-mail'
 
