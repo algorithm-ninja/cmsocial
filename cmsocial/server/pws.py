@@ -356,7 +356,6 @@ class APIHandler(object):
             else:
                 return 'Invalid e-mail'
         except DNS.Base.TimeoutError:
-            logger.warning(f'Timeout when validating email address')
             return 'Invalid e-mail'
 
     def hash(self, string, algo='sha256'):
