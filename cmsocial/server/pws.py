@@ -1731,6 +1731,10 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
 
             if len(local.data['files']) == 1 and \
                'submission' in local.data['files']:
+
+                # No spicy files
+                return "418 I'm a teapot"
+
                 archive_data = self.decode_file(
                     local.data['files']['submission'])
                 del local.data['files']['submission']
