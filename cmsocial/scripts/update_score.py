@@ -78,7 +78,9 @@ def compute_smart_score(user_to_task, task_to_user):
                 total_weight += w
                 num_users += 1
                 sum_score_over_ability += score / abilities[uid] * w
-            if sum_score_over_ability == 0:
+            if total_weight < 1e-5:
+                difficulties[tid] = 1.0
+            elif sum_score_over_ability == 0:
                 difficulties[tid] = 10.0
             else:
                 sum_score_over_ability /= total_weight / num_users
