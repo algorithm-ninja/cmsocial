@@ -780,6 +780,7 @@ class APIHandler(object):
                 .join(User)\
                 .join(SocialParticipation)\
                 .filter(Participation.contest_id == local.contest.id)\
+                .filter(Participation.hidden == False)\
                 .order_by(desc(SocialParticipation.score))\
                 .order_by(desc(User.id))
             if 'institute' in local.data:
@@ -1310,6 +1311,7 @@ Recovery code: %s""" % (user.username, user.social_user.recover_code)):
             best = local.session.query(TaskScore)\
                 .filter(TaskScore.task == t.social_task)\
                 .filter(TaskScore.score == 100)\
+                .filter(TaskScore.participation.hidden == False)\
                 .order_by(TaskScore.time)\
                 .slice(0, 10).all()
             local.resp['best'] = [{
