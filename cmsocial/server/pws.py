@@ -625,12 +625,13 @@ class APIHandler(object):
             hashlib.sha256).hexdigest()
         if computed_sig != sig:
             return 'Bad request'
-        # Get nonce.
-        payload_decoded = b64decode(payload).decode()
-        d = dict(nonce.split("=") for nonce in payload_decoded.split('&'))
+        # Get nonce and return_sso_url.
+        payload_decoded = urllib.parse.parse_qs(b64decode(payload).decode())
+        nonce = payload_decoded["nonce"]
+        return_sso_url = payload_decoded["return_sso_url"]
         # Prepare response.
         response_data = dict()
-        response_data['nonce'] = d['nonce']
+        response_data['nonce'] = nonce
         response_data['external_id'] = local.user.username
         response_data['username'] = local.user.username
         response_data['email'] = local.user.email
@@ -640,10 +641,10 @@ class APIHandler(object):
         sig = hmac.new(
             config.get("core", "secret").encode(), res_payload,
             hashlib.sha256).hexdigest()
-        local.resp['parameters'] = urllib.parse.urlencode({
-            'sso': res_payload,
-            'sig': sig
-        })
+        local.resp["return_sso_url"] = return_sso_url
+        local.resp["parameters"] = urllib.parse.urlencode(
+            {"sso": res_payload, "sig": sig}
+        )
 
     def user_handler(self):
         if local.data['action'] == 'new':
