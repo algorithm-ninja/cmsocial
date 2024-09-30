@@ -627,8 +627,8 @@ class APIHandler(object):
             return 'Bad request'
         # Get nonce and return_sso_url.
         payload_decoded = urllib.parse.parse_qs(b64decode(payload).decode())
-        nonce = payload_decoded["nonce"]
-        return_sso_url = payload_decoded["return_sso_url"]
+        nonce = payload_decoded["nonce"][0]
+        return_sso_url = payload_decoded["return_sso_url"][0]
         # Prepare response.
         response_data = dict()
         response_data['nonce'] = nonce
